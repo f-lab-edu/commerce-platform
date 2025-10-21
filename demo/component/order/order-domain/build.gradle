@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+group 'com.example'
+version '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':shared')
+    implementation project(':inventory-domain')
+}
+
+test {
+    useJUnitPlatform()
+}

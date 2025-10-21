@@ -1,0 +1,33 @@
+package com.commerce.united.domain.aggregate;
+
+import vo.Money;
+import vo.Quantity;
+
+public class OrderItem {
+//    private String orderItemId;
+    private String productId; // todo 참조의 의미를 위해서 외부 에그리거트는 타입을 만들었던건가?
+    private Money amt;
+    private Quantity quantity;
+
+    public static OrderItem create(
+            String productId,
+            long amt,
+            int quantity
+    ) {
+       OrderItem orderItem = new OrderItem();
+//       orderItem.orderItemId = String.valueOf(UUID.randomUUID());
+       orderItem.productId = productId;
+       orderItem.amt = new Money(amt);
+       orderItem.quantity = new Quantity(quantity);
+
+       return orderItem;
+    }
+
+    public void checkOrderItem() throws Exception {
+       this.quantity.checkQuantity();
+    }
+
+    public Money calculateOrderItem() {
+        return this.amt.multiply(this.quantity);
+    }
+}
