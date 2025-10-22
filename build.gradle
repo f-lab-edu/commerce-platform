@@ -33,7 +33,7 @@ subprojects {
     // *-domain 제외 모든 모듈에 적용
     if (project.name.endsWith('application') || project.name.endsWith('api')
             || project.name.endsWith('infrastructure')) {
-        apply plugin: 'org.springframework.boot'
+        apply plugin: 'org.springframework.boot' // todo 이게 왜 필요했을까
 
         dependencies {
             implementation 'org.springframework.boot:spring-boot-starter'
