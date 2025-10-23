@@ -1,0 +1,22 @@
+plugins {
+    /**
+     * Convention Plugin을 만들기 위한 필수 설정
+     *  /groovy .gradle 파일을 플러그인으로 컴파일 해줌
+     * 파일명이 플러그인 ID가 됨
+     */
+    id 'groovy-gradle-plugin'
+}
+
+repositories {
+    // plugin 저장소를 추가해서 외부 플러그인을 dependencies 에서 사용 가능하도록 한다.
+    gradlePluginPortal()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-gradle-plugin:3.5.6'
+    implementation 'io.spring.gradle:dependency-management-plugin:1.1.7'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
