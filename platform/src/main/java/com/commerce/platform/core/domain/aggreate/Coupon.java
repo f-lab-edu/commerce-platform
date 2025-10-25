@@ -30,10 +30,10 @@ public class Coupon {
         coupon.couponId = String.valueOf(UUID.randomUUID());
         coupon.code = code;
         coupon.discountPercent = discountPercent;
-        coupon.minOrderAmt = new Money(minOrderAmt);
-        coupon.maxDiscountAmt = new Money(maxDiscountAmt);
+        coupon.minOrderAmt = Money.create(minOrderAmt);
+        coupon.maxDiscountAmt = Money.create(maxDiscountAmt);
         coupon.validPeriod = new ValidPeriod(frDt, toDt);
-        coupon.totalQuantity = new Quantity(totalCnt);
+        coupon.totalQuantity = Quantity.create(totalCnt);
         coupon.remainQuantity = coupon.totalQuantity;
 
         return coupon;
@@ -45,7 +45,7 @@ public class Coupon {
     public boolean valid(Money orerAmt) {
         try {
             // 쿠폰 수량 확인
-            this.remainQuantity.minus(1);
+            this.remainQuantity.minus(Quantity.create(1));
 
             // 주문금액 확인
             if(this.minOrderAmt.getValue() > orerAmt.getValue()) throw new Exception("최소주문금액 미달");
@@ -64,7 +64,7 @@ public class Coupon {
      */
     public Money useCoupon(Money orderAmt) throws Exception {
         // 수량--
-        this.remainQuantity = this.remainQuantity.minus(1);
+        this.remainQuantity = this.remainQuantity.minus(Quantity.create(1));
 
         // 할인금액
         Money discountAmt = orderAmt.discount(this.discountPercent);

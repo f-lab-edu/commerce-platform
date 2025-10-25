@@ -13,12 +13,12 @@ public class OrderItem {
             String productId,
             long amt,
             int quantity
-    ) {
+    ) throws Exception {
        OrderItem orderItem = new OrderItem();
 //       orderItem.orderItemId = String.valueOf(UUID.randomUUID());
        orderItem.productId = productId;
-       orderItem.amt = new Money(amt);
-       orderItem.quantity = new Quantity(quantity);
+       orderItem.amt = Money.create(amt);
+       orderItem.quantity = Quantity.create(quantity);
 
        return orderItem;
     }

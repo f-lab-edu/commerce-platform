@@ -33,7 +33,7 @@ public class Order {
         order.orderId = String.valueOf(UUID.randomUUID());
         order.customerId = customerId;
         order.orderItems = orderItems;
-        order.discountAmt = new Money(0);
+        order.discountAmt = Money.create(0);
         order.status = OrderStatus.PENDING;
         order.orderedDateTime = LocalDateTime.now();
 
@@ -43,10 +43,10 @@ public class Order {
         return order;
     }
 
-    private void calculateAmt() {
+    private void calculateAmt() throws Exception {
         this.originAmt = orderItems.stream()
                 .map(OrderItem::calculateOrderItem)
-                .reduce(new Money(0), Money::add);
+                .reduce(Money.create(0L), Money::add);
 
         this.resultAmt = this.originAmt.substract(this.discountAmt);
     }

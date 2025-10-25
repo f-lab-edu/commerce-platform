@@ -13,7 +13,7 @@ public record ProductInfo (
      */
     public static ProductInfo from(Product product) {
         return new ProductInfo(
-                product.getProductId(),
+                product.getProductId().getId(),
                 product.getProductName(),
                 product.getPrice().getValue()
         );

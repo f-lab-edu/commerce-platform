@@ -1,27 +1,32 @@
 package com.commerce.platform.core.domain.vo;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
-@AllArgsConstructor
+@Builder(access = AccessLevel.PRIVATE)
 public class Money {
     private long value;
 
     public Money add(Money money) {
-        return new Money(this.value + money.value);
+        return create(this.value + money.value);
     }
 
     public Money substract(Money money) {
-        return new Money(this.value - money.value);
+        return create(this.value - money.value);
     }
 
     public Money discount(int percent) {
-        return new Money(this.value * (100 - percent));
+        return create(this.value * (100 - percent));
     }
 
     public Money multiply(Quantity quantity) {
-        return new Money(this.value * quantity.getValue());
+        return create(this.value * quantity.getValue());
+    }
+
+    public static Money create(long value) {
+        return Money.builder()
+                .value(value)
+                .build();
     }
 
 }
