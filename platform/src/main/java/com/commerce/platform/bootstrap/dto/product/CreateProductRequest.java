@@ -1,5 +1,10 @@
 package com.commerce.platform.bootstrap.dto.product;
 
+import com.commerce.platform.core.domain.aggreate.Product;
+import com.commerce.platform.core.domain.enums.ProductStatus;
+import com.commerce.platform.core.domain.vo.Money;
+import com.commerce.platform.core.domain.vo.ProductId;
+import com.commerce.platform.core.domain.vo.Quantity;
 import jakarta.validation.constraints.*;
 
 public record CreateProductRequest(
@@ -18,4 +23,19 @@ public record CreateProductRequest(
         @Min(value = 1, message = "재고 수량은 1 이상이어야 합니다")
         Long stockQuantity
 ) {
+        /**
+         * 상품 등록
+         */
+        public static Product to(CreateProductRequest request) {
+                Quantity quantity = Quantity.create(request.stockQuantity());
+
+                return Product.builder()
+                        .productId(ProductId.create())
+                        .productName(request.name())
+                        .description(request.description())
+                        .price(Money.create(request.price()))
+                        .stockQuantity(quantity)
+                        .status(ProductStatus.fromStockQuantity(quantity))
+                        .build();
+        }
 }

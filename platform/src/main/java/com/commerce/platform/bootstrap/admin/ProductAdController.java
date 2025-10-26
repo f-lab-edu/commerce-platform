@@ -20,16 +20,16 @@ public class ProductAdController {
 
     @PostMapping
     public ResponseEntity<String> createProduct(@Valid @RequestBody CreateProductRequest productRequest) {
-        Product product = Product.from(productRequest);
-        productUseCase.createProduct(product);
+        ProductId productId = productUseCase.createProduct(CreateProductRequest
+                .to(productRequest));
 
-        return ResponseEntity.ok("[성공] ProductId: " + product.getProductId());
+        return ResponseEntity.ok("[성공] ProductId: " + productId.getId());
     }
 
     @PatchMapping("/{productId}/stock")
     public ResponseEntity<String> updateStock(
             @PathVariable String productId,
-            @Valid @RequestBody UpdateStockRequest stockRequest) throws Exception {
+            @Valid @RequestBody UpdateStockRequest stockRequest) {
 
         UpdateStockCommand stockCommand = new UpdateStockCommand(
                 ProductId.of(productId),
