@@ -1,5 +1,6 @@
 package com.commerce.platform.core.domain.vo;
 
+import com.commerce.platform.shared.exception.BusinessException;
 import io.micrometer.common.util.StringUtils;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -8,6 +9,8 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static com.commerce.platform.shared.exception.BusinessError.INVALID_PRODUCT_ID;
+
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
 public class ProductId {
@@ -15,7 +18,7 @@ public class ProductId {
 
     public static ProductId of(String id) {
         if(StringUtils.isBlank(id)
-            || id.charAt(0) != 'P') throw new RuntimeException("상품ID가 아닙니다.");
+            || id.charAt(0) != 'P') throw new BusinessException(INVALID_PRODUCT_ID);
         return ProductId.builder()
                 .id(id)
                 .build();

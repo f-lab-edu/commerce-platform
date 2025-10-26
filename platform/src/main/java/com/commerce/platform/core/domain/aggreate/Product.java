@@ -1,16 +1,14 @@
 package com.commerce.platform.core.domain.aggreate;
 
-import com.commerce.platform.bootstrap.dto.product.CreateProductRequest;
 import com.commerce.platform.core.domain.enums.ProductStatus;
 import com.commerce.platform.core.domain.vo.Money;
 import com.commerce.platform.core.domain.vo.ProductId;
 import com.commerce.platform.core.domain.vo.Quantity;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Builder(access = AccessLevel.PRIVATE, toBuilder = true)
+@Builder(toBuilder = true)
 public class Product {
     private ProductId productId;
     private String productName;
@@ -18,22 +16,6 @@ public class Product {
     private Money price;
     private Quantity stockQuantity;
     private ProductStatus status;
-
-    /**
-     * 상품 등록
-     */
-    public static Product from(CreateProductRequest request) {
-        Quantity quantity = Quantity.create(request.stockQuantity());
-
-        return Product.builder()
-                .productId(ProductId.create())
-                .productName(request.name())
-                .description(request.description())
-                .price(Money.create(request.price()))
-                .stockQuantity(quantity)
-                .status(ProductStatus.fromStockQuantity(quantity))
-                .build();
-    }
 
     /**
      * 요청값으로 재고 변경 및 ProductStatus 세팅
@@ -53,7 +35,7 @@ public class Product {
      * @return
      * @throws Exception
      */
-    public Product increaseStock(Quantity incQuantity) throws Exception {
+    public Product increaseStock(Quantity incQuantity) {
         Quantity result = this.stockQuantity.add(incQuantity);
         return changeStockQuantity(result);
     }
@@ -64,7 +46,7 @@ public class Product {
      * @return
      * @throws Exception
      */
-    public Product decreaseStock(Quantity decQuantity) throws Exception {
+    public Product decreaseStock(Quantity decQuantity) {
         Quantity result =  this.stockQuantity.minus(decQuantity);
         return changeStockQuantity(result);
     }

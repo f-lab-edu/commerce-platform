@@ -6,7 +6,7 @@ import com.commerce.platform.core.domain.aggreate.Product;
 public record ProductInfo (
         String productId,
         String name,
-        Long price
+        long price
 ) {
     /**
      * domain -> api dto
