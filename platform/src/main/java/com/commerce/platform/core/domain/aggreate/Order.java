@@ -1,55 +1,59 @@
 package com.commerce.platform.core.domain.aggreate;
 
+import com.commerce.platform.core.domain.enums.OrderStatus;
+import com.commerce.platform.core.domain.vo.CouponId;
+import com.commerce.platform.core.domain.vo.CustomerId;
 import com.commerce.platform.core.domain.vo.Money;
-import com.commerce.platform.core.domain.vo.OrderStatus;
+import com.commerce.platform.core.domain.vo.OrderId;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Getter
+@Builder
 public class Order {
-    private String orderId;
-    private String customerId;
-    private String couponId;
+    private OrderId orderId;
+    private CustomerId customerId;
+    private CouponId couponId;
     private List<OrderItem> orderItems;
     private Money originAmt;     // 할인전금액
     private Money discountAmt;   // 할인금액
     private Money resultAmt;     // 최종금액
     private OrderStatus status;
     private LocalDateTime orderedDateTime;
+    private LocalDateTime updatedDateTime;
 
     public static Order create(
-            String customerId,
+            CustomerId customerId,
+            CouponId couponId,
             List<OrderItem> orderItems
-    ) throws Exception {
-        // 주문내역 확인
-        for (OrderItem orderItem : orderItems) {
-            orderItem.checkOrderItem();
-        }
-
-        Order order = new Order();
-        order.orderId = String.valueOf(UUID.randomUUID());
-        order.customerId = customerId;
-        order.orderItems = orderItems;
-        order.discountAmt = Money.create(0);
-        order.status = OrderStatus.PENDING;
-        order.orderedDateTime = LocalDateTime.now();
+    ) {
+        return Order.builder()
+                .orderId(OrderId.create())
+                .customerId(customerId)
+                .couponId(couponId)
+                .orderItems(orderItems)
+                .discountAmt(Money.create(0))
+                .status(OrderStatus.PENDING)
+                .orderedDateTime(LocalDateTime.now())
+                .build();
 
         // 원금액 계산
-        order.calculateAmt();
-
-        return order;
+//        order.calculateAmt();
     }
 
-    private void calculateAmt() throws Exception {
-        this.originAmt = orderItems.stream()
-                .map(OrderItem::calculateOrderItem)
-                .reduce(Money.create(0L), Money::add);
-
-        this.resultAmt = this.originAmt.substract(this.discountAmt);
+    /**
+     * 주문상품list 검증
+     */
+    public void checkOrderItems() {
+//        this.getOrderItems().stream()
+//                .forEach(OrderItem::checkOrderItem);
     }
+
+    /** 원금액, 할인금액, 최종금액 계산*/
 
     public void applyCoupon(String couponId, Money discountAmt) throws Exception {
         if(couponId == null) return;
@@ -62,6 +66,14 @@ public class Order {
 
         // 최종금액
         this.calculateAmt();
+    }
+
+    private void calculateAmt() throws Exception {
+        this.originAmt = orderItems.stream()
+                .map(OrderItem::calculateOrderItem)
+                .reduce(Money.create(0L), Money::add);
+
+        this.resultAmt = this.originAmt.subtract(this.discountAmt);
     }
 
     // todo 주문상태 변경

@@ -23,7 +23,7 @@ public class ProductAdController {
         ProductId productId = productUseCase.createProduct(CreateProductRequest
                 .to(productRequest));
 
-        return ResponseEntity.ok("[성공] ProductId: " + productId.getId());
+        return ResponseEntity.ok("[성공] ProductId: " + productId.id());
     }
 
     @PatchMapping("/{productId}/stock")
@@ -38,6 +38,6 @@ public class ProductAdController {
 
         Product updatedProduct = productUseCase.updateStock(stockCommand);
 
-        return ResponseEntity.ok("[성공] 최종수량: " + updatedProduct.getStockQuantity().getValue());
+        return ResponseEntity.ok("[성공] 최종수량: " + updatedProduct.getStockQuantity().value());
     }
 }

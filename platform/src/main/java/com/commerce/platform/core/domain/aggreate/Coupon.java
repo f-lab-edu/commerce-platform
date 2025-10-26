@@ -32,7 +32,7 @@ public class Coupon {
         coupon.discountPercent = discountPercent;
         coupon.minOrderAmt = Money.create(minOrderAmt);
         coupon.maxDiscountAmt = Money.create(maxDiscountAmt);
-        coupon.validPeriod = new ValidPeriod(frDt, toDt);
+        coupon.validPeriod = ValidPeriod.create(frDt, toDt);
         coupon.totalQuantity = Quantity.create(totalCnt);
         coupon.remainQuantity = coupon.totalQuantity;
 
@@ -48,10 +48,10 @@ public class Coupon {
             this.remainQuantity.minus(Quantity.create(1));
 
             // 주문금액 확인
-            if(this.minOrderAmt.getValue() > orerAmt.getValue()) throw new Exception("최소주문금액 미달");
+            if(this.minOrderAmt.value() > orerAmt.value()) throw new Exception("최소주문금액 미달");
 
             // 유효기간 확인
-            if(!this.validPeriod.checkNowInPeriod()) throw new Exception("적용가능일자가 아님");
+//            if(!this.validPeriod.checkNowInPeriod()) throw new Exception("적용가능일자가 아님");
 
             return true;
         } catch (Exception e) {
@@ -68,7 +68,7 @@ public class Coupon {
 
         // 할인금액
         Money discountAmt = orderAmt.discount(this.discountPercent);
-        if(discountAmt.getValue() > this.maxDiscountAmt.getValue()) {
+        if(discountAmt.value() > this.maxDiscountAmt.value()) {
             discountAmt = this.maxDiscountAmt;
         }
 
