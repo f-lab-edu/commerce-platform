@@ -1,10 +1,9 @@
-package com.commerce.platform.core.domain.service;
+package com.commerce.platform.core.application.in;
 
 import com.commerce.platform.bootstrap.dto.order.OrderRefundRequest;
 import com.commerce.platform.bootstrap.dto.order.OrderRefundResponse;
 import com.commerce.platform.bootstrap.dto.order.OrderRequest;
 import com.commerce.platform.bootstrap.dto.order.OrderResponse;
-import com.commerce.platform.core.application.in.OrderUseCase;
 import com.commerce.platform.core.application.out.OrderOutputPort;
 import com.commerce.platform.core.domain.aggreate.Order;
 import com.commerce.platform.core.domain.vo.OrderStatus;
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
-public class OrderService implements OrderUseCase {
+public class OrderUseCaseImpl implements OrderUseCase {
     private final OrderOutputPort orderOutputPort;
 
     @Override

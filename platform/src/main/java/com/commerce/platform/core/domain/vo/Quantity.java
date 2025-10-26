@@ -1,26 +1,37 @@
 package com.commerce.platform.core.domain.vo;
 
-import lombok.AllArgsConstructor;
+import com.commerce.platform.shared.exception.BusinessException;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 
+import static com.commerce.platform.shared.exception.BusinessError.INVALID_QUANTITY;
+import static com.commerce.platform.shared.exception.BusinessError.QUANTITY_EXCEEDS_MAXIMUM;
+
 @Getter
-@AllArgsConstructor
+@Builder(access = AccessLevel.PRIVATE)
 public class Quantity {
-    private int value;
+    private long value;
 
-    public Quantity add(int quantity) throws Exception {
-        if(quantity <= 0) throw new Exception("수량은 1 이상");
-
-        return new Quantity(this.value + quantity);
+    public Quantity add(Quantity quantity) {
+        checkQuantity();
+        return new Quantity(this.value + quantity.value);
     }
 
-    public Quantity minus(int quantity) throws Exception {
-        if(this.value < quantity) throw new Exception("수량 부족");
+    public Quantity minus(Quantity quantity) {
+        checkQuantity();
+        if(this.value < quantity.value) throw new BusinessException(QUANTITY_EXCEEDS_MAXIMUM);
 
-        return new Quantity(this.value - quantity);
+        return new Quantity(this.value - quantity.value);
     }
 
-    public void checkQuantity() throws Exception {
-        if(this.value < 1) throw new Exception("수량 확인");
+    public void checkQuantity() {
+        if(this.value < 1) throw new BusinessException(INVALID_QUANTITY);
+    }
+
+    public static Quantity create(long quantity) {
+        return Quantity.builder()
+                .value(quantity)
+                .build();
     }
 }
