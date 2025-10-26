@@ -1,46 +1,43 @@
-package com.commerce.platform.core.domain.service;
+package com.commerce.platform.core.application.in;
 
-import com.commerce.platform.bootstrap.dto.product.ProductInfo;
-import com.commerce.platform.core.application.in.ProductUseCase;
 import com.commerce.platform.core.application.out.ProductOutputPort;
 import com.commerce.platform.core.application.vo.UpdateStockCommand;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.vo.ProductId;
+import com.commerce.platform.shared.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static com.commerce.platform.shared.exception.BusinessError.PRODUCT_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Service
-public class ProductService implements ProductUseCase {
+public class ProductUseCaseImpl implements ProductUseCase {
     private final ProductOutputPort productOutputPort;
 
     @Override
-    public List<ProductInfo> getProductList(int page) {
-        return productOutputPort.findAll().stream()
-                .map(ProductInfo::from)
-                .collect(Collectors.toList());
+    public List<Product> getProductList(int page) {
+        return productOutputPort.findAll();
     }
 
     @Override
-    public ProductInfo getProduct(ProductId productId) throws Exception {
+    public Product getProduct(ProductId productId) {
         return productOutputPort.findById(productId)
-                .map(ProductInfo::from)
-                .orElseThrow(() -> new Exception("해당 상품 없음"));
-
+                .orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
     }
 
     @Override
-    public void createProduct(Product product) {
+    public ProductId createProduct(Product product) {
         productOutputPort.save(product);
+        return product.getProductId();
     }
 
     @Override
-    public Product updateStock(UpdateStockCommand stockCommand) throws Exception {
+    public Product updateStock(UpdateStockCommand stockCommand) {
         Product product = productOutputPort.findById(stockCommand.productId())
-                .orElseThrow(() -> new Exception("해당 상품 없음"));
+                .orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
 
         Product updatedProduct = switch (stockCommand.stockOperation()) {
             case SET      -> product.changeStockQuantity(stockCommand.quantity());
