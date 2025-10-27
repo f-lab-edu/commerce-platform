@@ -1,7 +1,7 @@
 package com.commerce.platform.core.application.in;
 
 import com.commerce.platform.core.application.out.ProductOutputPort;
-import com.commerce.platform.core.application.vo.UpdateStockCommand;
+import com.commerce.platform.core.application.in.dto.UpdateStockCommand;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.vo.ProductId;
 import com.commerce.platform.shared.exception.BusinessException;

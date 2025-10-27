@@ -1,4 +1,4 @@
-package com.commerce.platform.core.application.vo;
+package com.commerce.platform.core.application.in.dto;
 
 import com.commerce.platform.core.domain.enums.StockOperation;
 import com.commerce.platform.core.domain.vo.ProductId;

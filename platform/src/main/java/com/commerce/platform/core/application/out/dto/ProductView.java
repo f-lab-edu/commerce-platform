@@ -1,4 +1,4 @@
-package com.commerce.platform.core.domain.dto;
+package com.commerce.platform.core.application.out.dto;
 
 public record ProductView(
         String productName,

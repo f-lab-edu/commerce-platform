@@ -19,7 +19,6 @@ public record ValidPeriod (
     }
 
     private void validate() {
-        if(LocalDate.now().isBefore(frDt)) throw new BusinessException(INVALID_PERIOD);
-        else if(toDt.isBefore(frDt)) throw new BusinessException(INVALID_PERIOD);
+        if(toDt.isBefore(frDt)) throw new BusinessException(INVALID_PERIOD);
     }
 }

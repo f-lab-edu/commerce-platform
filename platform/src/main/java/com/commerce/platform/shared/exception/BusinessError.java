@@ -13,7 +13,7 @@ public enum BusinessError {
     INVALID_PRODUCT_ID("P002", "유효하지 않는 상품 ID"),
 
     // Order 관련
-    INVALID_ORDER_ID("O002", "유효하지 않는 주문 ID"),
+    INVALID_ORDER_ID("O001", "유효하지 않는 주문 ID"),
 
     // Quantity 관련
     INVALID_QUANTITY("Q001", "유효하지 않은 수량입니다"),
@@ -29,6 +29,8 @@ public enum BusinessError {
 
     // Coupon
     INVALID_COUPON("C001", "유효하지 않는 쿠폰 ID"),
+    BELOW_LEAST_ORDER_AMT("C002", "최소주문금액 미달"),
+    NOT_WITHIN_PERIOD_COUPON("C003", "쿠폰 적용 가능일자가 아닙니다."),
 
     // Money
     INVALID_MONEY("M001", "금액 오류"),

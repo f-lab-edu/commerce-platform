@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public class OrderPersistenceAdaptor implements OrderOutputPort {
+public class OrderAdaptor implements OrderOutputPort {
     @Override
     public Order saveOrder(Order order) {
         return null;

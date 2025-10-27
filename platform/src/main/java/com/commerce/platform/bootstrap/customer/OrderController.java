@@ -2,6 +2,7 @@ package com.commerce.platform.bootstrap.customer;
 
 import com.commerce.platform.bootstrap.dto.order.*;
 import com.commerce.platform.core.application.in.OrderUseCase;
+import com.commerce.platform.core.application.in.dto.CreateOrderCommand;
 import com.commerce.platform.core.domain.aggreate.Order;
 import com.commerce.platform.core.domain.vo.CustomerId;
 import com.commerce.platform.core.domain.vo.OrderId;
@@ -17,12 +18,12 @@ import java.util.List;
 public class OrderController {
     private final OrderUseCase orderUseCase;
 
-    // todo 장바구니에서 여러상품 주문
+    // todo 장바구니
 
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest orderRequest) {
-        Order order = OrderRequest.to(orderRequest);
-        orderUseCase.createOrder(order);
+        CreateOrderCommand orderCommand = CreateOrderCommand.from(orderRequest);
+        Order order = orderUseCase.createOrder(orderCommand);
 
         return ResponseEntity.ok(
                 OrderResponse.from(order));

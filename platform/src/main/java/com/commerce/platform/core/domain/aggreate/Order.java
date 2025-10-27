@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
-@Builder
+@Builder(access = AccessLevel.PRIVATE)
 public class Order {
     private OrderId orderId;
     private CustomerId customerId;
@@ -28,8 +28,8 @@ public class Order {
 
     public static Order create(
             CustomerId customerId,
-            CouponId couponId,
-            List<OrderItem> orderItems
+            List<OrderItem> orderItems,
+            CouponId couponId
     ) {
         return Order.builder()
                 .orderId(OrderId.create())
@@ -37,38 +37,29 @@ public class Order {
                 .couponId(couponId)
                 .orderItems(orderItems)
                 .discountAmt(Money.create(0))
+                .originAmt(Money.create(0))
+                .resultAmt(Money.create(0))
                 .status(OrderStatus.PENDING)
                 .orderedDateTime(LocalDateTime.now())
                 .build();
-
-        // 원금액 계산
-//        order.calculateAmt();
     }
 
-    /**
-     * 주문상품list 검증
-     */
-    public void checkOrderItems() {
-//        this.getOrderItems().stream()
-//                .forEach(OrderItem::checkOrderItem);
-    }
 
-    /** 원금액, 할인금액, 최종금액 계산*/
-
-    public void applyCoupon(String couponId, Money discountAmt) throws Exception {
-        if(couponId == null) return;
+    /** 할인금액, 최종금액 계산*/
+    public void calculateAmtWithCoupon(Money discountAmt) {
+        if(this.couponId == null) return;
         else if(this.status != OrderStatus.PENDING) {
-            throw new Exception("쿠촌적용 실패");
+            throw new RuntimeException("주문생성시에만 적용 가능");
         }
 
         // 할인금액
         this.discountAmt = discountAmt;
 
         // 최종금액
-        this.calculateAmt();
+        calculateAmt();
     }
 
-    private void calculateAmt() throws Exception {
+    public void calculateAmt() {
         this.originAmt = orderItems.stream()
                 .map(OrderItem::calculateOrderItem)
                 .reduce(Money.create(0L), Money::add);
@@ -76,9 +67,24 @@ public class Order {
         this.resultAmt = this.originAmt.subtract(this.discountAmt);
     }
 
-    // todo 주문상태 변경
-    public void changeStatus(OrderStatus status) {
-        this.status = status;
+    /** todo 주문상태 변경 */
+
+    /**
+     * 주문 완료처리
+     */
+    public void orderConfirmed() {
+        if(this.status != OrderStatus.PENDING) {
+            throw new RuntimeException("주문완료처리 불가");
+        }
+
+        if(this.originAmt == Money.create(0)
+                || (this.couponId != null && this.discountAmt == Money.create(0))
+                || this.originAmt.subtract(this.discountAmt) != this.resultAmt
+        ) {
+            throw new RuntimeException("주문생성 오류");
+        }
+
+        this.status = OrderStatus.CONFIRMED;
     }
 
 }

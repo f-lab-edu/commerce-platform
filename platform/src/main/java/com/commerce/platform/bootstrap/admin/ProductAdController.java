@@ -3,7 +3,7 @@ package com.commerce.platform.bootstrap.admin;
 import com.commerce.platform.bootstrap.dto.product.CreateProductRequest;
 import com.commerce.platform.bootstrap.dto.product.UpdateStockRequest;
 import com.commerce.platform.core.application.in.ProductUseCase;
-import com.commerce.platform.core.application.vo.UpdateStockCommand;
+import com.commerce.platform.core.application.in.dto.UpdateStockCommand;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.vo.ProductId;
 import com.commerce.platform.core.domain.vo.Quantity;
