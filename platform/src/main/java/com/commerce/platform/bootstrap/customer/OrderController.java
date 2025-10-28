@@ -3,6 +3,7 @@ package com.commerce.platform.bootstrap.customer;
 import com.commerce.platform.bootstrap.dto.order.*;
 import com.commerce.platform.core.application.in.OrderUseCase;
 import com.commerce.platform.core.application.in.dto.CreateOrderCommand;
+import com.commerce.platform.core.application.in.dto.OrderView;
 import com.commerce.platform.core.domain.aggreate.Order;
 import com.commerce.platform.core.domain.vo.CustomerId;
 import com.commerce.platform.core.domain.vo.OrderId;
@@ -44,16 +45,16 @@ public class OrderController {
 
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderDetailResponse> getOrder(@PathVariable String orderId) {
-        Order order = orderUseCase.getOrder(OrderId.of(orderId));
+        OrderView orderView = orderUseCase.getOrder(OrderId.of(orderId));
         return ResponseEntity.ok(
-                OrderDetailResponse.from(order)
+                OrderDetailResponse.from(orderView)
         );
     }
 
     @PatchMapping("/{orderId}/cancel")
     public ResponseEntity<OrderResponse> cancelOrder(@PathVariable String orderId,
                                      @RequestBody String reson) {
-        Order canceledOrder = orderUseCase.cancelOrder(orderId, reson);
+        Order canceledOrder = orderUseCase.cancelOrder(OrderId.of(orderId), reson);
         return ResponseEntity.ok(
                 OrderResponse.ofCanceled(canceledOrder)
         );
@@ -62,7 +63,7 @@ public class OrderController {
     @PostMapping("/{orderId}/refund")
     public ResponseEntity<OrderRefundResponse> refundOrder(@PathVariable String orderId,
                                            @RequestBody OrderRefundRequest request) {
-        Order refundedOrder = orderUseCase.refundOrder(orderId, request);
+        Order refundedOrder = orderUseCase.refundOrder(OrderId.of(orderId), request);
         return ResponseEntity.ok(
                 OrderRefundResponse.from(refundedOrder)
         );

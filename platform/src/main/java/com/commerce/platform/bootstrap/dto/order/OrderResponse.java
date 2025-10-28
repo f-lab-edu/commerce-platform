@@ -19,7 +19,7 @@ public record OrderResponse (
         return new OrderResponse(
                 order.getOrderId().id(),
                 order.getStatus().getValue(),
-                order.getOrderedDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd- HH:mm")),
+                order.getOrderedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd- HH:mm")),
                 null
         );
     }
@@ -31,8 +31,8 @@ public record OrderResponse (
         return new OrderResponse(
                 order.getOrderId().id(),
                 order.getStatus().getValue(),
-                null,
-                order.getUpdatedDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd- HH:mm"))
+                order.getOrderedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd- HH:mm")),
+                order.getUpdatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd- HH:mm"))
         );
     }
 }

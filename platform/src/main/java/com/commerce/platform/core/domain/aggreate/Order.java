@@ -12,6 +12,8 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.commerce.platform.core.domain.enums.OrderStatus.*;
+
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
 public class Order {
@@ -23,8 +25,8 @@ public class Order {
     private Money discountAmt;   // 할인금액
     private Money resultAmt;     // 최종금액
     private OrderStatus status;
-    private LocalDateTime orderedDateTime;
-    private LocalDateTime updatedDateTime;
+    private LocalDateTime orderedAt;
+    private LocalDateTime updatedAt;
 
     public static Order create(
             CustomerId customerId,
@@ -40,7 +42,7 @@ public class Order {
                 .originAmt(Money.create(0))
                 .resultAmt(Money.create(0))
                 .status(OrderStatus.PENDING)
-                .orderedDateTime(LocalDateTime.now())
+                .orderedAt(LocalDateTime.now())
                 .build();
     }
 
@@ -72,7 +74,7 @@ public class Order {
     /**
      * 주문 완료처리
      */
-    public void orderConfirmed() {
+    public void confirm() {
         if(this.status != OrderStatus.PENDING) {
             throw new RuntimeException("주문완료처리 불가");
         }
@@ -84,7 +86,33 @@ public class Order {
             throw new RuntimeException("주문생성 오류");
         }
 
-        this.status = OrderStatus.CONFIRMED;
+        updateOrderStatus(CONFIRMED);
     }
 
+    /** 주문 취소 **/
+    public void cancel() {
+        if(this.status != OrderStatus.CONFIRMED) {
+            throw new RuntimeException("주문 취소처리 불가");
+        }
+
+        updateOrderStatus(CANCELED);
+    }
+
+    /** 주문 환불 **/
+    public void refund() {
+        if(this.status != OrderStatus.PAID) {
+            throw new RuntimeException("환불처리 불가");
+        }
+
+        updateOrderStatus(REFUND);
+    }
+
+    /**
+     * 주문상태, 수정시간 변경
+     * @param updateStatus
+     */
+    private void updateOrderStatus(OrderStatus updateStatus) {
+        this.updatedAt = LocalDateTime.now();
+        this.status = updateStatus;
+    }
 }

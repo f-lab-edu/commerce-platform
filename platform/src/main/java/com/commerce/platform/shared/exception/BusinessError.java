@@ -32,6 +32,11 @@ public enum BusinessError {
     BELOW_LEAST_ORDER_AMT("C002", "최소주문금액 미달"),
     NOT_WITHIN_PERIOD_COUPON("C003", "쿠폰 적용 가능일자가 아닙니다."),
 
+    // CouponIssue
+    NOT_ISSUED_COUPON("I001", "미발행된 쿠폰입니다."),
+    USED_ISSUED_COUPON("I001", "이미 사용된 쿠폰입니다."),
+    EXPIRED_ISSUED_COUPON("I001", "사용 만료된 쿠폰입니다."),
+
     // Money
     INVALID_MONEY("M001", "금액 오류"),
 

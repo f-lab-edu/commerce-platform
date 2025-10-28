@@ -2,10 +2,11 @@ package com.commerce.platform.infrastructure.persistence;
 
 import com.commerce.platform.core.application.out.OrderOutputPort;
 import com.commerce.platform.core.domain.aggreate.Order;
-import com.commerce.platform.core.domain.enums.OrderStatus;
+import com.commerce.platform.core.domain.vo.CustomerId;
 import com.commerce.platform.core.domain.vo.OrderId;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -21,7 +22,7 @@ public class OrderAdaptor implements OrderOutputPort {
     }
 
     @Override
-    public Order updateOrder(String orderId, String reason, OrderStatus status) {
+    public List<Order> findByCustomerId(CustomerId customerId) {
         return null;
     }
 }

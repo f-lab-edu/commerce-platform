@@ -1,7 +1,7 @@
 package com.commerce.platform.bootstrap.dto.order;
 
-import com.commerce.platform.core.domain.aggreate.Order;
-import com.commerce.platform.core.domain.aggreate.OrderItem;
+import com.commerce.platform.core.application.in.dto.OrderView;
+import com.commerce.platform.core.application.in.dto.OrderView.OrderItemView;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -22,28 +22,28 @@ public record OrderDetailResponse(
             long amt,
             long quantity
     ){
-        public static OrderItemResponse from(OrderItem orderItem) {
+        public static OrderItemResponse from(OrderItemView orderItemView) {
             return new OrderItemResponse(
-                    orderItem.getProductId().id(),
-                    orderItem.getProductName(),
-                    orderItem.getAmt().value(),
-                    orderItem.getQuantity().value()
+                    orderItemView.productId().id(),
+                    orderItemView.productName(),
+                    orderItemView.amt().value(),
+                    orderItemView.quantity().value()
             );
         }
     }
 
     /** OrderDetailResponse 생성 */
-    public static OrderDetailResponse from(Order order) {
+    public static OrderDetailResponse from(OrderView orderView) {
         return new OrderDetailResponse(
-                order.getOrderId().id(),
-                order.getOrderItems().stream()
+                orderView.orderId().id(),
+                orderView.orderItemViews().stream()
                         .map(OrderItemResponse::from)
                         .toList(),
-                order.getOriginAmt().value(),
-                order.getDiscountAmt().value(),
-                order.getResultAmt().value(),
-                order.getStatus().getValue(),
-                order.getOrderedDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd- HH:mm"))
+                orderView.originAmt().value(),
+                orderView.discountAmt().value(),
+                orderView.resultAmt().value(),
+                orderView.orderStatus().getValue(),
+                orderView.orderedDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd- HH:mm"))
         );
     }
 }

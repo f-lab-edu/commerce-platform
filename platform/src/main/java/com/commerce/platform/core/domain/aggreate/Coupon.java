@@ -1,19 +1,25 @@
 package com.commerce.platform.core.domain.aggreate;
 
+import com.commerce.platform.core.domain.vo.CouponId;
 import com.commerce.platform.core.domain.vo.Money;
 import com.commerce.platform.core.domain.vo.Quantity;
 import com.commerce.platform.core.domain.vo.ValidPeriod;
 import com.commerce.platform.shared.exception.BusinessException;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
-import java.util.UUID;
+import java.time.LocalDateTime;
 
-import static com.commerce.platform.shared.exception.BusinessError.*;
+import static com.commerce.platform.shared.exception.BusinessError.BELOW_LEAST_ORDER_AMT;
+import static com.commerce.platform.shared.exception.BusinessError.NOT_WITHIN_PERIOD_COUPON;
 
 @Getter
+@Builder(access = AccessLevel.PRIVATE)
 public class Coupon {
-    private String couponId;
+    private CouponId couponId;
+    private String couponName;
     private String code;
     private int discountPercent;
     private Money minOrderAmt;
@@ -21,50 +27,50 @@ public class Coupon {
     private ValidPeriod validPeriod;
     private Quantity totalQuantity;
     private Quantity remainQuantity;
+    private LocalDateTime createdAt;
 
     public static Coupon create(
             String code,
+            String couponName,
             int discountPercent,
             int minOrderAmt,
             int maxDiscountAmt,
             LocalDate frDt,
             LocalDate toDt,
-            int totalCnt
+            int totalQuantity
     ) throws Exception {
-        Coupon coupon = new Coupon();
-        coupon.couponId = String.valueOf(UUID.randomUUID());
-        coupon.code = code;
-        coupon.discountPercent = discountPercent;
-        coupon.minOrderAmt = Money.create(minOrderAmt);
-        coupon.maxDiscountAmt = Money.create(maxDiscountAmt);
-        coupon.validPeriod = ValidPeriod.create(frDt, toDt);
-        coupon.totalQuantity = Quantity.create(totalCnt);
-        coupon.remainQuantity = coupon.totalQuantity;
 
-        return coupon;
+        return Coupon.builder()
+                .couponId(CouponId.create())
+                .couponName(couponName)
+                .code(code)
+                .discountPercent(discountPercent)
+                .minOrderAmt(Money.create(minOrderAmt))
+                .maxDiscountAmt(Money.create(maxDiscountAmt))
+                .validPeriod(ValidPeriod.create(frDt, toDt))
+                .totalQuantity(Quantity.create(totalQuantity))
+                .remainQuantity(Quantity.create(totalQuantity))
+                .build();
     }
 
     /**
-     * 쿠폰 다운로드 가능여부 확인
+     * 사용가능여부 확인
      */
-    public void valid(Money orderAmt) {
-        // 쿠폰 수량 확인
-//        this.remainQuantity.minus(Quantity.create(1));
-
+    public void isAvailable(Money orderAmt) {
         // 주문금액 확인
         if(this.minOrderAmt.value() > orderAmt.value()) throw new BusinessException(BELOW_LEAST_ORDER_AMT);
 
         // 유효기간 확인
-        if(LocalDate.now().isBefore(this.validPeriod.frDt())) throw new BusinessException(NOT_WITHIN_PERIOD_COUPON);
+        if(!validPeriod.nowInPeriod()) throw new BusinessException(NOT_WITHIN_PERIOD_COUPON);
     }
 
-    // todo 쿠폰 소진
+    // todo 쿠폰 소진, 다운로드
 
     /**
-     * 쿠폰적용
+     * 할인금액 계산
      */
-    public Money useCoupon(Money orderAmt) {
-        valid(orderAmt);
+    public Money calculateDiscountAmt(Money orderAmt) {
+        isAvailable(orderAmt);
 
         // 할인금액
         Money discountAmt = orderAmt.discount(this.discountPercent);
