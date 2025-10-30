@@ -1,9 +1,6 @@
 package com.commerce.platform.core.domain.vo;
 
 import com.commerce.platform.shared.exception.BusinessException;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
 
 import static com.commerce.platform.shared.exception.BusinessError.INVALID_QUANTITY;
 import static com.commerce.platform.shared.exception.BusinessError.QUANTITY_EXCEEDS_MAXIMUM;
@@ -26,10 +23,7 @@ public record Quantity (
     }
 
     public Quantity {
-        validate();
+        if(value < 1) throw new BusinessException(INVALID_QUANTITY);
     }
 
-    public void validate() {
-        if(this.value < 1) throw new BusinessException(INVALID_QUANTITY);
-    }
 }

@@ -13,10 +13,7 @@ public record CustomerId (
     }
 
     public CustomerId {
-        validate();
-    }
-
-    private void validate() {
         if(StringUtils.isBlank(id)) throw new BusinessException(INVALID_CUSTOMER);
     }
+
 }

@@ -1,11 +1,30 @@
 package com.commerce.platform.bootstrap.customer;
 
+import com.commerce.platform.core.application.in.CouponIssueUseCase;
+import com.commerce.platform.core.application.in.dto.CouponView;
+import com.commerce.platform.core.domain.vo.CouponId;
+import com.commerce.platform.core.domain.vo.CustomerId;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
-@RequestMapping("/coupon")
+@RequestMapping("/coupons")
 @RestController
 public class CouponController {
+    private final CouponIssueUseCase couponIssueUseCase;
+
+    @PostMapping("/{couponId}/issue")
+    public ResponseEntity<String> issueCoupon(@PathVariable String couponId) {
+        couponIssueUseCase.issueCoupon(CouponId.of(couponId), null);
+        return ResponseEntity.ok("발급 성공");
+    }
+
+    @GetMapping("/users/{customerId}")
+    public ResponseEntity<List<CouponView>> getMyCoupons(@PathVariable String customerId) {
+        List<CouponView> myCoupons = couponIssueUseCase.getMyCoupons(CustomerId.of(customerId));
+        return ResponseEntity.ok(myCoupons);
+    }
 }

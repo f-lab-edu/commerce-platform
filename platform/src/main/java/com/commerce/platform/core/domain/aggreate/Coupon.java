@@ -12,8 +12,7 @@ import lombok.Getter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static com.commerce.platform.shared.exception.BusinessError.BELOW_LEAST_ORDER_AMT;
-import static com.commerce.platform.shared.exception.BusinessError.NOT_WITHIN_PERIOD_COUPON;
+import static com.commerce.platform.shared.exception.BusinessError.*;
 
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
@@ -26,7 +25,7 @@ public class Coupon {
     private Money maxDiscountAmt;
     private ValidPeriod validPeriod;
     private Quantity totalQuantity;
-    private Quantity remainQuantity;
+    private Quantity issuedQuantity;
     private LocalDateTime createdAt;
 
     public static Coupon create(
@@ -37,7 +36,7 @@ public class Coupon {
             int maxDiscountAmt,
             LocalDate frDt,
             LocalDate toDt,
-            int totalQuantity
+            long totalQuantity
     ) throws Exception {
 
         return Coupon.builder()
@@ -49,7 +48,7 @@ public class Coupon {
                 .maxDiscountAmt(Money.create(maxDiscountAmt))
                 .validPeriod(ValidPeriod.create(frDt, toDt))
                 .totalQuantity(Quantity.create(totalQuantity))
-                .remainQuantity(Quantity.create(totalQuantity))
+                .issuedQuantity(Quantity.create(0))
                 .build();
     }
 
@@ -61,10 +60,25 @@ public class Coupon {
         if(this.minOrderAmt.value() > orderAmt.value()) throw new BusinessException(BELOW_LEAST_ORDER_AMT);
 
         // 유효기간 확인
-        if(!validPeriod.nowInPeriod()) throw new BusinessException(NOT_WITHIN_PERIOD_COUPON);
+        isValidPeriod();
     }
 
-    // todo 쿠폰 소진, 다운로드
+    /**
+     * 발급
+     */
+    public void issueCoupon() {
+        isValidPeriod();
+
+        // 수량 확인
+        try {
+            this.totalQuantity.minus(this.issuedQuantity.add(Quantity.create(1)));
+        } catch (BusinessException be) {
+            throw new BusinessException(QUANTITY_EXCEEDED_COUPON);
+        }
+
+        // 발급수량 ++
+        this.issuedQuantity = Quantity.create(this.issuedQuantity.value() + 1L);
+    }
 
     /**
      * 할인금액 계산
@@ -79,5 +93,9 @@ public class Coupon {
         }
 
         return discountAmt;
+    }
+
+    private void isValidPeriod() {
+        if(!validPeriod.nowInPeriod()) throw new BusinessException(NOT_WITHIN_PERIOD_COUPON);
     }
 }

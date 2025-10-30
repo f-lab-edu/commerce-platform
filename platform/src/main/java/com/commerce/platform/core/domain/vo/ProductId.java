@@ -21,12 +21,7 @@ public record ProductId (
     }
 
     public ProductId {
-        validate();
-    }
-
-    private void validate() {
         if(StringUtils.isBlank(id)
                 || id.charAt(0) != 'P') throw new BusinessException(INVALID_PRODUCT_ID);
     }
-
 }

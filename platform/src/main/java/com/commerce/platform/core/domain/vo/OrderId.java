@@ -23,10 +23,6 @@ public record OrderId (
     }
 
     public OrderId {
-        validate();
-    }
-
-    private void validate() {
         if(StringUtils.isBlank(id)
                 || id.charAt(0) != 'O') throw new BusinessException(INVALID_ORDER_ID);
     }

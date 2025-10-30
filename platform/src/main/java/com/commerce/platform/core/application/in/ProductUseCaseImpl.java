@@ -1,9 +1,11 @@
 package com.commerce.platform.core.application.in;
 
+import com.commerce.platform.core.application.in.dto.ProductDetail;
 import com.commerce.platform.core.application.out.ProductOutputPort;
 import com.commerce.platform.core.application.in.dto.UpdateStockCommand;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.vo.ProductId;
+import com.commerce.platform.core.domain.vo.Quantity;
 import com.commerce.platform.shared.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,8 +25,9 @@ public class ProductUseCaseImpl implements ProductUseCase {
     }
 
     @Override
-    public Product getProduct(ProductId productId) {
+    public ProductDetail getProduct(ProductId productId) {
         return productOutputPort.findById(productId)
+                .map(ProductDetail::from)
                 .orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
     }
 
@@ -35,19 +38,17 @@ public class ProductUseCaseImpl implements ProductUseCase {
     }
 
     @Override
-    public Product updateStock(UpdateStockCommand stockCommand) {
+    public Quantity updateStock(UpdateStockCommand stockCommand) {
         Product product = productOutputPort.findById(stockCommand.productId())
                 .orElseThrow(() -> new BusinessException(PRODUCT_NOT_FOUND));
 
-        Product updatedProduct = switch (stockCommand.stockOperation()) {
+        switch (stockCommand.stockOperation()) {
             case SET      -> product.changeStockQuantity(stockCommand.quantity());
             case INCREASE -> product.increaseStock(stockCommand.quantity());
             case DECREASE -> product.decreaseStock(stockCommand.quantity());
             default -> throw new IllegalStateException("Unexpected value: " + stockCommand.stockOperation());
         };
 
-        productOutputPort.save(updatedProduct);
-
-        return updatedProduct;
+        return product.getStockQuantity();
     }
 }

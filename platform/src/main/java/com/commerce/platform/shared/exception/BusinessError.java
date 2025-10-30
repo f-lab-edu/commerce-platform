@@ -11,6 +11,7 @@ public enum BusinessError {
     // Product 관련
     PRODUCT_NOT_FOUND("P001", "상품을 찾을 수 없습니다"),
     INVALID_PRODUCT_ID("P002", "유효하지 않는 상품 ID"),
+    PRODUCT_NOT_AVAILABLE("P002", "구매가 불가능한 상품입니다."),
 
     // Order 관련
     INVALID_ORDER_ID("O001", "유효하지 않는 주문 ID"),
@@ -30,12 +31,14 @@ public enum BusinessError {
     // Coupon
     INVALID_COUPON("C001", "유효하지 않는 쿠폰 ID"),
     BELOW_LEAST_ORDER_AMT("C002", "최소주문금액 미달"),
-    NOT_WITHIN_PERIOD_COUPON("C003", "쿠폰 적용 가능일자가 아닙니다."),
+    NOT_WITHIN_PERIOD_COUPON("C003", "쿠폰 발급 기간이 아닙니다."),
+    QUANTITY_EXCEEDED_COUPON("C004", "발급 가능 수량 초과"),
 
     // CouponIssue
     NOT_ISSUED_COUPON("I001", "미발행된 쿠폰입니다."),
-    USED_ISSUED_COUPON("I001", "이미 사용된 쿠폰입니다."),
-    EXPIRED_ISSUED_COUPON("I001", "사용 만료된 쿠폰입니다."),
+    USED_ISSUED_COUPON("I002", "이미 사용된 쿠폰입니다."),
+    EXPIRED_ISSUED_COUPON("I003", "사용 만료된 쿠폰입니다."),
+    DUPLICATE_ISSUED_COUPON("I004", "이미 발급된 쿠폰입니다."),
 
     // Money
     INVALID_MONEY("M001", "금액 오류"),

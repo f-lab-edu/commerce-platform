@@ -29,11 +29,7 @@ public record Money(
 
     // compact constructor
     public Money {
-        validateMoney();
-    }
-
-    public void validateMoney() {
-        if(this.value < 0) {
+        if(value < 0) {
             throw new BusinessException(INVALID_MONEY);
         }
     }

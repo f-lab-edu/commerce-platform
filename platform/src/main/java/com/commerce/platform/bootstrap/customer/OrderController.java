@@ -1,10 +1,11 @@
 package com.commerce.platform.bootstrap.customer;
 
-import com.commerce.platform.bootstrap.dto.order.*;
+import com.commerce.platform.bootstrap.dto.order.OrderRefundRequest;
+import com.commerce.platform.bootstrap.dto.order.OrderRequest;
 import com.commerce.platform.core.application.in.OrderUseCase;
 import com.commerce.platform.core.application.in.dto.CreateOrderCommand;
-import com.commerce.platform.core.application.in.dto.OrderView;
-import com.commerce.platform.core.domain.aggreate.Order;
+import com.commerce.platform.core.application.in.dto.OrderDetailResponse;
+import com.commerce.platform.core.application.in.dto.OrderResponse;
 import com.commerce.platform.core.domain.vo.CustomerId;
 import com.commerce.platform.core.domain.vo.OrderId;
 import lombok.RequiredArgsConstructor;
@@ -19,53 +20,40 @@ import java.util.List;
 public class OrderController {
     private final OrderUseCase orderUseCase;
 
-    // todo 장바구니
-
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest orderRequest) {
         CreateOrderCommand orderCommand = CreateOrderCommand.from(orderRequest);
-        Order order = orderUseCase.createOrder(orderCommand);
+        OrderResponse order = orderUseCase.createOrder(orderCommand);
 
-        return ResponseEntity.ok(
-                OrderResponse.from(order));
+        return ResponseEntity.ok(order);
     }
 
     @GetMapping
     public ResponseEntity<List<OrderResponse>> getOrders(
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam String customerId) {
-        List<Order> orders = orderUseCase.getOrders(CustomerId.of(customerId));
+        List<OrderResponse> orders = orderUseCase.getOrders(CustomerId.of(customerId));
 
-        return ResponseEntity.ok(
-                orders.stream()
-                        .map(OrderResponse::from)
-                        .toList()
-        );
+        return ResponseEntity.ok(orders);
     }
 
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderDetailResponse> getOrder(@PathVariable String orderId) {
-        OrderView orderView = orderUseCase.getOrder(OrderId.of(orderId));
-        return ResponseEntity.ok(
-                OrderDetailResponse.from(orderView)
-        );
+        OrderDetailResponse order = orderUseCase.getOrder(OrderId.of(orderId));
+        return ResponseEntity.ok(order);
     }
 
     @PatchMapping("/{orderId}/cancel")
     public ResponseEntity<OrderResponse> cancelOrder(@PathVariable String orderId,
                                      @RequestBody String reson) {
-        Order canceledOrder = orderUseCase.cancelOrder(OrderId.of(orderId), reson);
-        return ResponseEntity.ok(
-                OrderResponse.ofCanceled(canceledOrder)
-        );
+        OrderResponse canceledOrder = orderUseCase.cancelOrder(OrderId.of(orderId), reson);
+        return ResponseEntity.ok(canceledOrder);
     }
 
     @PostMapping("/{orderId}/refund")
-    public ResponseEntity<OrderRefundResponse> refundOrder(@PathVariable String orderId,
+    public ResponseEntity<OrderResponse> refundOrder(@PathVariable String orderId,
                                            @RequestBody OrderRefundRequest request) {
-        Order refundedOrder = orderUseCase.refundOrder(OrderId.of(orderId), request);
-        return ResponseEntity.ok(
-                OrderRefundResponse.from(refundedOrder)
-        );
+        OrderResponse refundedOrder = orderUseCase.refundOrder(OrderId.of(orderId), request);
+        return ResponseEntity.ok(refundedOrder);
     }
 }

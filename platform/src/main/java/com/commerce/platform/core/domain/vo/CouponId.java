@@ -22,10 +22,6 @@ public record CouponId(
     }
 
     public CouponId {
-        validate();
-    }
-
-    private void validate() {
         if(!StringUtils.isBlank(id)
                 && id.charAt(0) != 'C') throw new BusinessException(INVALID_COUPON);
     }

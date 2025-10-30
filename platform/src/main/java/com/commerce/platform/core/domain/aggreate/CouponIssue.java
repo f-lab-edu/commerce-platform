@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static com.commerce.platform.core.domain.enums.CouponIssueStatus.EXPIRED;
@@ -26,6 +27,17 @@ public class CouponIssue {
     LocalDateTime issuedAt;
     LocalDateTime usedAt;
 
+    public static CouponIssue create(
+            CouponId couponId,
+            CustomerId customerId
+    ) {
+        return CouponIssue.builder()
+                .couponId(couponId)
+                .customerId(customerId)
+                .status(CouponIssueStatus.UNUSED)
+                .issuedAt(LocalDateTime.now())
+                .build();
+    }
     /**
      * 쿠폰 사용처리
      */

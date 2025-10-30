@@ -1,4 +1,4 @@
-package com.commerce.platform.bootstrap.dto.product;
+package com.commerce.platform.core.application.in.dto;
 
 import com.commerce.platform.core.domain.aggreate.Product;
 
