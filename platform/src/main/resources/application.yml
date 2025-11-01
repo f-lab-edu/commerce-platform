@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/payment_db?serverTimezone=Asia/Seoul
+    username: root
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update  # 또는 validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+
+logging:
+  level:
+    org.hibernate.SQL: debug
