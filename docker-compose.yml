@@ -1,0 +1,17 @@
+
+services:
+  db:
+    image: mysql:9.0
+    container_name: commerce-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: je1234
+      MYSQL_DATA_BASE: commerce_db
+      TZ: Asia/Seoul
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+# 데이터 영속성을 위함
+volumes:
+  mysql-data:
