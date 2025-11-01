@@ -5,9 +5,11 @@ import com.commerce.platform.core.domain.vo.Money;
 import com.commerce.platform.core.domain.vo.Quantity;
 import com.commerce.platform.core.domain.vo.ValidPeriod;
 import com.commerce.platform.shared.exception.BusinessException;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,17 +17,42 @@ import java.time.LocalDateTime;
 import static com.commerce.platform.shared.exception.BusinessError.*;
 
 @Getter
-@Builder(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "coupon")
+@Entity
 public class Coupon {
+    @EmbeddedId
     private CouponId couponId;
+
+    @Column(name = "name", nullable = false, length = 30)
     private String couponName;
+
+    @Column(name = "code", nullable = false, length = 20)
     private String code;
+
+    @Column(name = "discount_percent", nullable = false)
     private int discountPercent;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "min_order_amt", nullable = false))
     private Money minOrderAmt;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "max_discount_amt", nullable = false))
     private Money maxDiscountAmt;
+
+    @Embedded
     private ValidPeriod validPeriod;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "total_quantity", nullable = false))
     private Quantity totalQuantity;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "issued_quantity", nullable = false))
     private Quantity issuedQuantity;
+
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     public static Coupon create(
@@ -97,5 +124,22 @@ public class Coupon {
 
     private void isValidPeriod() {
         if(!validPeriod.nowInPeriod()) throw new BusinessException(NOT_WITHIN_PERIOD_COUPON);
+    }
+
+    @Builder
+    private Coupon(CouponId couponId, String couponName, String code,
+                   int discountPercent, Money minOrderAmt, Money maxDiscountAmt,
+                   ValidPeriod validPeriod, Quantity totalQuantity, Quantity issuedQuantity,
+                   LocalDateTime createdAt) {
+        this.couponId = couponId;
+        this.couponName = couponName;
+        this.code = code;
+        this.discountPercent = discountPercent;
+        this.minOrderAmt = minOrderAmt;
+        this.maxDiscountAmt = maxDiscountAmt;
+        this.validPeriod = validPeriod;
+        this.totalQuantity = totalQuantity;
+        this.issuedQuantity = issuedQuantity;
+        this.createdAt = createdAt;
     }
 }

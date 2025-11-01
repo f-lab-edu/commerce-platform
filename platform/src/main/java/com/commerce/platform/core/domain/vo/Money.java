@@ -1,10 +1,14 @@
 package com.commerce.platform.core.domain.vo;
 
 import com.commerce.platform.shared.exception.BusinessException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 
 import static com.commerce.platform.shared.exception.BusinessError.INVALID_MONEY;
 
+@Embeddable
 public record Money(
+        @Column(name = "value")
         long value
 ) {
     public Money add(Money money) {

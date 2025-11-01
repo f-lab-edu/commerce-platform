@@ -1,38 +1,70 @@
 package com.commerce.platform.core.domain.aggreate;
 
 import com.commerce.platform.core.domain.enums.PayMethod;
+import com.commerce.platform.core.domain.enums.PayProvider;
+import com.commerce.platform.core.domain.enums.PaymentStatus;
 import com.commerce.platform.core.domain.enums.PgProvider;
-import com.commerce.platform.core.domain.enums.TransactionStatus;
 import com.commerce.platform.core.domain.vo.Money;
-import com.commerce.platform.core.domain.vo.PaymentResult;
-import com.commerce.platform.core.domain.vo.PgRequest;
-import com.commerce.platform.core.domain.vo.PgResponse;
+import com.commerce.platform.core.domain.vo.OrderId;
+import com.commerce.platform.core.domain.vo.PaymentId;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "payment")
+@Entity
 public class Payment {
-    private String paymentId;
 
-    // 참조
-    private String orderId;
-    private String customerId;
-    private String merchantId;
+    @EmbeddedId
+    private PaymentId paymentId;
 
-    // 결제정보
-    private TransactionStatus transactionStatus;
+    @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "order_id", nullable = false))
+    private OrderId orderId;
+
+    // 결제 정보
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "approved_amt", nullable = false))
+    private Money approvedAmt; // 결제 금액
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "pay_method", nullable = false, length = 10)
     private PayMethod payMethod;
-    private Money amount;
-    private String installment; // todo 타입?
-    private LocalDateTime paymentDateTime;
 
-    // pg정보
+    @Column(name = "pay_provider", length = 10)
+    private PayProvider cardProvider;
+
+    @Column(name = "installment", length = 2)
+    private String installment;
+
+    // PG 정보
+    @Enumerated(EnumType.STRING)
+    @Column(name = "pg_provider", nullable = false, length = 20)
     private PgProvider pgProvider;
-    private PgRequest pgRequest;   // pg사 결제 요청
-    private PgResponse pgResponse; // pg사 결제 응답
 
-    // 우리가 제공할 응답
-    private PaymentResult paymentResult;
+    @Column(name = "pg_tid", length = 100)
+    private String pgTid;  // PG사 승인 ID
 
+    @Column(name = "pg_cancel_tid", length = 100)
+    private String pgCancelTid;  // PG사 전체취소 ID
 
-    // 승인, 취소, 부분취소
+    // 결제 상태
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", nullable = false, length = 20)
+    private PaymentStatus paymentStatus;
+
+    @Column(name = "requested_at", nullable = false)
+    private LocalDateTime requestedAt;
+
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
+
+    @Column(name = "canceled_at")
+    private LocalDateTime canceledAt;
+
 }

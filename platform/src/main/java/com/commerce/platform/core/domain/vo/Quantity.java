@@ -1,11 +1,15 @@
 package com.commerce.platform.core.domain.vo;
 
 import com.commerce.platform.shared.exception.BusinessException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 
 import static com.commerce.platform.shared.exception.BusinessError.INVALID_QUANTITY;
 import static com.commerce.platform.shared.exception.BusinessError.QUANTITY_EXCEEDS_MAXIMUM;
 
+@Embeddable
 public record Quantity (
+        @Column(name = "value")
         long value
 ) {
     public Quantity add(Quantity quantity) {
