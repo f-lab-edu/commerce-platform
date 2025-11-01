@@ -5,9 +5,10 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum PayMethod {
-    CARD("카드결제"),
-    PHONE("휴대폰결제");
+public enum PaymentStatus {
+    APPROVED("approved"),
+    FULL_CANCELED("fullCanceled"),
+    PARTIAL_CANCELED("partialCanceled");
 
     private final String value;
 }

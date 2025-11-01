@@ -34,11 +34,14 @@ public enum BusinessError {
     NOT_WITHIN_PERIOD_COUPON("C003", "쿠폰 발급 기간이 아닙니다."),
     QUANTITY_EXCEEDED_COUPON("C004", "발급 가능 수량 초과"),
 
-    // CouponIssue
+    // CouponIssues
     NOT_ISSUED_COUPON("I001", "미발행된 쿠폰입니다."),
     USED_ISSUED_COUPON("I002", "이미 사용된 쿠폰입니다."),
     EXPIRED_ISSUED_COUPON("I003", "사용 만료된 쿠폰입니다."),
     DUPLICATE_ISSUED_COUPON("I004", "이미 발급된 쿠폰입니다."),
+
+    // Payment
+    INVALID_PAYMENT("T", "유효하지 않는 결제ID"),
 
     // Money
     INVALID_MONEY("M001", "금액 오류"),

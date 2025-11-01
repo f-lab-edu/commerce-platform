@@ -4,7 +4,7 @@ import com.commerce.platform.core.application.in.dto.CouponView;
 import com.commerce.platform.core.application.out.CouponIssueOutPort;
 import com.commerce.platform.core.application.out.CouponOutPort;
 import com.commerce.platform.core.domain.aggreate.Coupon;
-import com.commerce.platform.core.domain.aggreate.CouponIssue;
+import com.commerce.platform.core.domain.aggreate.CouponIssues;
 import com.commerce.platform.core.domain.vo.CouponId;
 import com.commerce.platform.core.domain.vo.CustomerId;
 import com.commerce.platform.shared.exception.BusinessException;
@@ -28,12 +28,12 @@ public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
 
     @Override
     public List<CouponView> getMyCoupons(CustomerId customerId) {
-        List<CouponIssue> myCoupons = couponIssueOutPort.findByCustomerId(customerId);
+        List<CouponIssues> myCoupons = couponIssueOutPort.findByCustomerId(customerId);
 
         if(myCoupons.isEmpty()) return List.of();
 
         List<CouponId> couponIds = myCoupons.stream()
-                .map(CouponIssue::getCouponId)
+                .map(ci -> ci.getCouponIssueId().couponId())
                 .toList();
 
         Map<CouponId, Coupon> couponMap = couponOutPort.findByIdIn(couponIds)
@@ -42,7 +42,7 @@ public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
 
         return myCoupons.stream()
                 .map(item -> {
-                    Coupon coupon = couponMap.get(item.getCouponId());
+                    Coupon coupon = couponMap.get(item.getCouponIssueId().couponId());
                     return new CouponView(coupon.getCouponName(),
                             coupon.getDiscountPercent(),
                             coupon.getMinOrderAmt().value(),
@@ -66,6 +66,6 @@ public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
 
         // 발행
         coupon.issueCoupon();
-        couponIssueOutPort.save(CouponIssue.create(couponId, customerId));
+        couponIssueOutPort.save(CouponIssues.create(couponId, customerId));
     }
 }

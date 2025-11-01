@@ -9,24 +9,21 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static com.commerce.platform.shared.exception.BusinessError.INVALID_PRODUCT_ID;
+import static com.commerce.platform.shared.exception.BusinessError.INVALID_PAYMENT;
 
 @Embeddable
-public record ProductId (
+public record PaymentId(
         @Column(name = "id", length = 21)
         String id
 ) implements Serializable {
-    public static ProductId of(String id) {
-        return new ProductId(id);
-    }
 
-    public static ProductId create() {
-        return new ProductId("P" + LocalDateTime.now()
+    public static PaymentId create() {
+        return new PaymentId("T" + LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")));
     }
 
-    public ProductId {
+    public PaymentId {
         if(StringUtils.isBlank(id)
-                || id.charAt(0) != 'P') throw new BusinessException(INVALID_PRODUCT_ID);
+                || id.charAt(0) != 'T') throw new BusinessException(INVALID_PAYMENT);
     }
 }

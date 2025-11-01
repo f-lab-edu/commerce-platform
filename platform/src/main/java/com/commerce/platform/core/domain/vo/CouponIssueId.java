@@ -8,13 +8,13 @@ import jakarta.persistence.Embedded;
 import java.io.Serializable;
 
 @Embeddable
-public record OrderItemId(
+public record CouponIssueId(
         @Embedded
-        @AttributeOverride(name = "id", column = @Column(name = "order_id", nullable = false, length = 21))
-        OrderId orderId,
+        @AttributeOverride(name = "id", column = @Column(name = "coupon_id", nullable = false, length = 21))
+        CouponId couponId,
 
         @Embedded
-        @AttributeOverride(name = "id", column = @Column(name = "product_id", nullable = false, length = 21))
-        ProductId productId
+        @AttributeOverride(name = "id", column = @Column(name = "customer_id", nullable = false, length = 21))
+        CustomerId customerId
 ) implements Serializable {
 }

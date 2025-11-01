@@ -5,26 +5,77 @@ import com.commerce.platform.core.domain.vo.CouponId;
 import com.commerce.platform.core.domain.vo.CustomerId;
 import com.commerce.platform.core.domain.vo.Money;
 import com.commerce.platform.core.domain.vo.OrderId;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 import static com.commerce.platform.core.domain.enums.OrderStatus.*;
 
 @Getter
-@Builder(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+@Table(name = "orders")
 public class Order {
+    @EmbeddedId
     private OrderId orderId;
+
+    @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "customer_id", nullable = false, length = 21))
     private CustomerId customerId;
+
+    @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "coupon_id", length = 21))
     private CouponId couponId;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "origin_amt"))
     private Money originAmt;     // 할인전금액
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "discount_amt"))
     private Money discountAmt;   // 할인금액
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "result_amt"))
     private Money resultAmt;     // 최종금액
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 4)
     private OrderStatus status;
+
+    @Column(name = "ordered_at", nullable = false)
     private LocalDateTime orderedAt;
+
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+
+    @Builder
+    private Order(
+            OrderId orderId,
+            CustomerId customerId,
+            CouponId couponId,
+            Money originAmt,
+            Money discountAmt,
+            Money resultAmt,
+            OrderStatus status,
+            LocalDateTime orderedAt,
+            LocalDateTime updatedAt
+    ) {
+        this.orderId = orderId;
+        this.customerId = customerId;
+        this.couponId = couponId;
+        this.originAmt = originAmt;
+        this.discountAmt = discountAmt;
+        this.resultAmt = resultAmt;
+        this.status = status;
+        this.orderedAt = orderedAt;
+        this.updatedAt = updatedAt;
+    }
 
     public static Order create(
             CustomerId customerId,

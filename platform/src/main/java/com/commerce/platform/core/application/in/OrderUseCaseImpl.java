@@ -82,7 +82,7 @@ public class OrderUseCaseImpl implements OrderUseCase {
         List<OrderItem> orderItems = orderItemOutPort.findByOrderId(order.getOrderId());
 
         List<ProductId> productIds = orderItems.stream()
-                .map(OrderItem::getProductId)
+                .map(oi -> oi.getOrderItemId().productId())
                 .toList();
 
         Map<ProductId, Product> productMap = productOutputPort.findByIdIn(productIds).stream()
@@ -134,12 +134,12 @@ public class OrderUseCaseImpl implements OrderUseCase {
         if(couponId == null) return Money.create(0);
 
         // 발급된 쿠폰 확인
-        CouponIssue issuedCoupon = couponIssueOutPort.findByIdCustomerId(couponId, order.getCustomerId())
+        CouponIssues issuedCoupon = couponIssueOutPort.findByIdCustomerId(couponId, order.getCustomerId())
                 .orElseThrow(() -> new BusinessException(NOT_ISSUED_COUPON));
         issuedCoupon.valid();
 
         // 쿠폰 정보 조회
-        Coupon coupon = couponOutPort.findById(issuedCoupon.getCouponId())
+        Coupon coupon = couponOutPort.findById(issuedCoupon.getCouponIssueId().couponId())
                 .orElseThrow(() -> new BusinessException(INVALID_COUPON));
         Money discountAmt = coupon.calculateDiscountAmt(order.getOriginAmt());
 
@@ -155,7 +155,7 @@ public class OrderUseCaseImpl implements OrderUseCase {
      */
     private Money calculateTotalAmountFromProducts(List<OrderItem> orderItems) {
         List<ProductId> productIds = orderItems.stream()
-                .map(OrderItem::getProductId)
+                .map(oi -> oi.getOrderItemId().productId())
                 .toList();
 
         Map<ProductId, Product> productMap = productOutputPort.findByIdIn(productIds).stream()
@@ -163,7 +163,7 @@ public class OrderUseCaseImpl implements OrderUseCase {
 
         return orderItems.stream()
                 .map(item -> {
-                    Product product = productMap.get(item.getProductId());
+                    Product product = productMap.get(item.getOrderItemId().productId());
                     product.decreaseStock(item.getQuantity()); // todo 재고 소진 테스트
                     return product.getPrice()
                             .multiply(item.getQuantity());
