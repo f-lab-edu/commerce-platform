@@ -4,8 +4,13 @@ import com.commerce.platform.core.domain.enums.ProductStatus;
 import com.commerce.platform.core.domain.vo.Money;
 import com.commerce.platform.core.domain.vo.ProductId;
 import com.commerce.platform.core.domain.vo.Quantity;
+import com.commerce.platform.shared.exception.BusinessException;
 import lombok.Builder;
 import lombok.Getter;
+
+import static com.commerce.platform.core.domain.enums.ProductStatus.DISCONTINUED;
+import static com.commerce.platform.core.domain.enums.ProductStatus.OUT_OF_STOCK;
+import static com.commerce.platform.shared.exception.BusinessError.PRODUCT_NOT_AVAILABLE;
 
 @Getter
 @Builder(toBuilder = true)
@@ -22,11 +27,9 @@ public class Product {
      * @param updatedQuantity
      * @return
      */
-    public Product changeStockQuantity(Quantity updatedQuantity) {
-        return this.toBuilder()
-                .stockQuantity(updatedQuantity)
-                .status(ProductStatus.fromStockQuantity(updatedQuantity))
-                .build();
+    public void changeStockQuantity(Quantity updatedQuantity) {
+        this.stockQuantity = updatedQuantity;
+        this.status = ProductStatus.fromStockQuantity(updatedQuantity);
     }
 
     /**
@@ -35,9 +38,9 @@ public class Product {
      * @return
      * @throws Exception
      */
-    public Product increaseStock(Quantity incQuantity) {
+    public void increaseStock(Quantity incQuantity) {
         Quantity result = this.stockQuantity.add(incQuantity);
-        return changeStockQuantity(result);
+        changeStockQuantity(result);
     }
 
     /**
@@ -46,8 +49,13 @@ public class Product {
      * @return
      * @throws Exception
      */
-    public Product decreaseStock(Quantity decQuantity) {
+    public void decreaseStock(Quantity decQuantity) {
+        if(this.status == OUT_OF_STOCK
+                || this.status == DISCONTINUED ) {
+            throw new BusinessException(PRODUCT_NOT_AVAILABLE);
+        }
+
         Quantity result =  this.stockQuantity.minus(decQuantity);
-        return changeStockQuantity(result);
+        changeStockQuantity(result);
     }
 }

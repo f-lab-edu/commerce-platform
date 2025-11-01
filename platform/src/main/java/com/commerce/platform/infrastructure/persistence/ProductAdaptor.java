@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class ProductPersistenceAdaptor implements ProductOutputPort {
+public class ProductAdaptor implements ProductOutputPort {
     @Override
     public List<Product> findAll() {
         return null;
@@ -22,6 +22,10 @@ public class ProductPersistenceAdaptor implements ProductOutputPort {
 
     @Override
     public void save(Product product) {
+    }
 
+    @Override
+    public List<Product> findByIdIn(List<ProductId> productIds) {
+        return null;
     }
 }

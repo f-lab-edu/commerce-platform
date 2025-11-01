@@ -1,0 +1,37 @@
+package com.commerce.platform.core.application.in.dto;
+
+import com.commerce.platform.bootstrap.dto.order.OrderRequest;
+import com.commerce.platform.core.domain.vo.CouponId;
+import com.commerce.platform.core.domain.vo.CustomerId;
+import com.commerce.platform.core.domain.vo.ProductId;
+import com.commerce.platform.core.domain.vo.Quantity;
+
+import java.util.List;
+
+public record CreateOrderCommand(
+        CustomerId customerId,
+        CouponId couponId,
+        List<OrderItemCommand> orderItemCommands
+) {
+    public record OrderItemCommand(
+            ProductId productId,
+            Quantity quantity
+    ) {}
+
+    public static CreateOrderCommand from(OrderRequest orderRequest) {
+        List<OrderItemCommand> itemCommands = orderRequest.orderItemRequests().stream()
+                .map(itemReq -> {
+                    return new OrderItemCommand(
+                            ProductId.of(itemReq.productId()),
+                            Quantity.create(itemReq.quantity()));
+                })
+                .toList();
+
+        return new CreateOrderCommand(
+                CustomerId.of(orderRequest.customerId()),
+                CouponId.of(orderRequest.couponId()),
+                itemCommands
+        );
+
+    }
+}

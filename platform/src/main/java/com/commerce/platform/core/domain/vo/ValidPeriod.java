@@ -1,21 +1,28 @@
 package com.commerce.platform.core.domain.vo;
 
+import com.commerce.platform.shared.exception.BusinessException;
+
 import java.time.LocalDate;
 
-public class ValidPeriod {
-    LocalDate frDt;
-    LocalDate toDt;
+import static com.commerce.platform.shared.exception.BusinessError.INVALID_PERIOD;
 
-    public ValidPeriod(LocalDate frDt, LocalDate toDt) throws Exception {
-        if(LocalDate.now().isBefore(frDt)) throw new Exception("적용 시작일자 확인");
-        else if(toDt.isBefore(frDt)) throw new Exception("적용 종료일자 확인");
-
-        this.frDt = frDt;
-        this.toDt = toDt;
+public record ValidPeriod (
+        LocalDate frDt,
+        LocalDate toDt
+) {
+    public static ValidPeriod create(LocalDate frDt, LocalDate toDt) {
+        return new ValidPeriod(frDt, toDt);
     }
 
-    public boolean checkNowInPeriod() {
-        LocalDate now = LocalDate.now();
-        return !now.isBefore(this.frDt) && !now.isAfter(this.toDt);
+    public ValidPeriod {
+        if(toDt.isBefore(frDt)) throw new BusinessException(INVALID_PERIOD);
+    }
+    
+    public boolean nowInPeriod() {
+        if(!LocalDate.now().isBefore(frDt)
+                && !LocalDate.now().isAfter(toDt)) {
+            return true;
+        }
+        return false;
     }
 }

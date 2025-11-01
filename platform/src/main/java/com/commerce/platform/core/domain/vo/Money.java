@@ -1,17 +1,17 @@
 package com.commerce.platform.core.domain.vo;
 
-import lombok.*;
+import com.commerce.platform.shared.exception.BusinessException;
 
-@Getter
-@Builder(access = AccessLevel.PRIVATE)
-public class Money {
-    private long value;
+import static com.commerce.platform.shared.exception.BusinessError.INVALID_MONEY;
 
+public record Money(
+        long value
+) {
     public Money add(Money money) {
         return create(this.value + money.value);
     }
 
-    public Money substract(Money money) {
+    public Money subtract(Money money) {
         return create(this.value - money.value);
     }
 
@@ -20,13 +20,17 @@ public class Money {
     }
 
     public Money multiply(Quantity quantity) {
-        return create(this.value * quantity.getValue());
+        return create(this.value * quantity.value());
     }
 
     public static Money create(long value) {
-        return Money.builder()
-                .value(value)
-                .build();
+        return new Money(value);
     }
 
+    // compact constructor
+    public Money {
+        if(value < 0) {
+            throw new BusinessException(INVALID_MONEY);
+        }
+    }
 }

@@ -1,27 +1,28 @@
 package com.commerce.platform.infrastructure.persistence;
 
-import com.commerce.platform.bootstrap.dto.order.OrderRequest;
 import com.commerce.platform.core.application.out.OrderOutputPort;
 import com.commerce.platform.core.domain.aggreate.Order;
-import com.commerce.platform.core.domain.vo.OrderStatus;
+import com.commerce.platform.core.domain.vo.CustomerId;
+import com.commerce.platform.core.domain.vo.OrderId;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class OrderPersistenceAdaptor implements OrderOutputPort {
+public class OrderAdaptor implements OrderOutputPort {
     @Override
-    public Order saveOrder(OrderRequest request) {
+    public Order saveOrder(Order order) {
         return null;
     }
 
     @Override
-    public Optional<Order> findById(String orderId) {
+    public Optional<Order> findById(OrderId orderId) {
         return Optional.empty();
     }
 
     @Override
-    public Order updateOrder(String orderId, String reason, OrderStatus status) {
+    public List<Order> findByCustomerId(CustomerId customerId) {
         return null;
     }
 }

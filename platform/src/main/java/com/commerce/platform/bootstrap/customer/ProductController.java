@@ -1,9 +1,8 @@
 package com.commerce.platform.bootstrap.customer;
 
-import com.commerce.platform.bootstrap.dto.product.ProductDetail;
 import com.commerce.platform.bootstrap.dto.product.ProductInfo;
 import com.commerce.platform.core.application.in.ProductUseCase;
-import com.commerce.platform.core.domain.aggreate.Product;
+import com.commerce.platform.core.application.in.dto.ProductDetail;
 import com.commerce.platform.core.domain.vo.ProductId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +28,7 @@ public class ProductController {
 
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDetail> getProduct(@PathVariable String productId) {
-        Product product = productUseCase.getProduct(ProductId.of(productId));
-        ProductDetail pd = ProductDetail.from(product);
+        ProductDetail pd = productUseCase.getProduct(ProductId.of(productId));
 
         return ResponseEntity.ok(pd);
     }

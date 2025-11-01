@@ -8,8 +8,8 @@ import com.commerce.platform.core.application.in.ProductUseCase;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.enums.StockOperation;
 import com.commerce.platform.core.domain.vo.ProductId;
+import com.commerce.platform.core.domain.vo.Quantity;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +19,6 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.commerce.platform.shared.exception.BusinessError.INVALID_REQUEST_VALUE;
 import static org.hamcrest.Matchers.containsString;
@@ -52,33 +49,14 @@ class ProductControllerTest {
     @MockitoBean
     ProductUseCase productUseCase;
 
-    List<Product> productList;
-    List<CreateProductRequest> requestList;
-
-    @BeforeEach
-    void setUp() {
-        CreateProductRequest req = null;
-        Product product = null;
-        productList = new ArrayList<>();
-        requestList = new ArrayList<>();
-
-        for (int i = 0; i < 5; i++) {
-            req = new CreateProductRequest("테스트상품_" + i,
-                    "이 상품은 테스트용 입니다.",
-                    1004L,
-                    5000L);
-
-            product = CreateProductRequest.to(req);
-            requestList.add(req);
-            productList.add(product);
-        }
-    }
-
     @DisplayName("상품 등록 성공")
     @Test
     void createProduct() throws Exception {
-        ProductId expectedId = productList.get(0).getProductId();
-        CreateProductRequest req = requestList.get(0);
+        ProductId expectedId = ProductId.create();
+        CreateProductRequest req = new CreateProductRequest("테스트상품_",
+                "이 상품은 테스트용 입니다.",
+                1004L,
+                5000L);
 
         given(productUseCase.createProduct(any()))
                 .willReturn(expectedId);
@@ -88,7 +66,7 @@ class ProductControllerTest {
                 .content(objectMapper.writeValueAsString(req)))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(content().string(containsString(expectedId.getId())));
+            .andExpect(content().string(containsString(expectedId.id())));
 
         verify(productUseCase).createProduct(any());
     }
@@ -96,18 +74,22 @@ class ProductControllerTest {
     @DisplayName("재고 수정 성공")
     @Test
     void updateStock() throws Exception {
-        Product givenProduct = productList.get(0);
-        UpdateStockRequest stockRequest = new UpdateStockRequest(100L, StockOperation.SET);
+        Product givenProduct = Product.builder()
+                .productId(ProductId.create())
+                .stockQuantity(Quantity.create(100))
+                .build();
+
+        UpdateStockRequest stockRequest = new UpdateStockRequest(10, StockOperation.SET);
 
         given(productUseCase.updateStock(any()))
-                .willReturn(givenProduct);
+                .willReturn(Quantity.create(10));
 
-        mockMvc.perform(patch("/admin/products/{productId}/stock", givenProduct.getProductId().getId())
+        mockMvc.perform(patch("/admin/products/{productId}/stock", givenProduct.getProductId().id())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(stockRequest)))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(content().string(containsString(String.valueOf(givenProduct.getStockQuantity().getValue()))));
+            .andExpect(content().string(containsString(String.valueOf(stockRequest.quantity()))));
 
         verify(productUseCase).updateStock(any());
     }
@@ -115,10 +97,14 @@ class ProductControllerTest {
     @DisplayName("재고 수정 실패 - Validation 오류")
     @Test
     void failedUpdateStockO() throws Exception {
-        Product givenProduct = productList.get(0);
+        Product givenProduct = Product.builder()
+                .productId(ProductId.create())
+                .stockQuantity(Quantity.create(100))
+                .build();
+
         UpdateStockRequest stockRequest = new UpdateStockRequest(-1, null);
 
-        mockMvc.perform(patch("/admin/products/{productId}/stock", givenProduct.getProductId().getId())
+        mockMvc.perform(patch("/admin/products/{productId}/stock", givenProduct.getProductId().id())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(stockRequest)))
                 .andExpect(status().isBadRequest())

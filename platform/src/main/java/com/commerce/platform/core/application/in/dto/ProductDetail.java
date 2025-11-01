@@ -1,4 +1,4 @@
-package com.commerce.platform.bootstrap.dto.product;
+package com.commerce.platform.core.application.in.dto;
 
 import com.commerce.platform.core.domain.aggreate.Product;
 
@@ -11,9 +11,9 @@ public record ProductDetail(
 ) {
     public static ProductDetail from(Product product) {
         return new ProductDetail(
-                product.getProductId().getId(),
+                product.getProductId().id(),
                 product.getProductName(),
-                product.getPrice().getValue(),
+                product.getPrice().value(),
                 product.getDescription(),
                 product.getStatus().getDescription()
         );

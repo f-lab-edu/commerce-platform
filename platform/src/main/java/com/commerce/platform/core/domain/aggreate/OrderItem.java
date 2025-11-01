@@ -1,33 +1,29 @@
 package com.commerce.platform.core.domain.aggreate;
 
-import com.commerce.platform.core.domain.vo.Money;
+import com.commerce.platform.core.domain.vo.OrderId;
+import com.commerce.platform.core.domain.vo.ProductId;
 import com.commerce.platform.core.domain.vo.Quantity;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
 
+@Getter
+@Builder(access = AccessLevel.PRIVATE)
 public class OrderItem {
-//    private String orderItemId;
-    private String productId; // todo 참조의 의미를 위해서 외부 에그리거트는 타입을 만들었던건가?
-    private Money amt;
+    private OrderId orderId;
+    private ProductId productId;
     private Quantity quantity;
 
     public static OrderItem create(
-            String productId,
-            long amt,
-            int quantity
-    ) throws Exception {
-       OrderItem orderItem = new OrderItem();
-//       orderItem.orderItemId = String.valueOf(UUID.randomUUID());
-       orderItem.productId = productId;
-       orderItem.amt = Money.create(amt);
-       orderItem.quantity = Quantity.create(quantity);
+            OrderId orderId,
+            ProductId productId,
 
-       return orderItem;
-    }
-
-    public void checkOrderItem() throws Exception {
-       this.quantity.checkQuantity();
-    }
-
-    public Money calculateOrderItem() {
-        return this.amt.multiply(this.quantity);
+            Quantity quantity
+    ) {
+       return OrderItem.builder()
+               .orderId(orderId)
+               .productId(productId)
+               .quantity(quantity)
+               .build();
     }
 }

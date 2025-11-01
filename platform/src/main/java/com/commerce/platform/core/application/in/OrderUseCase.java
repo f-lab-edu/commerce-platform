@@ -1,13 +1,18 @@
 package com.commerce.platform.core.application.in;
 
 import com.commerce.platform.bootstrap.dto.order.OrderRefundRequest;
-import com.commerce.platform.bootstrap.dto.order.OrderRefundResponse;
-import com.commerce.platform.bootstrap.dto.order.OrderRequest;
-import com.commerce.platform.bootstrap.dto.order.OrderResponse;
+import com.commerce.platform.core.application.in.dto.CreateOrderCommand;
+import com.commerce.platform.core.application.in.dto.OrderDetailResponse;
+import com.commerce.platform.core.application.in.dto.OrderResponse;
+import com.commerce.platform.core.domain.vo.CustomerId;
+import com.commerce.platform.core.domain.vo.OrderId;
+
+import java.util.List;
 
 public interface OrderUseCase {
-    OrderResponse createOrder(OrderRequest orderRequest);
-    OrderResponse getOrder(String orderId) throws Exception;
-    OrderResponse cancelOrder(String orderId, String reason);
-    OrderRefundResponse refundOrder(String orderId, OrderRefundRequest request);
+    OrderResponse createOrder(CreateOrderCommand orderCommand);
+    List<OrderResponse> getOrders(CustomerId customerId);
+    OrderDetailResponse getOrder(OrderId orderId);
+    OrderResponse cancelOrder(OrderId orderId, String reason);
+    OrderResponse refundOrder(OrderId orderId, OrderRefundRequest request);
 }

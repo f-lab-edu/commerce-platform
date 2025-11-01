@@ -20,10 +20,10 @@ public enum ProductStatus {
      * 재고 수량에 따라 상태 결정
      */
     public static ProductStatus fromStockQuantity(Quantity stockQuantity) {
-        if (stockQuantity.getValue() == 0) {
+        if (stockQuantity.value() == 0) {
             return OUT_OF_STOCK;
         }
-        if (stockQuantity.getValue() <= LOW_STOCK_THRESHOLD) {
+        if (stockQuantity.value() <= LOW_STOCK_THRESHOLD) {
             return LOW_STOCK;
         }
         return ACTIVE;

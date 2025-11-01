@@ -3,8 +3,7 @@ package com.commerce.platform.bootstrap.admin;
 import com.commerce.platform.bootstrap.dto.product.CreateProductRequest;
 import com.commerce.platform.bootstrap.dto.product.UpdateStockRequest;
 import com.commerce.platform.core.application.in.ProductUseCase;
-import com.commerce.platform.core.application.vo.UpdateStockCommand;
-import com.commerce.platform.core.domain.aggreate.Product;
+import com.commerce.platform.core.application.in.dto.UpdateStockCommand;
 import com.commerce.platform.core.domain.vo.ProductId;
 import com.commerce.platform.core.domain.vo.Quantity;
 import jakarta.validation.Valid;
@@ -23,7 +22,7 @@ public class ProductAdController {
         ProductId productId = productUseCase.createProduct(CreateProductRequest
                 .to(productRequest));
 
-        return ResponseEntity.ok("[성공] ProductId: " + productId.getId());
+        return ResponseEntity.ok("[성공] ProductId: " + productId.id());
     }
 
     @PatchMapping("/{productId}/stock")
@@ -36,8 +35,8 @@ public class ProductAdController {
                 Quantity.create(stockRequest.quantity()),
                 stockRequest.operation());
 
-        Product updatedProduct = productUseCase.updateStock(stockCommand);
+        Quantity nowQuantity = productUseCase.updateStock(stockCommand);
 
-        return ResponseEntity.ok("[성공] 최종수량: " + updatedProduct.getStockQuantity().getValue());
+        return ResponseEntity.ok("[성공] 최종수량: " + nowQuantity.value());
     }
 }

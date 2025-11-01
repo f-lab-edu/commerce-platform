@@ -11,18 +11,42 @@ public enum BusinessError {
     // Product 관련
     PRODUCT_NOT_FOUND("P001", "상품을 찾을 수 없습니다"),
     INVALID_PRODUCT_ID("P002", "유효하지 않는 상품 ID"),
+    PRODUCT_NOT_AVAILABLE("P002", "구매가 불가능한 상품입니다."),
+
+    // Order 관련
+    INVALID_ORDER_ID("O001", "유효하지 않는 주문 ID"),
 
     // Quantity 관련
     INVALID_QUANTITY("Q001", "유효하지 않은 수량입니다"),
     QUANTITY_BELOW_MINIMUM("Q002", "수량은 최소 1개 이상이어야 합니다"),
     QUANTITY_EXCEEDS_MAXIMUM("Q003", "수량이 최대 한도를 초과했습니다"),
 
-
     // Stock 관련
     INSUFFICIENT_STOCK("S001", "재고가 부족합니다"),
     STOCK_NOT_AVAILABLE("S002", "재고를 사용할 수 없습니다"),
 
-    // 유효성, 미지정오류
+    // Customer
+    INVALID_CUSTOMER("M001", "고객ID 확인요망"),
+
+    // Coupon
+    INVALID_COUPON("C001", "유효하지 않는 쿠폰 ID"),
+    BELOW_LEAST_ORDER_AMT("C002", "최소주문금액 미달"),
+    NOT_WITHIN_PERIOD_COUPON("C003", "쿠폰 발급 기간이 아닙니다."),
+    QUANTITY_EXCEEDED_COUPON("C004", "발급 가능 수량 초과"),
+
+    // CouponIssue
+    NOT_ISSUED_COUPON("I001", "미발행된 쿠폰입니다."),
+    USED_ISSUED_COUPON("I002", "이미 사용된 쿠폰입니다."),
+    EXPIRED_ISSUED_COUPON("I003", "사용 만료된 쿠폰입니다."),
+    DUPLICATE_ISSUED_COUPON("I004", "이미 발급된 쿠폰입니다."),
+
+    // Money
+    INVALID_MONEY("M001", "금액 오류"),
+
+    // ValidPeriod
+    INVALID_PERIOD("V001", "유효기간 오류"),
+
+    // @Valid, 미지정오류
     INVALID_REQUEST_VALUE("8888", "요청데이터를 확인하세요"),
     UNKNOWN_ERROR("9999", "관리자에서 문의해주세요.")
     ;
