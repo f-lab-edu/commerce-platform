@@ -1,7 +1,8 @@
 package com.commerce.platform.core.application.in;
 
 import com.commerce.platform.bootstrap.dto.coupon.CouponRequest;
+import com.commerce.platform.core.domain.aggreate.Coupon;
 
 public interface CouponUseCase {
-    void createCoupon(CouponRequest couponRequest);
+    Coupon createCoupon(CouponRequest couponRequest);
 }

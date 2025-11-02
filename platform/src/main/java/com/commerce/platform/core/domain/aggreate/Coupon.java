@@ -59,12 +59,12 @@ public class Coupon {
             String code,
             String couponName,
             int discountPercent,
-            int minOrderAmt,
-            int maxDiscountAmt,
+            long minOrderAmt,
+            long maxDiscountAmt,
             LocalDate frDt,
             LocalDate toDt,
             long totalQuantity
-    ) throws Exception {
+    ) {
 
         return Coupon.builder()
                 .couponId(CouponId.create())
@@ -124,6 +124,13 @@ public class Coupon {
 
     private void isValidPeriod() {
         if(!validPeriod.nowInPeriod()) throw new BusinessException(NOT_WITHIN_PERIOD_COUPON);
+    }
+
+    /**
+     * 테스트용
+     */
+    public void changeIssuedQuantityForTest(long quantity) {
+        this.issuedQuantity = Quantity.create(quantity);
     }
 
     @Builder

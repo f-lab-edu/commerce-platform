@@ -1,4 +1,4 @@
-package com.commerce.platform.infrastructure.persistence;
+package com.commerce.platform.infrastructure.adaptor;
 
 import com.commerce.platform.core.application.out.ProductOutputPort;
 import com.commerce.platform.core.domain.aggreate.Product;

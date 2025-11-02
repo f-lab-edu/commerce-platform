@@ -1,6 +1,7 @@
 package com.commerce.platform.core.domain.service;
 
 import com.commerce.platform.core.application.in.ProductUseCaseImpl;
+import com.commerce.platform.core.application.in.dto.ProductDetail;
 import com.commerce.platform.core.application.out.ProductOutputPort;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.enums.ProductStatus;
@@ -50,11 +51,12 @@ class ProductServiceTest {
                 .thenReturn(Optional.of(exProduct));
 
         // when
-        Product acProduct = productService.getProduct(exProduct.getProductId());
+
+        ProductDetail dto = productService.getProduct(exProduct.getProductId());
 
         // then
-        assertThat(acProduct.getProductId()).isEqualTo(exProduct.getProductId());
-        assertThat(acProduct.getProductName()).isEqualTo(exProduct.getProductName());
+        assertThat(dto.productId()).isEqualTo(exProduct.getProductId().id());
+        assertThat(dto.name()).isEqualTo(exProduct.getProductName());
 
         verify(productOutputPort).findById(any());
     }

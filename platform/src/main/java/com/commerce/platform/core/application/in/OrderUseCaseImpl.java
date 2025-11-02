@@ -132,9 +132,10 @@ public class OrderUseCaseImpl implements OrderUseCase {
      */
     private Money applyCoupon(Order order, CouponId couponId) {
         if(couponId == null) return Money.create(0);
+        CouponIssueId couponIssueId = new CouponIssueId(couponId, order.getCustomerId());
 
         // 발급된 쿠폰 확인
-        CouponIssues issuedCoupon = couponIssueOutPort.findByIdCustomerId(couponId, order.getCustomerId())
+        CouponIssues issuedCoupon = couponIssueOutPort.findByCouponIssueId(couponIssueId)
                 .orElseThrow(() -> new BusinessException(NOT_ISSUED_COUPON));
         issuedCoupon.valid();
 

@@ -3,6 +3,9 @@ spring:
     url: jdbc:mysql://localhost:3306/payment_db?serverTimezone=Asia/Seoul
     username: root
     password:
+    hikari:
+      maximum-pool-size: 20
+      connection-timeout: 3000
 
   jpa:
     hibernate:
@@ -16,4 +19,4 @@ spring:
 
 logging:
   level:
-    org.hibernate.SQL: debug
+    org.hibernate.SQL: info

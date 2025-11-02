@@ -35,10 +35,10 @@ public class CouponIssues {
     @AttributeOverride(name = "id", column = @Column(name = "order_id", length = 21))
     OrderId orderId;
 
-    @Column(name = "issued_at", nullable = false)
+    @Column(name = "issued_at", nullable = false, updatable = false)
     LocalDateTime issuedAt;
 
-    @Column(name = "usedAt", nullable = false)
+    @Column(name = "usedAt")
     LocalDateTime usedAt;
 
     public static CouponIssues create(

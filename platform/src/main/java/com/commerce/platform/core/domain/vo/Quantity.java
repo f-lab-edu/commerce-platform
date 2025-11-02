@@ -27,7 +27,7 @@ public record Quantity (
     }
 
     public Quantity {
-        if(value < 1) throw new BusinessException(INVALID_QUANTITY);
+        if(value < 0) throw new BusinessException(INVALID_QUANTITY);
     }
 
 }
