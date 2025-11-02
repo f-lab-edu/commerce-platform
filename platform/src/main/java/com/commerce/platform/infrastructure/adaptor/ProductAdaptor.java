@@ -3,29 +3,35 @@ package com.commerce.platform.infrastructure.adaptor;
 import com.commerce.platform.core.application.out.ProductOutputPort;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.vo.ProductId;
-import org.springframework.stereotype.Repository;
+import com.commerce.platform.infrastructure.persistence.ProductRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
-@Repository
+@RequiredArgsConstructor
+@Component
 public class ProductAdaptor implements ProductOutputPort {
+    private final ProductRepository repository;
+
     @Override
     public List<Product> findAll() {
-        return null;
+        return repository.findAll();
     }
 
     @Override
     public Optional<Product> findById(ProductId productId) {
-        return Optional.empty();
+        return repository.findById(productId);
     }
 
     @Override
     public void save(Product product) {
+        repository.save(product);
     }
 
     @Override
     public List<Product> findByIdIn(List<ProductId> productIds) {
-        return null;
+        return repository.findAllById(productIds);
     }
 }

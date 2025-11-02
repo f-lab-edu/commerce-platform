@@ -4,25 +4,29 @@ import com.commerce.platform.core.application.out.OrderOutputPort;
 import com.commerce.platform.core.domain.aggreate.Order;
 import com.commerce.platform.core.domain.vo.CustomerId;
 import com.commerce.platform.core.domain.vo.OrderId;
-import org.springframework.stereotype.Repository;
+import com.commerce.platform.infrastructure.persistence.OrderRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
-@Repository
+@RequiredArgsConstructor
+@Component
 public class OrderAdaptor implements OrderOutputPort {
+    private final OrderRepository repository;
     @Override
     public Order saveOrder(Order order) {
-        return null;
+        return repository.save(order);
     }
 
     @Override
     public Optional<Order> findById(OrderId orderId) {
-        return Optional.empty();
+        return repository.findById(orderId);
     }
 
     @Override
     public List<Order> findByCustomerId(CustomerId customerId) {
-        return null;
+        return repository.findByCustomerId(customerId);
     }
 }

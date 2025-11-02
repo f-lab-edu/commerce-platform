@@ -1,4 +1,4 @@
-package com.commerce.platform.infrastructure.adaptor;
+package com.commerce.platform.infrastructure.persistence;
 
 import com.commerce.platform.core.application.out.LockOutPort;
 import lombok.RequiredArgsConstructor;

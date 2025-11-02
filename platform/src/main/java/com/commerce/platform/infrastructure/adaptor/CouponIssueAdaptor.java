@@ -6,13 +6,13 @@ import com.commerce.platform.core.domain.vo.CouponIssueId;
 import com.commerce.platform.core.domain.vo.CustomerId;
 import com.commerce.platform.infrastructure.persistence.CouponIssueRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-@Repository
+@Component
 public class CouponIssueAdaptor implements CouponIssueOutPort{
     private final CouponIssueRepository repository;
 
