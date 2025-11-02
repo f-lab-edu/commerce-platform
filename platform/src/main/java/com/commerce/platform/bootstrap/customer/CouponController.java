@@ -16,9 +16,9 @@ import java.util.List;
 public class CouponController {
     private final CouponIssueUseCase couponIssueUseCase;
 
-    @PostMapping("/{couponId}/issue")
+    @PostMapping("/{couponId}/issue/{customerId}")
     public ResponseEntity<String> issueCoupon(@PathVariable String couponId) {
-        couponIssueUseCase.issueCoupon(CouponId.of(couponId), null);
+        couponIssueUseCase.issueCoupon(CouponId.of(couponId), CustomerId.of("test1")); // todo tmp customerId
         return ResponseEntity.ok("발급 성공");
     }
 

@@ -3,13 +3,17 @@ package com.commerce.platform.core.application.in;
 import com.commerce.platform.core.application.in.dto.CouponView;
 import com.commerce.platform.core.application.out.CouponIssueOutPort;
 import com.commerce.platform.core.application.out.CouponOutPort;
+import com.commerce.platform.core.domain.service.LockFacade;
 import com.commerce.platform.core.domain.aggreate.Coupon;
 import com.commerce.platform.core.domain.aggreate.CouponIssues;
 import com.commerce.platform.core.domain.vo.CouponId;
+import com.commerce.platform.core.domain.vo.CouponIssueId;
 import com.commerce.platform.core.domain.vo.CustomerId;
 import com.commerce.platform.shared.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,13 +24,16 @@ import java.util.stream.Collectors;
 import static com.commerce.platform.shared.exception.BusinessError.DUPLICATE_ISSUED_COUPON;
 import static com.commerce.platform.shared.exception.BusinessError.INVALID_COUPON;
 
+@Log4j2
 @RequiredArgsConstructor
 @Service
 public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
     private final CouponOutPort couponOutPort;
     private final CouponIssueOutPort couponIssueOutPort;
+    private final LockFacade lockFacade;
 
     @Override
+    @Transactional(readOnly = true)
     public List<CouponView> getMyCoupons(CustomerId customerId) {
         List<CouponIssues> myCoupons = couponIssueOutPort.findByCustomerId(customerId);
 
@@ -55,17 +62,25 @@ public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
 
     @Override
     public void issueCoupon(CouponId couponId, CustomerId customerId) {
+        CouponIssueId couponIssueId = new CouponIssueId(couponId, customerId);
         // 이미 다운받았는지 확인
-        couponIssueOutPort.findByIdCustomerId(couponId, customerId)
-                .ifPresent(couponIssue -> {
+        couponIssueOutPort.findByCouponIssueId(couponIssueId)
+                .ifPresent(exist -> {
                     throw new BusinessException(DUPLICATE_ISSUED_COUPON);
                 });
 
-        Coupon coupon = couponOutPort.findById(couponId)
-                .orElseThrow(() -> new BusinessException(INVALID_COUPON));
-
         // 발행
-        coupon.issueCoupon();
-        couponIssueOutPort.save(CouponIssues.create(couponId, customerId));
+        // 여기 내부에서 새로운 트랜잭션으로 실행된다.
+        lockFacade.executeWithLock("COUPON_ISSUE_", couponId.id(), () -> {
+            Coupon coupon = couponOutPort.findById(couponId)
+                    .orElseThrow(() -> new BusinessException(INVALID_COUPON));
+            log.info("coupon issuedQuantity : " + coupon.getIssuedQuantity().value());
+            // 쿠폰 발급
+            coupon.issueCoupon();
+            // 발급 이력 저장
+            couponIssueOutPort.save(CouponIssues.create(couponId, customerId));
+            return null;
+        });
+
     }
 }

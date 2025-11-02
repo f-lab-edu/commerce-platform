@@ -1,6 +1,7 @@
 package com.commerce.platform.bootstrap.exception;
 
 import com.commerce.platform.shared.exception.BusinessException;
+import com.commerce.platform.shared.exception.LockUnavailableException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -60,6 +61,22 @@ public class GlobalExceptionHandler {
                         request.getMethod(),
                         INVALID_REQUEST_VALUE.getCode(),
                         errors.toString()));
+    }
+
+    /**
+     * 비즈니스 오류 처리
+     */
+    @ExceptionHandler(LockUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessException(
+            HttpServletRequest request,
+            LockUnavailableException le) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(
+                        request.getRequestURI(),
+                        request.getMethod(),
+                        "1111",
+                        "잠시후 다시 시도해주세"));
     }
 
     /**
