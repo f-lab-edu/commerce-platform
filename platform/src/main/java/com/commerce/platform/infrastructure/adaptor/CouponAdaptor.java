@@ -5,13 +5,13 @@ import com.commerce.platform.core.domain.aggreate.Coupon;
 import com.commerce.platform.core.domain.vo.CouponId;
 import com.commerce.platform.infrastructure.persistence.CouponRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-@Repository
+@Component
 public class CouponAdaptor implements CouponOutPort {
     private final CouponRepository repository;
 

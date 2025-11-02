@@ -1,0 +1,10 @@
+package com.commerce.platform.infrastructure.persistence;
+
+import com.commerce.platform.core.domain.aggreate.Product;
+import com.commerce.platform.core.domain.vo.ProductId;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ProductRepository extends JpaRepository<Product, ProductId> {
+}
