@@ -28,7 +28,8 @@ public enum BusinessError {
     // Customer
     INVALID_CUSTOMER("M001", "고객ID 확인요망"),
     DUPLICATED_REGISTRY_CARD("M002", "이미 등록된 카드 존재"),
-    EXCEED_REGISTRY_CARD("M002", "카드는 최대 5개 등록 가능합니다."),
+    EXCEED_REGISTRY_CARD("M003", "카드는 최대 5개 등록 가능합니다."),
+    NOT_FOUND_REGISTRY_CARD("M004", "해당 카드가 존재하지 않습니다."),
 
     // Coupon
     INVALID_COUPON("C001", "유효하지 않는 쿠폰 ID"),

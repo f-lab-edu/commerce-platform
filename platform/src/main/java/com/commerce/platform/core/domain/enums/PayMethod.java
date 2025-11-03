@@ -7,8 +7,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum PayMethod {
     CARD("카드결제"),
-    PHONE("휴대폰결제"),
-    JE_PAY("등록된 카드로 결제");
+    EASY_PAY("간편결제"),
+    PHONE("휴대폰결제");
 
     private final String value;
 }

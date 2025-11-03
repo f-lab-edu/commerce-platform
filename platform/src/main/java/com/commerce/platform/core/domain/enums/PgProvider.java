@@ -9,9 +9,9 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public enum PgProvider {
-    TOSS(List.of(PayMethod.CARD, PayMethod.JE_PAY)),
-    NHN(List.of(PayMethod.CARD, PayMethod.JE_PAY)),
-    NICE_PAYMENTS(List.of(PayMethod.CARD, PayMethod.JE_PAY)),
+    TOSS(List.of(PayMethod.CARD, PayMethod.EASY_PAY)),
+    NHN(List.of(PayMethod.CARD, PayMethod.EASY_PAY)),
+    NICE_PAYMENTS(List.of(PayMethod.CARD, PayMethod.EASY_PAY)),
 
     DANAL(List.of(PayMethod.PHONE)),
     PAYLETTER(List.of(PayMethod.PHONE))
