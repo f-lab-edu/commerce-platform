@@ -3,6 +3,8 @@ package com.commerce.platform.core.domain.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+
 @Getter
 @AllArgsConstructor
 public enum PayProvider {
@@ -23,4 +25,11 @@ public enum PayProvider {
     ;
 
     private final String value;
+
+    public static PayProvider getPayProviderByValue(String value) {
+        return Arrays.stream(PayProvider.values())
+                .filter(p -> p.value.equalsIgnoreCase(value))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 결제사: " + value));
+    }
 }

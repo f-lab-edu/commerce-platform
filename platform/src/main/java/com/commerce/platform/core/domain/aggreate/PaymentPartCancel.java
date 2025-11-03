@@ -33,7 +33,7 @@ public class PaymentPartCancel {
     @Column(name = "pg_cancel_tid", length = 100)
     private String pgCancelTid;
 
-    @Column(name = "requested_at", nullable = false)
+    @Column(name = "requested_at", nullable = false, updatable = false)
     private LocalDateTime requestedAt;
 
     @Column(name = "canceled_at")

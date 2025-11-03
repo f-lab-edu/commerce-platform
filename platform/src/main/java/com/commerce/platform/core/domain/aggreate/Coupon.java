@@ -24,10 +24,10 @@ public class Coupon {
     @EmbeddedId
     private CouponId couponId;
 
-    @Column(name = "name", nullable = false, length = 30)
+    @Column(name = "name", nullable = false, unique = true, length = 30)
     private String couponName;
 
-    @Column(name = "code", nullable = false, length = 20)
+    @Column(name = "code", nullable = false, unique = true, length = 20)
     private String code;
 
     @Column(name = "discount_percent", nullable = false)
