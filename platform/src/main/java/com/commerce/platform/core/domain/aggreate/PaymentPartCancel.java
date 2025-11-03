@@ -15,7 +15,12 @@ import java.time.LocalDateTime;
 @Entity
 public class PaymentPartCancel {
 
-    @EmbeddedId
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "part_canceled_payment_id", nullable = false))
     private PaymentId paymentPartCancelId;
 
     @Embedded
