@@ -20,3 +20,8 @@ spring:
 logging:
   level:
     org.hibernate.SQL: info
+
+#jasypt: todo
+
+aes256:
+  key: 61qDonoZcEtIEvUZVPkIKIYovHH82rXtK7T1g/rcc1k=
