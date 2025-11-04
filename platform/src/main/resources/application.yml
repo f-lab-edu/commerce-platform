@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: platform
+
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      connection-timeout: 3000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  docker:
+    compose:
+      enabled: true
+      file: docker-compose.yml
+      env-file: .env
+      lifecycle-management: start_only

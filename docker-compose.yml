@@ -1,17 +1,21 @@
 
 services:
   db:
-    image: mysql:9.0
+    image: mysql:8.0
     container_name: commerce-mysql
+    env_file:
+      - .env
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT}:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: je1234
-      MYSQL_DATA_BASE: commerce_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
       TZ: Asia/Seoul
+    command:
+      - --default-authentication-plugin=mysql_native_password
     volumes:
-      - mysql-data:/var/lib/mysql
+      - db-data:/var/lib/mysql
 
 # 데이터 영속성을 위함
 volumes:
-  mysql-data:
+  db-data:
