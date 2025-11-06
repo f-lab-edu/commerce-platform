@@ -22,3 +22,6 @@ spring:
       file: docker-compose.yml
       env-file: .env
       lifecycle-management: start_only
+
+aes256:
+  key: 61qDonoZcEtIEvUZVPkIKIYovHH82rXtK7T1g/rcc1k=
