@@ -1,0 +1,15 @@
+ spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      connection-timeout: 3000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  docker:
+    compose:
+      enabled: false
+      file: docker-compose.yml
+      env-file: .env.prod
