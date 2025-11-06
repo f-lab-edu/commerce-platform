@@ -10,4 +10,5 @@ public interface ProductOutputPort {
     List<Product> findAll();
     Optional<Product> findById(ProductId productId);
     void save(Product product);
+    List<Product> findByIdIn(List<ProductId> productIds);
 }

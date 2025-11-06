@@ -13,9 +13,9 @@ public record ProductInfo (
      */
     public static ProductInfo from(Product product) {
         return new ProductInfo(
-                product.getProductId().getId(),
+                product.getProductId().id(),
                 product.getProductName(),
-                product.getPrice().getValue()
+                product.getPrice().value()
         );
     }
 }

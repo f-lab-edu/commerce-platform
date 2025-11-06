@@ -1,21 +1,35 @@
 package com.commerce.platform.core.domain.vo;
 
+import com.commerce.platform.shared.exception.BusinessException;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+
+import java.io.Serializable;
 import java.time.LocalDate;
 
-public class ValidPeriod {
-    LocalDate frDt;
-    LocalDate toDt;
+import static com.commerce.platform.shared.exception.BusinessError.INVALID_PERIOD;
 
-    public ValidPeriod(LocalDate frDt, LocalDate toDt) throws Exception {
-        if(LocalDate.now().isBefore(frDt)) throw new Exception("적용 시작일자 확인");
-        else if(toDt.isBefore(frDt)) throw new Exception("적용 종료일자 확인");
+@Embeddable
+public record ValidPeriod (
+        @Column(name = "fr_dt", nullable = false)
+        LocalDate frDt,
 
-        this.frDt = frDt;
-        this.toDt = toDt;
+        @Column(name = "to_dt", nullable = false)
+        LocalDate toDt
+) implements Serializable {
+    public static ValidPeriod create(LocalDate frDt, LocalDate toDt) {
+        return new ValidPeriod(frDt, toDt);
     }
 
-    public boolean checkNowInPeriod() {
-        LocalDate now = LocalDate.now();
-        return !now.isBefore(this.frDt) && !now.isAfter(this.toDt);
+    public ValidPeriod {
+        if(toDt.isBefore(frDt)) throw new BusinessException(INVALID_PERIOD);
+    }
+    
+    public boolean nowInPeriod() {
+        if(!LocalDate.now().isBefore(frDt)
+                && !LocalDate.now().isAfter(toDt)) {
+            return true;
+        }
+        return false;
     }
 }
