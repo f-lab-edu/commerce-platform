@@ -1,10 +1,9 @@
 package com.commerce.platform.core.application.out;
 
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
-
-import java.util.Map;
+import com.commerce.platform.core.application.out.dto.PgPayResponse;
 
 public interface EasyPay {
-    Map<String, String> approveEasyPay(PayOrderCommand command);
-    Map<String, String> cancelEasyPay(PayOrderCommand command);
+    PgPayResponse approveEasyPay(PayOrderCommand command);
+    PgPayResponse cancelEasyPay(PayOrderCommand command);
 }

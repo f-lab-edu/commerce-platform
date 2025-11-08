@@ -4,10 +4,9 @@ import com.commerce.platform.core.application.in.dto.PayOrderCommand;
 import com.commerce.platform.core.application.out.CardPay;
 import com.commerce.platform.core.application.out.EasyPay;
 import com.commerce.platform.core.application.out.PgStrategy;
+import com.commerce.platform.core.application.out.dto.PgPayResponse;
 import com.commerce.platform.core.domain.enums.PgProvider;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 @Component
 public class TossStrategy extends PgStrategy
@@ -20,22 +19,22 @@ public class TossStrategy extends PgStrategy
 
 
     @Override
-    public Map<String, String> approveCard(PayOrderCommand command) {
+    public PgPayResponse approveCard(PayOrderCommand command) {
         return null;
     }
 
     @Override
-    public Map<String, String> cancelCard(PayOrderCommand command) {
+    public PgPayResponse cancelCard(PayOrderCommand command) {
         return null;
     }
 
     @Override
-    public Map<String, String> approveEasyPay(PayOrderCommand command) {
+    public PgPayResponse approveEasyPay(PayOrderCommand command) {
         return null;
     }
 
     @Override
-    public Map<String, String> cancelEasyPay(PayOrderCommand command) {
+    public PgPayResponse cancelEasyPay(PayOrderCommand command) {
         return null;
     }
 }

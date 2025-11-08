@@ -1,9 +1,8 @@
 package com.commerce.platform.core.application.out;
 
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
+import com.commerce.platform.core.application.out.dto.PgPayResponse;
 import com.commerce.platform.core.domain.enums.PgProvider;
-
-import java.util.Map;
 
 public abstract class PgStrategy {
 
@@ -14,9 +13,8 @@ public abstract class PgStrategy {
      * @param command
      * @return pg 응답
      */
-    public final Map<String, String> processApproval(PayOrderCommand command) {
-
-        return switch (command.payMethod()) {
+    public final PgPayResponse processApproval(PayOrderCommand command) {
+        return switch (command.getPayMethod()) {
             case CARD -> getCardPay().approveCard(command);
             case EASY_PAY -> getEasyPay().approveEasyPay(command);
             case PHONE -> getPhonePay().approvePhone(command);
@@ -28,8 +26,8 @@ public abstract class PgStrategy {
      * @param command
      * @return pg 응답
      */
-    public final Map<String, String> processCancel(PayOrderCommand command) {
-        return switch (command.payMethod()) {
+    public final PgPayResponse processCancel(PayOrderCommand command) {
+        return switch (command.getPayMethod()) {
             case CARD -> getCardPay().cancelCard(command);
             case EASY_PAY -> getEasyPay().cancelEasyPay(command);
             case PHONE -> getPhonePay().cancelPhone(command);

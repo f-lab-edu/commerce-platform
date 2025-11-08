@@ -3,10 +3,9 @@ package com.commerce.platform.infrastructure.pg;
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
 import com.commerce.platform.core.application.out.PgStrategy;
 import com.commerce.platform.core.application.out.PhonePay;
+import com.commerce.platform.core.application.out.dto.PgPayResponse;
 import com.commerce.platform.core.domain.enums.PgProvider;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 @Component
 public class DanalStrategy extends PgStrategy
@@ -17,12 +16,12 @@ public class DanalStrategy extends PgStrategy
     }
 
     @Override
-    public Map<String, String> approvePhone(PayOrderCommand command) {
+    public PgPayResponse approvePhone(PayOrderCommand command) {
         return null;
     }
 
     @Override
-    public Map<String, String> cancelPhone(PayOrderCommand command) {
+    public PgPayResponse cancelPhone(PayOrderCommand command) {
         return null;
     }
 }

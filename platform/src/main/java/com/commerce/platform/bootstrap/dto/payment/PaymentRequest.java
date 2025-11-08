@@ -2,6 +2,7 @@ package com.commerce.platform.bootstrap.dto.payment;
 
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
 import com.commerce.platform.core.domain.enums.PayMethod;
+import com.commerce.platform.core.domain.enums.PayProvider;
 import com.commerce.platform.core.domain.enums.PaymentStatus;
 import com.commerce.platform.core.domain.vo.Money;
 import com.commerce.platform.core.domain.vo.OrderId;
@@ -19,6 +20,9 @@ public record PaymentRequest(
         PayMethod payMethod,
 
         @NotBlank
+        PayProvider payProvider,
+
+        @NotBlank
         PaymentStatus paymentStatus,
 
         String installment
@@ -26,10 +30,11 @@ public record PaymentRequest(
         public PayOrderCommand toApproval() {
                 return new PayOrderCommand(
                         OrderId.of(this.orderId),
-                        Money.create(amount),
+                        null,
                         null,
                         installment,
                         payMethod,
+                        payProvider,
                         PaymentStatus.APPROVED
                 );
         }
@@ -41,6 +46,7 @@ public record PaymentRequest(
                         Money.create(amount),
                         null,
                         payMethod,
+                        null,
                         paymentStatus
                 );
         }

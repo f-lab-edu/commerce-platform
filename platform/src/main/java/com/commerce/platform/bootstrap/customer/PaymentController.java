@@ -25,8 +25,9 @@ public class PaymentController {
     @PostMapping
     public ResponseEntity<PayResult> createPayment(@Valid @RequestBody PaymentRequest paymentRequest) {
         PayResult payResult = switch (paymentRequest.paymentStatus()) {
-            case APPROVED                          -> paymentUseCase.doApproval(paymentRequest.toApproval());
-            case FULL_CANCELED, PARTIAL_CANCELED   -> paymentUseCase.doCancel(paymentRequest.toCancel());
+            case APPROVED         -> paymentUseCase.doApproval(paymentRequest.toApproval());
+            case FULL_CANCELED    -> paymentUseCase.doCancel(paymentRequest.toCancel());
+            case PARTIAL_CANCELED -> paymentUseCase.doPartCancel(paymentRequest.toCancel());
             default -> throw new IllegalStateException("Unexpected value: " + paymentRequest.paymentStatus());
         };
 

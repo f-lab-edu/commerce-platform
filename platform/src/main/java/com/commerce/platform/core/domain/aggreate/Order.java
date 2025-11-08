@@ -1,5 +1,6 @@
 package com.commerce.platform.core.domain.aggreate;
 
+import com.commerce.platform.core.application.out.dto.PgPayResponse;
 import com.commerce.platform.core.domain.enums.OrderStatus;
 import com.commerce.platform.core.domain.vo.CouponId;
 import com.commerce.platform.core.domain.vo.CustomerId;
@@ -130,6 +131,19 @@ public class Order {
         }
 
         updateOrderStatus(REFUND);
+    }
+
+    /** 주문 결제 **/
+    public void validForPay() {
+        if(this.status != OrderStatus.CONFIRMED) {
+            throw new RuntimeException("결제처리 불가");
+        }
+    }
+
+    public void changeStatusAfterPay(PgPayResponse pgPayResponse) {
+        if(!pgPayResponse.isSuccess()) return;
+
+        updateOrderStatus(PAID);
     }
 
     /**

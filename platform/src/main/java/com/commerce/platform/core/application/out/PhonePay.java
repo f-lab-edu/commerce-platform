@@ -1,10 +1,9 @@
 package com.commerce.platform.core.application.out;
 
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
-
-import java.util.Map;
+import com.commerce.platform.core.application.out.dto.PgPayResponse;
 
 public interface PhonePay {
-    Map<String, String> approvePhone(PayOrderCommand command);
-    Map<String, String> cancelPhone(PayOrderCommand command);
+    PgPayResponse approvePhone(PayOrderCommand command);
+    PgPayResponse cancelPhone(PayOrderCommand command);
 }
