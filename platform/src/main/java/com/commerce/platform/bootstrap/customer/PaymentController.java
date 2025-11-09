@@ -3,6 +3,7 @@ package com.commerce.platform.bootstrap.customer;
 import com.commerce.platform.bootstrap.dto.payment.PaymentRequest;
 import com.commerce.platform.core.application.in.PaymentUseCase;
 import com.commerce.platform.core.application.in.dto.PayResult;
+import com.commerce.platform.shared.exception.BusinessException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +25,22 @@ public class PaymentController {
      */
     @PostMapping
     public ResponseEntity<PayResult> createPayment(@Valid @RequestBody PaymentRequest paymentRequest) {
-        PayResult payResult = switch (paymentRequest.paymentStatus()) {
-            case APPROVED         -> paymentUseCase.doApproval(paymentRequest.toApproval());
-            case FULL_CANCELED    -> paymentUseCase.doCancel(paymentRequest.toCancel());
-            case PARTIAL_CANCELED -> paymentUseCase.doPartCancel(paymentRequest.toCancel());
-            default -> throw new IllegalStateException("Unexpected value: " + paymentRequest.paymentStatus());
-        };
+        PayResult result = null;
 
-        return ResponseEntity.ok(payResult);
+        try {
+            switch (paymentRequest.paymentStatus()) {
+                case APPROVED         -> paymentUseCase.doApproval(paymentRequest.toApproval());
+                case FULL_CANCELED    -> paymentUseCase.doCancel(paymentRequest.toCancel());
+                case PARTIAL_CANCELED -> paymentUseCase.doPartCancel(paymentRequest.toCancel());
+                default -> throw new IllegalStateException("Unexpected value: " + paymentRequest.paymentStatus());
+            };
+        } catch (BusinessException e) {
+            result = new PayResult.Failed(e.getCode(), e.getMessage());
+        } catch (Exception e) {
+            result = new PayResult.Failed("9999", "전체취소 처리 중 오류가 발생했습니다");
+        }
+
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/registry-card/{cardId}")

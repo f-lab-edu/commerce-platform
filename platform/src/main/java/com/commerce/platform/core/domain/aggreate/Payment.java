@@ -104,5 +104,15 @@ public class Payment {
             return;
         }
         this.canceledAt = LocalDateTime.now();
+        this.paymentStatus = PaymentStatus.FULL_CANCELED;
+    }
+
+    /**
+     * 전체/부분 취소 가능 여부 검증
+     */
+    public void validateForCancel() {
+        if(this.paymentStatus != PaymentStatus.APPROVED) {
+            throw new RuntimeException("취소가 불가능한 결제 상태입니다");
+        }
     }
 }

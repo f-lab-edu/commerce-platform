@@ -27,4 +27,8 @@ public class PaymentPgRouter {
         return pgStrategies.get(targetPg);
     }
 
+    public PgStrategy getPgStrategyByProvider(PgProvider pgProvider) {
+        return pgStrategies.get(pgProvider);
+    }
+
 }

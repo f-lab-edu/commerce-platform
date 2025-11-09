@@ -44,7 +44,13 @@ public enum BusinessError {
     DUPLICATE_ISSUED_COUPON("I004", "이미 발급된 쿠폰입니다."),
 
     // Payment
-    INVALID_PAYMENT("T", "유효하지 않는 결제ID"),
+    INVALID_PAYMENT("T001", "유효하지 않는 결제ID"),
+    PAYMENT_ALREADY_CANCELED("T002", "이미 전체 취소된 결제입니다"),
+    PAYMENT_HAS_PARTIAL_CANCEL("T003", "부분 취소 내역이 존재하여 전체 취소가 불가능합니다"),
+    PAYMENT_CANCEL_AMOUNT_EXCEEDED("T004", "취소 가능 금액을 초과했습니다"),
+    PAYMENT_INVALID_STATUS_FOR_CANCEL("T005", "취소 불가능한 결제 상태입니다"),
+    PG_RESPONSE_FAILED("T006", "결제처리 결과 실패"),
+    INVALID_PARTIAL_CANCEL_AMOUNT("T007", "부분취소 불가능한 금액입니다. 전체취소로 요청하세요."),
 
     // Money
     INVALID_MONEY("M001", "금액 오류"),
