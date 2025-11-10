@@ -1,5 +1,6 @@
 package com.commerce.platform.core.application.out;
 
+import com.commerce.platform.core.application.in.dto.PayCancelCommand;
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
 import com.commerce.platform.core.application.out.dto.PgPayResponse;
 import com.commerce.platform.core.domain.enums.PgProvider;
@@ -26,7 +27,7 @@ public abstract class PgStrategy {
      * @param command
      * @return pg 응답
      */
-    public final PgPayResponse processCancel(PayOrderCommand command) {
+    public final PgPayResponse processCancel(PayCancelCommand command) {
         return switch (command.getPayMethod()) {
             case CARD -> getCardPay().cancelCard(command);
             case EASY_PAY -> getEasyPay().cancelEasyPay(command);

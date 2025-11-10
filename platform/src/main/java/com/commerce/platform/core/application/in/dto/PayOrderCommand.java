@@ -13,9 +13,8 @@ import lombok.Data;
 public class PayOrderCommand {
         private OrderId orderId;
         private Money approvedAmount;
-        private Money cancelAmount;
         private String installment;
         private PayMethod payMethod;
         private PayProvider payProvider;
-        private PaymentStatus paymentStatus;
+        private final PaymentStatus paymentStatus = PaymentStatus.APPROVED;
 }

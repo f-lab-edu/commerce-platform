@@ -15,11 +15,13 @@ public enum BusinessError {
 
     // Order 관련
     INVALID_ORDER_ID("O001", "유효하지 않는 주문 ID"),
+    INVALID_ORDER_ITEM_ID("O002", "유효하지 주문건 ID"),
 
     // Quantity 관련
     INVALID_QUANTITY("Q001", "유효하지 않은 수량입니다"),
     QUANTITY_BELOW_MINIMUM("Q002", "수량은 최소 1개 이상이어야 합니다"),
     QUANTITY_EXCEEDS_MAXIMUM("Q003", "수량이 최대 한도를 초과했습니다"),
+    INVALID_CANCELED_QUANTITY("Q004", "취소 불가능한 수량입니다."),
 
     // Stock 관련
     INSUFFICIENT_STOCK("S001", "재고가 부족합니다"),

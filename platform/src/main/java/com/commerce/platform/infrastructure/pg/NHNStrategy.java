@@ -1,5 +1,6 @@
 package com.commerce.platform.infrastructure.pg;
 
+import com.commerce.platform.core.application.in.dto.PayCancelCommand;
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
 import com.commerce.platform.core.application.out.CardPay;
 import com.commerce.platform.core.application.out.PgStrategy;
@@ -16,7 +17,7 @@ public class NHNStrategy extends PgStrategy
     }
 
     @Override
-    public PgPayResponse cancelCard(PayOrderCommand command) {
+    public PgPayResponse cancelCard(PayCancelCommand command) {
         return null;
     }
 

@@ -11,7 +11,6 @@ import com.commerce.platform.infrastructure.persistence.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -31,13 +30,13 @@ public class PaymentAdaptor implements PaymentOutPort {
     }
 
     @Override
-    public void savePartCancel(PaymentPartCancel partCancel) {
-        paymentPartCancelRepository.save(partCancel);
+    public PaymentPartCancel savePartCancel(PaymentPartCancel partCancel) {
+        return paymentPartCancelRepository.save(partCancel);
     }
 
     @Override
-    public boolean existsPartCancelByPaymentId(PaymentId paymentId) {
-        return paymentPartCancelRepository.existsPaymentPartCancelByApprovedPaymentId(paymentId);
+    public boolean existsPartCancelByPaymentId(PaymentId approvedpaymentId) {
+        return paymentPartCancelRepository.existsPaymentPartCancelByApprovedPaymentId(approvedpaymentId);
     }
 
     @Override

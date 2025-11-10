@@ -13,7 +13,7 @@ public interface PaymentOutPort {
     Optional<Payment> findByOrderId(OrderId orderId);
     
     // 부분취소 관련
-    void savePartCancel(PaymentPartCancel partCancel);
+    PaymentPartCancel savePartCancel(PaymentPartCancel partCancel);
     boolean existsPartCancelByPaymentId(PaymentId paymentId);
     Money getRemainAmount(PaymentId paymentId);
 }

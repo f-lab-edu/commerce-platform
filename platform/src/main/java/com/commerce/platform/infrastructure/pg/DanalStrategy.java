@@ -1,5 +1,6 @@
 package com.commerce.platform.infrastructure.pg;
 
+import com.commerce.platform.core.application.in.dto.PayCancelCommand;
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
 import com.commerce.platform.core.application.out.PgStrategy;
 import com.commerce.platform.core.application.out.PhonePay;
@@ -21,7 +22,7 @@ public class DanalStrategy extends PgStrategy
     }
 
     @Override
-    public PgPayResponse cancelPhone(PayOrderCommand command) {
+    public PgPayResponse cancelPhone(PayCancelCommand command) {
         return null;
     }
 }

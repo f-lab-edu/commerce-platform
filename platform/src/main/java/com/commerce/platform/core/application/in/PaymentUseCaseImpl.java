@@ -1,15 +1,10 @@
 package com.commerce.platform.core.application.in;
 
+import com.commerce.platform.core.application.in.dto.PayCancelCommand;
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
-import com.commerce.platform.core.application.out.CustomerCardOutPort;
-import com.commerce.platform.core.application.out.OrderOutputPort;
-import com.commerce.platform.core.application.out.PaymentOutPort;
-import com.commerce.platform.core.application.out.PgStrategy;
+import com.commerce.platform.core.application.out.*;
 import com.commerce.platform.core.application.out.dto.PgPayResponse;
-import com.commerce.platform.core.domain.aggreate.CustomerCard;
-import com.commerce.platform.core.domain.aggreate.Order;
-import com.commerce.platform.core.domain.aggreate.Payment;
-import com.commerce.platform.core.domain.aggreate.PaymentPartCancel;
+import com.commerce.platform.core.domain.aggreate.*;
 import com.commerce.platform.core.domain.service.PaymentPgRouter;
 import com.commerce.platform.core.domain.vo.Money;
 import com.commerce.platform.shared.exception.BusinessError;
@@ -18,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 import static com.commerce.platform.shared.exception.BusinessError.*;
 
@@ -28,6 +26,8 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
     private final PaymentPgRouter pgRouter;
     private final PaymentOutPort paymentOutPort;
     private final OrderOutputPort orderOutputPort;
+    private final OrderItemOutPort orderItemOutPort;
+    private final ProductOutputPort productOutputPort;
     private final CustomerCardOutPort customerCardOutPort;
 
     @Override
@@ -62,10 +62,10 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
      */
     @Override
     @Transactional
-    public void doCancel(PayOrderCommand payOrderCommand) {
+    public void doCancel(PayCancelCommand cancelCommand) {
 
         // 주문 검증
-        Order orderEntity = orderOutputPort.findById(payOrderCommand.getOrderId())
+        Order orderEntity = orderOutputPort.findById(cancelCommand.getOrderId())
                 .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
         orderEntity.validateForCancel();
 
@@ -80,10 +80,13 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
             throw new BusinessException(BusinessError.PAYMENT_HAS_PARTIAL_CANCEL);
         }
 
-        // 취소요청
+        cancelCommand.setCanceledAmount(orderEntity.getResultAmt());
+        cancelCommand.setPayProvider(paymentEntity.getPayProvider());
+        cancelCommand.setPayMethod(paymentEntity.getPayMethod());
+        cancelCommand.setPgProvider(paymentEntity.getPgProvider());
+
         PgStrategy pgStrategy = pgRouter.getPgStrategyByProvider(paymentEntity.getPgProvider());
-        payOrderCommand.setCancelAmount(paymentEntity.getApprovedAmt());
-        PgPayResponse pgResponse = pgStrategy.processCancel(payOrderCommand);
+        PgPayResponse pgResponse = pgStrategy.processCancel(cancelCommand);
 
         // PG 응답 반영
         if (!pgResponse.isSuccess()) {
@@ -93,7 +96,6 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
         orderEntity.refund();
         paymentEntity.canceled(pgResponse);
         paymentOutPort.savePayment(paymentEntity);
-
     }
 
     /**
@@ -101,9 +103,9 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
      */
     @Override
     @Transactional
-    public void doPartCancel(PayOrderCommand payOrderCommand) {
+    public Long doPartCancel(PayCancelCommand cancelCommand) {
         // 주문 검정
-        Order orderEntity = orderOutputPort.findById(payOrderCommand.getOrderId())
+        Order orderEntity = orderOutputPort.findById(cancelCommand.getOrderId())
                 .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
         orderEntity.validateForCancel();
 
@@ -121,21 +123,43 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
             remainAmt = paymentEntity.getApprovedAmt();
         }
 
-        // 취소 요청 금액 검증
-        Money requestCancelAmt = payOrderCommand.getCancelAmount();
-        if (requestCancelAmt.value() > remainAmt.value()) {
-            throw new BusinessException(BusinessError.PAYMENT_CANCEL_AMOUNT_EXCEEDED);
-        } else if (!hasPartialCancel && requestCancelAmt.value() == remainAmt.value()) {
-            throw new BusinessException(INVALID_PARTIAL_CANCEL_AMOUNT);
+        // 취소가능금액 검증
+        if(remainAmt.value() == 0) {
+            throw new BusinessException(PAYMENT_CANCEL_AMOUNT_EXCEEDED);
         }
 
+        // 부분취소 가능수량 검증
+        OrderItem orderItemEntity = orderItemOutPort.findById(cancelCommand.getOrderItemId())
+                .orElseThrow(() -> new BusinessException(INVALID_ORDER_ITEM_ID));
+        // 해당 건 삭제처리
+        orderItemEntity.canceledItem(cancelCommand.getCanceledQuantity());
+        // 새롭게 행 생성한다.
+        OrderItem refreshOrderItem = OrderItem.create(cancelCommand.getOrderId(),
+                orderItemEntity.getProductId(),
+                orderItemEntity.getQuantity().minus(cancelCommand.getCanceledQuantity()));
+        orderItemOutPort.saveAll(List.of(refreshOrderItem));
+
+        // 취소금액 계산
+        Money canceledAmt = productOutputPort.findById(orderItemEntity.getProductId())
+                .get()
+                .getPrice().multiply(cancelCommand.getCanceledQuantity());
+
+        cancelCommand.setCanceledAmount(canceledAmt);
+        cancelCommand.setPayProvider(paymentEntity.getPayProvider());
+        cancelCommand.setPayMethod(paymentEntity.getPayMethod());
+        cancelCommand.setPgProvider(paymentEntity.getPgProvider());
+
         // 최종 남은금액
-        Money new_remainAmt = remainAmt.subtract(requestCancelAmt);
+        Money refreshRemainAmt = remainAmt.subtract(canceledAmt);
 
         // 취소 요청
-        PgStrategy pgStrategy = pgRouter.routPg(paymentEntity.getPayMethod());
-        payOrderCommand.setCancelAmount(new_remainAmt);
-        PgPayResponse pgResponse = pgStrategy.processCancel(payOrderCommand);
+        cancelCommand.setCanceledAmount(paymentEntity.getApprovedAmt());
+        cancelCommand.setPayProvider(paymentEntity.getPayProvider());
+        cancelCommand.setPayMethod(paymentEntity.getPayMethod());
+        cancelCommand.setPgProvider(paymentEntity.getPgProvider());
+
+        PgStrategy pgStrategy = pgRouter.getPgStrategyByProvider(paymentEntity.getPgProvider());
+        PgPayResponse pgResponse = pgStrategy.processCancel(cancelCommand);
 
         if (!pgResponse.isSuccess()) {
             throw new BusinessException(PG_RESPONSE_FAILED);
@@ -143,13 +167,14 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
 
         // 부분취소 내역 저장
         PaymentPartCancel partCancel = PaymentPartCancel.create(
-                paymentEntity.getPaymentId(),  // Payment 엔티티 전달
-                requestCancelAmt,
-                new_remainAmt
+                paymentEntity.getPaymentId(),
+                canceledAmt,
+                refreshRemainAmt
         );
         partCancel.completed(pgResponse.pgTid());
         paymentOutPort.savePartCancel(partCancel);
 
+        return partCancel.getId();
     }
 
     /**
@@ -160,13 +185,6 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
     public void doApprovalWithCardId(Long cardId) {
         CustomerCard customerCard = customerCardOutPort.findActiveById(cardId)
                 .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
-
-    }
-
-    /**
-     * 실패거래건 저장
-     */
-    private void saveFailedPayment(Payment payment, PgPayResponse pgResponse) {
 
     }
 
