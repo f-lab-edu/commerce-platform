@@ -1,17 +1,19 @@
 package com.commerce.platform.core.application.in;
 
+import com.commerce.platform.core.application.in.dto.PayCancelCommand;
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
 import com.commerce.platform.core.application.out.PaymentOutPort;
 import com.commerce.platform.core.application.out.PgStrategy;
 import com.commerce.platform.core.application.out.dto.PgPayResponse;
 import com.commerce.platform.core.domain.aggreate.Order;
+import com.commerce.platform.core.domain.aggreate.OrderItem;
 import com.commerce.platform.core.domain.aggreate.Payment;
 import com.commerce.platform.core.domain.enums.*;
 import com.commerce.platform.core.domain.service.PaymentPgRouter;
-import com.commerce.platform.core.domain.vo.CustomerId;
-import com.commerce.platform.core.domain.vo.Money;
+import com.commerce.platform.core.domain.vo.*;
+import com.commerce.platform.infrastructure.persistence.OrderItemRepository;
 import com.commerce.platform.infrastructure.persistence.OrderRepository;
-import com.commerce.platform.infrastructure.pg.TossStrategy;
+import com.commerce.platform.infrastructure.persistence.PaymentPartCancelRepository;
 import com.commerce.platform.shared.exception.BusinessError;
 import com.commerce.platform.shared.exception.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -41,10 +45,21 @@ class PaymentUseCaseImplTest {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private PaymentPartCancelRepository paymentPartCancelRepository;
+
     @MockBean
     private PaymentPgRouter mockPaymentPgRouter;
 
     private Order testOrder;
+
+    private List<OrderItem> testOrderItems;
+
+    private final ProductId productId1 = ProductId.of("P20251110222600000001");
+    private final ProductId productId2 = ProductId.of("P20251110222600000002");
 
     private PgPayResponse success_pgResponse = new PgPayResponse(
             "PG_TID_12345",
@@ -66,31 +81,29 @@ class PaymentUseCaseImplTest {
         testOrder = Order.create(CustomerId.of("test1"), null);
         testOrder.confirm(Money.create(35000), Money.create(0));
         orderRepository.save(testOrder);
-        
         orderRepository.flush();
+
+        testOrderItems = List.of(
+            OrderItem.create(testOrder.getOrderId(), productId1, Quantity.create(3)),
+            OrderItem.create(testOrder.getOrderId(), productId2, Quantity.create(1))
+        );
+
+        orderItemRepository.saveAll(testOrderItems);
+        orderItemRepository.flush();
     }
 
+    @DisplayName("주문 결제 성공")
     @Test
     void doApproval_successful() {
         PayOrderCommand command = new PayOrderCommand(
                 testOrder.getOrderId(),
                 null,
                 null,
-                null,
                 PayMethod.CARD,
-                PayProvider.KB,
-                PaymentStatus.APPROVED
+                PayProvider.KB
         );
 
-        // mock pg
-        PgStrategy mockPgStrategy = mock(PgStrategy.class);
-        
-        when(mockPaymentPgRouter.routPg(PayMethod.CARD))
-                .thenReturn(mockPgStrategy);
-        when(mockPgStrategy.getPgProvider())
-                .thenReturn(PgProvider.TOSS);
-        when(mockPgStrategy.processApproval(any()))
-                .thenReturn(success_pgResponse);
+        mockPgStrategy();
 
         paymentUseCase.doApproval(command);
 
@@ -105,27 +118,19 @@ class PaymentUseCaseImplTest {
                 .isEqualTo(OrderStatus.PAID);
     }
 
+    @DisplayName("전체환불 성공")
     @Test
     void doCancel_successful() {
         // 주문 결제
         doApproval_successful();
 
-        PayOrderCommand command = new PayOrderCommand(
-                testOrder.getOrderId(),
-                null,
-                null,
-                null,
-                PayMethod.CARD,
-                null,
-                PaymentStatus.FULL_CANCELED
-        );
+        // 전체취소 요청
+        PayCancelCommand command = PayCancelCommand.builder()
+                .orderId(testOrder.getOrderId())
+                .paymentStatus(PaymentStatus.FULL_CANCELED)
+                .build();
 
-        PgStrategy mockPgStrategy = mock(PgStrategy.class);
-
-        when(mockPaymentPgRouter.getPgStrategyByProvider(any()))
-                .thenReturn(mockPgStrategy);
-        when(mockPgStrategy.processCancel(any()))
-                .thenReturn(success_pgResponse);
+        mockPgStrategy();
 
         paymentUseCase.doCancel(command);
 
@@ -145,46 +150,31 @@ class PaymentUseCaseImplTest {
         // 결제 승인
         doApproval_successful();
         
-        // 10,000원 부분취소
-        PayOrderCommand partCancelCommand = new PayOrderCommand(
-                testOrder.getOrderId(),
-                null,
-                Money.create(10000),
-                null,
-                PayMethod.CARD,
-                null,
-                null
-        );
+        mockPgStrategy();
 
-        PgStrategy mockStrategy = mock(TossStrategy.class);
-        PgPayResponse partCancelResponse = new PgPayResponse(
-                "PART_CANCEL_TID_001",
-                "0000",
-                "부분취소 성공",
-                true
-        );
+        // 부분취소 요청
+        OrderItem canceledItem = testOrderItems.get(0);
 
-        when(mockPaymentPgRouter.routPg(PayMethod.CARD))
-                .thenReturn(mockStrategy);
-        when(mockStrategy.processCancel(any()))
-                .thenReturn(partCancelResponse);
+        PayCancelCommand partCancelCommand = PayCancelCommand.builder()
+                .orderId(testOrder.getOrderId())
+                .orderItemId(canceledItem.getId())
+                .canceledQuantity(Quantity.create(2))
+                .paymentStatus(PaymentStatus.PARTIAL_CANCELED)
+                .build();
+
+        mockPgStrategy();
 
         // 부분취소
-        paymentUseCase.doPartCancel(partCancelCommand);
+        Long partCancelId = paymentUseCase.doPartCancel(partCancelCommand);
 
         // 전체취소
-        PayOrderCommand fullCancelCommand = new PayOrderCommand(
-                testOrder.getOrderId(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                PaymentStatus.FULL_CANCELED
-        );
+        PayCancelCommand fullCancelCommand = PayCancelCommand.builder()
+                .orderId(testOrder.getOrderId())
+                .paymentStatus(PaymentStatus.FULL_CANCELED)
+                .build();
 
         // 전체취소 실패
-        assertThatThrownBy(() ->paymentUseCase.doCancel(fullCancelCommand))
+        assertThatThrownBy(() -> paymentUseCase.doCancel(fullCancelCommand))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining(BusinessError.PAYMENT_HAS_PARTIAL_CANCEL.getMessage());
 
@@ -199,4 +189,124 @@ class PaymentUseCaseImplTest {
     }
 
 
+    @DisplayName("부분취소 성공")
+    @Test
+    void doPartCancel_successful() {
+        // 주문 결제
+        doApproval_successful();
+
+        // 부분취소 요청
+        OrderItem canceledItem = testOrderItems.get(0);
+
+        PayCancelCommand partCancelCommand = PayCancelCommand.builder()
+                .orderId(testOrder.getOrderId())
+                .orderItemId(canceledItem.getId())
+                .canceledQuantity(Quantity.create(2))
+                .paymentStatus(PaymentStatus.PARTIAL_CANCELED)
+                .build();
+
+        mockPgStrategy();
+
+        // 부분취소
+        Long partCancelId = paymentUseCase.doPartCancel(partCancelCommand);
+
+        // payment 상태
+        assertThat(paymentOutPort.findByOrderId(testOrder.getOrderId()).get().getPaymentStatus())
+                .as("원거래는 승인상태 유지")
+                .isEqualTo(PaymentStatus.APPROVED);
+
+        assertThat(paymentPartCancelRepository.findById(partCancelId))
+                .isPresent()
+                .get()
+                .satisfies(partCancel -> {
+                    assertThat(partCancel)
+                            .as("insert 부분취소")
+                            .isNotNull();
+
+                    assertThat(partCancel.getCanceledAmt().value())
+                            .as("부분취소 금액 검증")
+                            .isEqualTo(2500 * 2) ;
+                });
+
+        // orderitem 검증
+        assertThat(orderItemRepository.findById(canceledItem.getId()))
+                .isPresent()
+                .get()
+                .satisfies(
+                        orderItem -> {
+                            assertThat(orderItem.isCanceled()).isEqualTo(true);
+                        }
+                );
+
+        assertThat(orderItemRepository.findByOrderIdAndProductIdAndCanceled(partCancelCommand.getOrderId(), canceledItem.getProductId(), false))
+                .isPresent()
+                .get()
+                .satisfies(oi -> {
+                    assertThat(oi.getQuantity().value())
+                            .as("새로 추가된 orderitem 수량 확인")
+                            .isEqualTo(canceledItem.getQuantity().minus(partCancelCommand.getCanceledQuantity()).value());
+                    assertThat(oi.isCanceled()).isEqualTo(false);
+                });
+
+        // order 상태 검증
+        Order refundedOrder = orderRepository.findById(testOrder.getOrderId()).orElseThrow();
+        assertThat(refundedOrder.getStatus())
+                .as("주문상태는 결제완료로 유지")
+                .isEqualTo(OrderStatus.PAID);
+    }
+
+    @DisplayName("부분취소 실패 : 취소 가능 수량 초과")
+    @Test
+    void doPartCancel_failed() {
+        // 주문 결제
+        doApproval_successful();
+
+        // 부분취소 요청
+        PayCancelCommand partCancelCommand = PayCancelCommand.builder()
+                .orderId(testOrder.getOrderId())
+                .orderItemId(testOrderItems.get(1).getId())
+                .canceledQuantity(Quantity.create(2))
+                .paymentStatus(PaymentStatus.PARTIAL_CANCELED)
+                .build();
+
+        mockPgStrategy();
+
+        // 부분취소
+        assertThatThrownBy(() -> paymentUseCase.doPartCancel(partCancelCommand))
+                .isInstanceOf(BusinessException.class)
+                        .hasMessageContaining(BusinessError.INVALID_CANCELED_QUANTITY.getMessage());
+
+        assertThat(paymentOutPort.findByOrderId(testOrder.getOrderId()).get().getPaymentStatus())
+                .as("원거래는 승인상태 유지")
+                .isEqualTo(PaymentStatus.APPROVED);
+
+        PaymentId paymentId = paymentOutPort.findByOrderId(testOrder.getOrderId()).get().getPaymentId();
+        assertThat(paymentPartCancelRepository.existsPaymentPartCancelByApprovedPaymentId(paymentId))
+                .as("not insert 부분취소")
+                .isEqualTo(false);
+
+        // order 상태 검증
+        Order refundedOrder = orderRepository.findById(testOrder.getOrderId()).orElseThrow();
+        assertThat(refundedOrder.getStatus()).isEqualTo(OrderStatus.PAID)
+                .as("주문상태는 결제완료로 유지");
+    }
+
+    private void mockPgStrategy() {
+        PgStrategy mockPgStrategy = mock(PgStrategy.class);
+
+        when(mockPaymentPgRouter.getPgStrategyByProvider(any()))
+                .thenReturn(mockPgStrategy);
+
+        when(mockPgStrategy.processCancel(any()))
+                .thenReturn(success_pgResponse);
+
+        when(mockPaymentPgRouter.routPg(PayMethod.CARD))
+                .thenReturn(mockPgStrategy);
+
+        when(mockPgStrategy.getPgProvider())
+                .thenReturn(PgProvider.TOSS);
+
+        when(mockPgStrategy.processApproval(any()))
+                .thenReturn(success_pgResponse);
+    }
 }
