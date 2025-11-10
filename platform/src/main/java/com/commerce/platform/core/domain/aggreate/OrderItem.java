@@ -1,41 +1,63 @@
 package com.commerce.platform.core.domain.aggreate;
 
 import com.commerce.platform.core.domain.vo.OrderId;
-import com.commerce.platform.core.domain.vo.OrderItemId;
 import com.commerce.platform.core.domain.vo.ProductId;
 import com.commerce.platform.core.domain.vo.Quantity;
+import com.commerce.platform.shared.exception.BusinessException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import static com.commerce.platform.shared.exception.BusinessError.INVALID_CANCELED_QUANTITY;
+
 @Getter
 @Entity
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name = "order_item")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderItem {
-    @EmbeddedId
-    private OrderItemId orderItemId;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "order_id", nullable = false, length = 21))
+    OrderId orderId;
+
+    @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "product_id", nullable = false, length = 21))
+    ProductId productId;
 
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "quantity", nullable = false))
     private Quantity quantity;
+
+    private boolean canceled;
 
     public static OrderItem create(
             OrderId orderId,
             ProductId productId,
             Quantity quantity
     ) {
-       return OrderItem.builder()
-               .orderItemId(new OrderItemId(orderId, productId))
-               .quantity(quantity)
-               .build();
+        OrderItem oi = new OrderItem();
+        oi.orderId = orderId;
+        oi.productId = productId;
+        oi.quantity = quantity;
+        oi.canceled = false;
+        return oi;
     }
 
-    @Builder
-    private OrderItem(OrderItemId orderItemId, Quantity quantity) {
-        this.orderItemId = orderItemId;
-        this.quantity = quantity;
+    /**
+     * 부분취소 시 해당건 canceld true.
+     * 수정된 행은 새로 추가된다.
+     */
+    public void canceledItem(Quantity canceledQuantity) {
+        if(this.quantity.value() < canceledQuantity.value()) {
+            throw new BusinessException(INVALID_CANCELED_QUANTITY);
+        }
+        this.canceled = true;
     }
 }

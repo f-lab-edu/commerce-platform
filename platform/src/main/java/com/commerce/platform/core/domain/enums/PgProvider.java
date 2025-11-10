@@ -3,16 +3,29 @@ package com.commerce.platform.core.domain.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Getter
 @AllArgsConstructor
 public enum PgProvider {
-    // todo 여기서 pg사별 지원하는 결제유형을 관리해야되는지
-    //  todo 카드-수기, 인증, sms 위한 값을 만들지 이 부분은 생략할지 CardAuthType
-    TOSS("토스"),
-    OLIVE_NETWORKS("올리브네트웍스"),
-    NHN("NHN"),
-    NICE_PAYMENTS("나이스페이먼츠");
+    TOSS(List.of(PayMethod.CARD, PayMethod.EASY_PAY)),
+    NHN(List.of(PayMethod.CARD, PayMethod.EASY_PAY)),
+    NICE_PAYMENTS(List.of(PayMethod.CARD, PayMethod.EASY_PAY)),
 
-    private final String value;
+    DANAL(List.of(PayMethod.PHONE)),
+    PAYLETTER(List.of(PayMethod.PHONE))
+    ;
+
+    private final List<PayMethod> payMethods;
+
+    public static List<PgProvider> getByPayMethod(PayMethod payMethod) {
+        List<PgProvider> pgProviders = Arrays.stream(PgProvider.values())
+                .filter(pg -> pg.getPayMethods().contains(payMethod))
+                .toList();
+
+        if(pgProviders.isEmpty()) throw new IllegalArgumentException("지원 PG사 없음");
+        return pgProviders;
+    }
 
 }

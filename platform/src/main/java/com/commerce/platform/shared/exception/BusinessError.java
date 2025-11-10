@@ -15,11 +15,13 @@ public enum BusinessError {
 
     // Order 관련
     INVALID_ORDER_ID("O001", "유효하지 않는 주문 ID"),
+    INVALID_ORDER_ITEM_ID("O002", "유효하지 주문건 ID"),
 
     // Quantity 관련
     INVALID_QUANTITY("Q001", "유효하지 않은 수량입니다"),
     QUANTITY_BELOW_MINIMUM("Q002", "수량은 최소 1개 이상이어야 합니다"),
     QUANTITY_EXCEEDS_MAXIMUM("Q003", "수량이 최대 한도를 초과했습니다"),
+    INVALID_CANCELED_QUANTITY("Q004", "취소 불가능한 수량입니다."),
 
     // Stock 관련
     INSUFFICIENT_STOCK("S001", "재고가 부족합니다"),
@@ -28,7 +30,8 @@ public enum BusinessError {
     // Customer
     INVALID_CUSTOMER("M001", "고객ID 확인요망"),
     DUPLICATED_REGISTRY_CARD("M002", "이미 등록된 카드 존재"),
-    EXCEED_REGISTRY_CARD("M002", "카드는 최대 5개 등록 가능합니다."),
+    EXCEED_REGISTRY_CARD("M003", "카드는 최대 5개 등록 가능합니다."),
+    NOT_FOUND_REGISTRY_CARD("M004", "해당 카드가 존재하지 않습니다."),
 
     // Coupon
     INVALID_COUPON("C001", "유효하지 않는 쿠폰 ID"),
@@ -43,7 +46,13 @@ public enum BusinessError {
     DUPLICATE_ISSUED_COUPON("I004", "이미 발급된 쿠폰입니다."),
 
     // Payment
-    INVALID_PAYMENT("T", "유효하지 않는 결제ID"),
+    INVALID_PAYMENT("T001", "유효하지 않는 결제ID"),
+    PAYMENT_ALREADY_CANCELED("T002", "이미 전체 취소된 결제입니다"),
+    PAYMENT_HAS_PARTIAL_CANCEL("T003", "부분 취소 내역이 존재하여 전체 취소가 불가능합니다"),
+    PAYMENT_CANCEL_AMOUNT_EXCEEDED("T004", "취소 가능 금액을 초과했습니다"),
+    PAYMENT_INVALID_STATUS_FOR_CANCEL("T005", "취소 불가능한 결제 상태입니다"),
+    PG_RESPONSE_FAILED("T006", "결제처리 결과 실패"),
+    INVALID_PARTIAL_CANCEL_AMOUNT("T007", "부분취소 불가능한 금액입니다. 전체취소로 요청하세요."),
 
     // Money
     INVALID_MONEY("M001", "금액 오류"),

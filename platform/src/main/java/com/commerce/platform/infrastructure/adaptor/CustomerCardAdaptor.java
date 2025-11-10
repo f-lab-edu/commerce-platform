@@ -7,6 +7,8 @@ import com.commerce.platform.infrastructure.persistence.CustomerCardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Component
 public class CustomerCardAdaptor implements CustomerCardOutPort {
@@ -20,5 +22,10 @@ public class CustomerCardAdaptor implements CustomerCardOutPort {
     @Override
     public int countActiveCardByCustomerId(CustomerId customerId) {
         return repository.countByActiveCustomerId(customerId);
+    }
+
+    @Override
+    public Optional<CustomerCard> findActiveById(Long cardId) {
+        return repository.findByIdAndActive(cardId);
     }
 }
