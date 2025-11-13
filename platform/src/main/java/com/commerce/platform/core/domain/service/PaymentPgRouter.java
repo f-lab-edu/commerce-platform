@@ -2,6 +2,7 @@ package com.commerce.platform.core.domain.service;
 
 import com.commerce.platform.core.application.out.PgStrategy;
 import com.commerce.platform.core.domain.enums.PayMethod;
+import com.commerce.platform.core.domain.enums.PayProvider;
 import com.commerce.platform.core.domain.enums.PgProvider;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +19,11 @@ public class PaymentPgRouter {
                 .collect(Collectors.toMap(PgStrategy::getPgProvider, pg -> pg));
     }
 
-    public PgStrategy routPg(PayMethod payMethod) {
-        List<PgProvider> availablePgList = PgProvider.getByPayMethod(payMethod);
+    public PgStrategy routPg(PayMethod payMethod, PayProvider payProvider) {
+        // 선택 결제유형+카드사 지원 pg 추출
+        List<PgProvider> availablePgList = PgProvider.getByPayMethod(payMethod, payProvider);
 
-        // todo 조건에 따른 pg사 선택
+        // pg서버 정상, 수수료 가장 작은 pg 선택
         PgProvider targetPg = availablePgList.get(0);
 
         return pgStrategies.get(targetPg);
