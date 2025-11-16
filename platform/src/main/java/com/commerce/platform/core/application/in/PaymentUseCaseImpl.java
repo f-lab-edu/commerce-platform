@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.commerce.platform.shared.exception.BusinessError.*;
 
@@ -39,7 +38,7 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
         orderEntity.validForPay();
 
         // pg사 라우팅
-        PgStrategy pgStrategy = pgRouter.routPg(payOrdercommand.getPayMethod(), payOrdercommand.getPayProvider());
+        PgStrategy pgStrategy = pgRouter.routePg(payOrdercommand.getPayMethod(), payOrdercommand.getPayProvider());
 
         // 결재 entity 생성
         payOrdercommand.setApprovedAmount(orderEntity.getResultAmt());
