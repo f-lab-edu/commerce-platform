@@ -28,4 +28,11 @@ public enum PgProvider {
         return pgProviders;
     }
 
+    public static PgProvider getByPgName(String pgName) {
+        return Arrays.stream(PgProvider.values())
+                .filter(pg -> pg.name().equalsIgnoreCase(pgName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("미지원 PG사"));
+    }
+
 }
