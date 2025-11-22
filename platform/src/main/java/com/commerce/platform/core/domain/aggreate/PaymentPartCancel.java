@@ -15,7 +15,12 @@ import java.time.LocalDateTime;
 @Entity
 public class PaymentPartCancel {
 
-    @EmbeddedId
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "part_canceled_payment_id", nullable = false))
     private PaymentId paymentPartCancelId;
 
     @Embedded
@@ -38,4 +43,27 @@ public class PaymentPartCancel {
 
     @Column(name = "canceled_at")
     private LocalDateTime canceledAt;
+
+    /**
+     * 부분 취소 생성
+     */
+    public static PaymentPartCancel create(
+            PaymentId approvedPaymentId,
+            Money canceledAmt,
+            Money remainAmt
+    ) {
+        PaymentPartCancel partCancel = new PaymentPartCancel();
+        partCancel.paymentPartCancelId = PaymentId.create();
+        partCancel.approvedPaymentId = approvedPaymentId;
+        partCancel.canceledAmt = canceledAmt;
+        partCancel.remainAmt = remainAmt;
+        partCancel.requestedAt = LocalDateTime.now();
+        return partCancel;
+    }
+
+    /**부분취소 완료 처리*/
+    public void completed(String pgCancelTid) {
+        this.pgCancelTid = pgCancelTid;
+        this.canceledAt = LocalDateTime.now();
+    }
 }

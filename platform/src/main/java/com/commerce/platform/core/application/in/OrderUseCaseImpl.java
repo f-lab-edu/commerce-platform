@@ -82,7 +82,7 @@ public class OrderUseCaseImpl implements OrderUseCase {
         List<OrderItem> orderItems = orderItemOutPort.findByOrderId(order.getOrderId());
 
         List<ProductId> productIds = orderItems.stream()
-                .map(oi -> oi.getOrderItemId().productId())
+                .map(oi -> oi.getProductId())
                 .toList();
 
         Map<ProductId, Product> productMap = productOutputPort.findByIdIn(productIds).stream()
@@ -156,7 +156,7 @@ public class OrderUseCaseImpl implements OrderUseCase {
      */
     private Money calculateTotalAmountFromProducts(List<OrderItem> orderItems) {
         List<ProductId> productIds = orderItems.stream()
-                .map(oi -> oi.getOrderItemId().productId())
+                .map(oi -> oi.getProductId())
                 .toList();
 
         Map<ProductId, Product> productMap = productOutputPort.findByIdIn(productIds).stream()
@@ -164,7 +164,7 @@ public class OrderUseCaseImpl implements OrderUseCase {
 
         return orderItems.stream()
                 .map(item -> {
-                    Product product = productMap.get(item.getOrderItemId().productId());
+                    Product product = productMap.get(item.getProductId());
                     product.decreaseStock(item.getQuantity()); // todo 재고 소진 테스트
                     return product.getPrice()
                             .multiply(item.getQuantity());
