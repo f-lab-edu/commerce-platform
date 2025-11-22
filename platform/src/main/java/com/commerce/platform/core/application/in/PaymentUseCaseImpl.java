@@ -39,7 +39,7 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
         orderEntity.validForPay();
 
         // pg사 라우팅
-        PgStrategy pgStrategy = pgRouter.routPg(payOrdercommand.getPayMethod());
+        PgStrategy pgStrategy = pgRouter.routePg(payOrdercommand.getPayMethod(), payOrdercommand.getPayProvider());
 
         // 결재 entity 생성
         payOrdercommand.setApprovedAmount(orderEntity.getResultAmt());
