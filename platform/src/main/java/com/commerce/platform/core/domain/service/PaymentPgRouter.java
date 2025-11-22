@@ -5,11 +5,14 @@ import com.commerce.platform.core.domain.enums.PayMethod;
 import com.commerce.platform.core.domain.enums.PayProvider;
 import com.commerce.platform.core.domain.enums.PgProvider;
 import com.commerce.platform.infrastructure.adaptor.PgCacheService;
+import com.commerce.platform.infrastructure.persistence.PgFeeInfo;
+import com.commerce.platform.infrastructure.persistence.PgFeeInfoRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -23,11 +26,27 @@ public class PaymentPgRouter {
     
     private final Map<PgProvider, PgStrategy> pgStrategies;
     private final PgCacheService pgCacheService;
+    private final PgFeeInfoRepository feeInfoRepository;
+    //결제방식 + 카드사/통신사 별 수수료기준 정렬됨
+    private Map<PayMethod, Map<PayProvider, TreeSet<PgFeeInfo>>> pgFeeCache = null;
 
-    public PaymentPgRouter(List<PgStrategy> list, PgCacheService pgCacheService) {
+    public PaymentPgRouter(List<PgStrategy> list, PgCacheService pgCacheService, PgFeeInfoRepository feeInfoRepository) {
         this.pgStrategies = list.stream()
                 .collect(Collectors.toMap(PgStrategy::getPgProvider, pg -> pg));
         this.pgCacheService = pgCacheService;
+        this.feeInfoRepository = feeInfoRepository;
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void initPgCache() {
+        pgFeeCache = feeInfoRepository.findAllActiveAndValid()
+                .stream()
+                .collect(Collectors.groupingBy(PgFeeInfo::getPayMethod,
+                        Collectors.groupingBy(PgFeeInfo::getPayProvider,
+                                Collectors.toCollection(() ->
+                                        new TreeSet<>(Comparator.comparing(PgFeeInfo::getFeeRate))
+                                )
+                        )));
     }
 
     /**
@@ -35,10 +54,12 @@ public class PaymentPgRouter {
      * Redis에서 캐싱
      */
     public PgStrategy routePg(PayMethod payMethod, PayProvider payProvider) {
-        
-        List<PgProvider> supportedPgs = PgProvider.getByPayMethod(payMethod, payProvider);
-
-        PgProvider selectedPg = pgCacheService.getBestPg(payMethod, payProvider, supportedPgs);
+        PgProvider selectedPg = pgFeeCache.get(payMethod).get(payProvider)
+                .stream()
+                .filter(pgFeeInfo -> pgCacheService.isHealthy(pgFeeInfo.getPgProvider()))
+                .toList()
+                .getFirst()
+                .getPgProvider();
         
         if (selectedPg == null) {
             throw new IllegalStateException("현재 사용 가능한 PG사가 없습니다");
