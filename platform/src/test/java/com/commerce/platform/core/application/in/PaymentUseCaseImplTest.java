@@ -11,6 +11,7 @@ import com.commerce.platform.core.domain.aggreate.Payment;
 import com.commerce.platform.core.domain.enums.*;
 import com.commerce.platform.core.domain.service.PaymentPgRouter;
 import com.commerce.platform.core.domain.vo.*;
+import com.commerce.platform.infrastructure.adaptor.*;
 import com.commerce.platform.infrastructure.persistence.OrderItemRepository;
 import com.commerce.platform.infrastructure.persistence.OrderRepository;
 import com.commerce.platform.infrastructure.persistence.PaymentPartCancelRepository;
@@ -20,9 +21,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.List;
 
@@ -32,12 +34,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@Transactional
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import({
+        PaymentUseCaseImpl.class,
+        PaymentAdaptor.class,
+        OrderAdaptor.class,
+        OrderItemAdaptor.class,
+        ProductAdaptor.class,
+        CustomerCardAdaptor.class
+})
+@DataJpaTest
 class PaymentUseCaseImplTest {
     
     @Autowired
-    private PaymentUseCase paymentUseCase;
+    private PaymentUseCaseImpl paymentUseCase;
 
     @Autowired
     private PaymentOutPort paymentOutPort;
@@ -51,7 +61,7 @@ class PaymentUseCaseImplTest {
     @Autowired
     private PaymentPartCancelRepository paymentPartCancelRepository;
 
-    @MockBean
+    @MockitoBean
     private PaymentPgRouter mockPaymentPgRouter;
 
     private Order testOrder;
