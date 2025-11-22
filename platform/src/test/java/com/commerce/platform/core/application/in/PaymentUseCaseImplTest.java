@@ -310,7 +310,7 @@ class PaymentUseCaseImplTest {
         when(mockPgStrategy.processCancel(any()))
                 .thenReturn(success_pgResponse);
 
-        when(mockPaymentPgRouter.routPg(PayMethod.CARD))
+        when(mockPaymentPgRouter.routePg(PayMethod.CARD, PayProvider.SAMSUNG))
                 .thenReturn(mockPgStrategy);
 
         when(mockPgStrategy.getPgProvider())
