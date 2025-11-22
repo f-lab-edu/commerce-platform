@@ -1,27 +1,17 @@
 package com.commerce.platform.infrastructure.pg;
 
-import com.commerce.platform.core.application.in.dto.PayCancelCommand;
-import com.commerce.platform.core.application.in.dto.PayOrderCommand;
-import com.commerce.platform.core.application.out.CardPay;
 import com.commerce.platform.core.application.out.PgStrategy;
-import com.commerce.platform.core.application.out.dto.PgPayResponse;
 import com.commerce.platform.core.domain.enums.PgProvider;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NHNStrategy extends PgStrategy
-        implements CardPay {
-    @Override
-    public PgPayResponse approveCard(PayOrderCommand command) {
-        return null;
-    }
+public class NHNStrategy extends PgStrategy {
 
     @Override
-    public PgPayResponse cancelCard(PayCancelCommand command) {
-        return null;
+    public String process(String request) {
+        return "";
     }
 
-    @Override
     public PgProvider getPgProvider() {
         return PgProvider.NHN;
     }
