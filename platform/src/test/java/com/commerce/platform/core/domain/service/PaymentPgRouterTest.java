@@ -1,5 +1,6 @@
 package com.commerce.platform.core.domain.service;
 
+import com.commerce.platform.PlatformApplication;
 import com.commerce.platform.core.domain.enums.PayMethod;
 import com.commerce.platform.core.domain.enums.PayProvider;
 import com.commerce.platform.core.domain.enums.PgProvider;
@@ -14,6 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -106,5 +110,23 @@ class PaymentPgRouterTest {
         assertThat(paymentPgRouter.routePg(PayMethod.CARD, PayProvider.SAMSUNG))
                 .as("SAMSUNG 카드 결제: NHN 장애로 TOSS로 폴백")
                 .isInstanceOf(TossStrategy.class);
+    }
+
+    @DisplayName("ApplicationStartedEvent 동작 검증")
+    @Test
+    void initPgCache() {
+        SpringApplication application = new SpringApplication(PlatformApplication.class);
+
+        application.addListeners(
+                (ApplicationListener<ApplicationReadyEvent>) event -> {
+                    PaymentPgRouter targetBean = (PaymentPgRouter) event.getApplicationContext()
+                            .getBean("paymentPgRouter");
+
+//                    assertThat(targetBean.pgFeeCache).isNotEmpty();
+                }
+        );
+
+        application.run();
+
     }
 }
