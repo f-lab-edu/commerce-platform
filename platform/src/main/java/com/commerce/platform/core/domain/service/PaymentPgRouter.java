@@ -10,6 +10,7 @@ import com.commerce.platform.infrastructure.persistence.PgFeeInfoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -42,14 +43,7 @@ public class PaymentPgRouter {
 
     @EventListener(ApplicationStartedEvent.class)
     public void initPgCache() {
-        pgFeeCache = feeInfoRepository.findAllActiveAndValid()
-                .stream()
-                .collect(Collectors.groupingBy(PgFeeInfo::getPayMethod,
-                        Collectors.groupingBy(PgFeeInfo::getPayProvider,
-                                Collectors.toCollection(() ->
-                                        new TreeSet<>(Comparator.comparing(PgFeeInfo::getFeeRate))
-                                )
-                        )));
+        setPgFeeCache();
     }
 
     /**
@@ -80,5 +74,21 @@ public class PaymentPgRouter {
             throw new IllegalArgumentException("존재하지 않는 PG: " + pgProvider);
         }
         return strategy;
+    }
+
+    @Scheduled(cron = "0 * * * * *")
+    private void refreshPgCache() {
+        setPgFeeCache();
+    }
+
+    private void setPgFeeCache() {
+        pgFeeCache = feeInfoRepository.findAllActiveAndValid()
+                .stream()
+                .collect(Collectors.groupingBy(PgFeeInfo::getPayMethod,
+                        Collectors.groupingBy(PgFeeInfo::getPayProvider,
+                                Collectors.toCollection(() ->
+                                        new TreeSet<>(Comparator.comparing(PgFeeInfo::getFeeRate))
+                                )
+                        )));
     }
 }
