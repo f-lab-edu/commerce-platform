@@ -1,6 +1,7 @@
 package com.commerce.platform.core.domain.aggreate;
 
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
+import com.commerce.platform.core.application.out.dto.PgPayCancelResponse;
 import com.commerce.platform.core.application.out.dto.PgPayResponse;
 import com.commerce.platform.core.domain.enums.PayMethod;
 import com.commerce.platform.core.domain.enums.PayProvider;
@@ -96,10 +97,10 @@ public class Payment {
         this.paymentStatus = PaymentStatus.APPROVED;
     }
 
-    public void canceled(PgPayResponse pgResponse) {
-        this.pgCancelTid = pgResponse.pgTid();
+    public void canceled(PgPayCancelResponse cancelResponse) {
+        this.pgCancelTid = cancelResponse.pgCcTid();
 
-        if(!pgResponse.isSuccess()) {
+        if(!cancelResponse.isSuccess()) {
             this.paymentStatus = PaymentStatus.FAILED;
             return;
         }

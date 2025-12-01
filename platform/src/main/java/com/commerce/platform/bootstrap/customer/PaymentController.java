@@ -32,7 +32,8 @@ public class PaymentController {
                     null,
                     paymentRequest.installment(),
                     paymentRequest.payMethod(),
-                    paymentRequest.payProvider()
+                    paymentRequest.payProvider(),
+                    null
             );
 
             paymentUseCase.doApproval(command);
