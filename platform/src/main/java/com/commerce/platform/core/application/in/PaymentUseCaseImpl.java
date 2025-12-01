@@ -3,6 +3,7 @@ package com.commerce.platform.core.application.in;
 import com.commerce.platform.core.application.in.dto.PayCancelCommand;
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
 import com.commerce.platform.core.application.out.*;
+import com.commerce.platform.core.application.out.dto.PgPayCancelResponse;
 import com.commerce.platform.core.application.out.dto.PgPayResponse;
 import com.commerce.platform.core.domain.aggreate.*;
 import com.commerce.platform.core.domain.service.PaymentPgRouter;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.commerce.platform.shared.exception.BusinessError.*;
 
@@ -39,7 +39,7 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
         orderEntity.validForPay();
 
         // pg사 라우팅
-        PgStrategy pgStrategy = pgRouter.routPg(payOrdercommand.getPayMethod());
+        PgStrategy pgStrategy = pgRouter.routePg(payOrdercommand.getPayMethod(), payOrdercommand.getPayProvider());
 
         // 결재 entity 생성
         payOrdercommand.setApprovedAmount(orderEntity.getResultAmt());
@@ -47,6 +47,8 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
 
         // pg 결제 응답 수신
         PgPayResponse pgResponse = pgStrategy.processApproval(payOrdercommand);
+
+        validRequestAmount(payOrdercommand.getApprovedAmount(), pgResponse.amount().value());
 
         // 결제 결과에 따른 주문/결제 상태 변경
         orderEntity.changeStatusAfterPay(pgResponse);
@@ -86,12 +88,15 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
         cancelCommand.setPgProvider(paymentEntity.getPgProvider());
 
         PgStrategy pgStrategy = pgRouter.getPgStrategyByProvider(paymentEntity.getPgProvider());
-        PgPayResponse pgResponse = pgStrategy.processCancel(cancelCommand);
+        PgPayCancelResponse pgResponse = pgStrategy.processCancel(cancelCommand);
 
         // PG 응답 반영
         if (!pgResponse.isSuccess()) {
             throw new BusinessException(PG_RESPONSE_FAILED);
         }
+
+        // Pg취소금액, 요청취소금액 검증
+        validRequestAmount(cancelCommand.getCanceledAmount(), pgResponse.cancelAmount());
 
         orderEntity.refund();
         paymentEntity.canceled(pgResponse);
@@ -159,11 +164,13 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
         cancelCommand.setPgProvider(paymentEntity.getPgProvider());
 
         PgStrategy pgStrategy = pgRouter.getPgStrategyByProvider(paymentEntity.getPgProvider());
-        PgPayResponse pgResponse = pgStrategy.processCancel(cancelCommand);
+        PgPayCancelResponse pgResponse = pgStrategy.processCancel(cancelCommand);
 
         if (!pgResponse.isSuccess()) {
             throw new BusinessException(PG_RESPONSE_FAILED);
         }
+
+        validRequestAmount(cancelCommand.getCanceledAmount(), pgResponse.cancelAmount());
 
         // 부분취소 내역 저장
         PaymentPartCancel partCancel = PaymentPartCancel.create(
@@ -171,7 +178,7 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
                 canceledAmt,
                 refreshRemainAmt
         );
-        partCancel.completed(pgResponse.pgTid());
+        partCancel.completed(pgResponse.pgCcTid());
         paymentOutPort.savePartCancel(partCancel);
 
         return partCancel.getId();
@@ -188,4 +195,14 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
 
     }
 
+    /**
+     * pg 요청금액 , 고객 요청금액 동일 검증
+     * @param customerRequestAmt
+     * @param pgResponseAmt
+     */
+    private void validRequestAmount(Money customerRequestAmt, Long pgResponseAmt) {
+        if(customerRequestAmt.value() != pgResponseAmt) {
+            throw new RuntimeException("요청금액 불일치");
+        }
+    }
 }

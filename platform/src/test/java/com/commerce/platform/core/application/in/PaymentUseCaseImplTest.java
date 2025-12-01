@@ -4,6 +4,7 @@ import com.commerce.platform.core.application.in.dto.PayCancelCommand;
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
 import com.commerce.platform.core.application.out.PaymentOutPort;
 import com.commerce.platform.core.application.out.PgStrategy;
+import com.commerce.platform.core.application.out.dto.PgPayCancelResponse;
 import com.commerce.platform.core.application.out.dto.PgPayResponse;
 import com.commerce.platform.core.domain.aggreate.Order;
 import com.commerce.platform.core.domain.aggreate.OrderItem;
@@ -75,14 +76,20 @@ class PaymentUseCaseImplTest {
             "PG_TID_12345",
             "0000",
             "성공",
-            true
+            Money.create(35000),
+            true,
+            null,
+            null,
+            null
     );
 
-    private PgPayResponse fail_pgResponse = new PgPayResponse(
-            "PG_TID_12345",
-            "errorCode",
-            "실패",
-            false
+    private PgPayCancelResponse cancelResponse = new PgPayCancelResponse(
+            "PG_CC_TID_12345",
+            "success",
+            "취소성공",
+            "고객취소",
+            35000L,
+            true
     );
 
     @BeforeEach
@@ -110,7 +117,8 @@ class PaymentUseCaseImplTest {
                 null,
                 null,
                 PayMethod.CARD,
-                PayProvider.KB
+                PayProvider.KB,
+                null
         );
 
         mockPgStrategy();
@@ -304,13 +312,10 @@ class PaymentUseCaseImplTest {
     private void mockPgStrategy() {
         PgStrategy mockPgStrategy = mock(PgStrategy.class);
 
-        when(mockPaymentPgRouter.getPgStrategyByProvider(any()))
+        when(mockPaymentPgRouter.routePg(any(PayMethod.class), any(PayProvider.class)))
                 .thenReturn(mockPgStrategy);
 
-        when(mockPgStrategy.processCancel(any()))
-                .thenReturn(success_pgResponse);
-
-        when(mockPaymentPgRouter.routPg(PayMethod.CARD))
+        when(mockPaymentPgRouter.getPgStrategyByProvider(any()))
                 .thenReturn(mockPgStrategy);
 
         when(mockPgStrategy.getPgProvider())
@@ -318,5 +323,8 @@ class PaymentUseCaseImplTest {
 
         when(mockPgStrategy.processApproval(any()))
                 .thenReturn(success_pgResponse);
+
+        when(mockPgStrategy.processCancel(any()))
+                .thenReturn(cancelResponse);
     }
 }

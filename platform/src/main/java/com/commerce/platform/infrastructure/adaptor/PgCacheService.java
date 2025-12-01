@@ -38,7 +38,7 @@ public class PgCacheService {
      *  key= pg:route:CARD:SHIN_HAN
      *  score: 수수료율
      */
-    @PostConstruct
+//    @PostConstruct
     public void initPgCache() {
         Set<String> keys = redisTemplate.keys(ROUTE_KEY_PREFIX + "*");
 
