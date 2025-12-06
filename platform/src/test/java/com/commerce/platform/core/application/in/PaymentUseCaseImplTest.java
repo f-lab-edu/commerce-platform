@@ -34,6 +34,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ * paymentUseCase, 결제관련 repository 통합테스트
+ */
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({
         PaymentUseCaseImpl.class,
@@ -304,14 +307,14 @@ class PaymentUseCaseImplTest {
     private void mockPgStrategy() {
         PgStrategy mockPgStrategy = mock(PgStrategy.class);
 
+        when(mockPaymentPgRouter.routePg(any(PayMethod.class), any(PayProvider.class)))
+                .thenReturn(mockPgStrategy);
+
         when(mockPaymentPgRouter.getPgStrategyByProvider(any()))
                 .thenReturn(mockPgStrategy);
 
         when(mockPgStrategy.processCancel(any()))
                 .thenReturn(success_pgResponse);
-
-        when(mockPaymentPgRouter.routPg(PayMethod.CARD))
-                .thenReturn(mockPgStrategy);
 
         when(mockPgStrategy.getPgProvider())
                 .thenReturn(PgProvider.TOSS);
