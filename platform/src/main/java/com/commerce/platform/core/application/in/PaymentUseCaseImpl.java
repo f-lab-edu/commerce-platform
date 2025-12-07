@@ -87,7 +87,7 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
         cancelCommand.setPayMethod(paymentEntity.getPayMethod());
         cancelCommand.setPgProvider(paymentEntity.getPgProvider());
 
-        PgStrategy pgStrategy = pgRouter.getPgStrategyByProvider(paymentEntity.getPgProvider());
+        PgStrategy pgStrategy = pgRouter.getPgStrategyByProvider(paymentEntity.getPgProvider(), paymentEntity.getPayMethod());
         PgPayCancelResponse pgResponse = pgStrategy.processCancel(cancelCommand);
 
         // PG 응답 반영
@@ -163,7 +163,7 @@ public class PaymentUseCaseImpl implements PaymentUseCase{
         cancelCommand.setPayMethod(paymentEntity.getPayMethod());
         cancelCommand.setPgProvider(paymentEntity.getPgProvider());
 
-        PgStrategy pgStrategy = pgRouter.getPgStrategyByProvider(paymentEntity.getPgProvider());
+        PgStrategy pgStrategy = pgRouter.getPgStrategyByProvider(paymentEntity.getPgProvider(), paymentEntity.getPayMethod());
         PgPayCancelResponse pgResponse = pgStrategy.processCancel(cancelCommand);
 
         if (!pgResponse.isSuccess()) {

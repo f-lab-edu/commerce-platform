@@ -1,4 +1,4 @@
-package com.commerce.platform.infrastructure.pg.nhn;
+package com.commerce.platform.infrastructure.pg.nhn.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

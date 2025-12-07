@@ -1,6 +1,5 @@
-package com.commerce.platform.infrastructure.pg.nhn;
+package com.commerce.platform.infrastructure.pg.nhn.dto;
 
-import com.commerce.platform.core.application.in.dto.PayOrderCommand;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -30,17 +29,4 @@ public record NhnApprovalRequest(
 
         @JsonProperty("pay_type")
         String payType  // 결제수단 구분 신용카드 : PACA
-) {
-    public static NhnApprovalRequest create(PayOrderCommand command) {
-        return new NhnApprovalRequest(
-                command.getJsonSubData(),
-                command.getJsonSubData(),
-                command.getJsonSubData(),
-                command.getJsonSubData(),
-                "00100000",
-                String.valueOf(command.getApprovedAmount().value()),
-                String.valueOf(command.getOrderId().id()),
-                "PACA"
-        );
-    }
-}
+) { }

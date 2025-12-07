@@ -1,11 +1,11 @@
-package com.commerce.platform.infrastructure.pg.toss;
+package com.commerce.platform.infrastructure.pg.toss.dto;
 
 import java.util.List;
 
 /**
- * TOSS 결제유형에 따른 승인 응답 DTO
+ * TOSS 결제유형별 요청 응답 DTO
  **/
-public record TossApprovalResponse(
+public record TossTransResponse(
         String mId,                         // 가맹점 ID (상점 식별자, MID)
         String version,                     // API 버전 (예: "2022-11-16")
         String paymentKey,                  // 결제 키 (토스가 발급한 결제 고유 식별자, 승인/취소/조회 시 필수)

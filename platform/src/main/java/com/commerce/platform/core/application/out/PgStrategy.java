@@ -4,6 +4,7 @@ import com.commerce.platform.core.application.in.dto.PayCancelCommand;
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
 import com.commerce.platform.core.application.out.dto.PgPayCancelResponse;
 import com.commerce.platform.core.application.out.dto.PgPayResponse;
+import com.commerce.platform.core.domain.enums.PayMethod;
 import com.commerce.platform.core.domain.enums.PgProvider;
 
 public abstract class PgStrategy {
@@ -19,5 +20,7 @@ public abstract class PgStrategy {
     public abstract PgPayCancelResponse processCancel(PayCancelCommand command);
 
     public abstract PgProvider getPgProvider();
+
+    public abstract PayMethod getPgPayMethod();
 
 }

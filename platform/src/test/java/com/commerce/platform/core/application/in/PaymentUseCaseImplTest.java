@@ -321,7 +321,7 @@ class PaymentUseCaseImplTest {
         when(mockPaymentPgRouter.routePg(any(PayMethod.class), any(PayProvider.class)))
                 .thenReturn(mockPgStrategy);
 
-        when(mockPaymentPgRouter.getPgStrategyByProvider(any()))
+        when(mockPaymentPgRouter.getPgStrategyByProvider(any(), any()))
                 .thenReturn(mockPgStrategy);
 
         when(mockPgStrategy.getPgProvider())

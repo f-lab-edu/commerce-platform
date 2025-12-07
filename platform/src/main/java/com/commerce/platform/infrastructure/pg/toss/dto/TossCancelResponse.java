@@ -1,4 +1,4 @@
-package com.commerce.platform.infrastructure.pg.toss;
+package com.commerce.platform.infrastructure.pg.toss.dto;
 
 public record TossCancelResponse(
         String transactionKey,

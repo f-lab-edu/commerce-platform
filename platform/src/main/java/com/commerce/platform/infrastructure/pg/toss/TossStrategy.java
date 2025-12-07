@@ -7,7 +7,8 @@ import com.commerce.platform.core.application.out.dto.PgPayCancelResponse;
 import com.commerce.platform.core.application.out.dto.PgPayResponse;
 import com.commerce.platform.core.domain.enums.PayMethod;
 import com.commerce.platform.core.domain.enums.PgProvider;
-import com.commerce.platform.core.domain.vo.Money;
+import com.commerce.platform.infrastructure.pg.toss.dto.TossCancelResponse;
+import com.commerce.platform.infrastructure.pg.toss.dto.TossTransResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -21,14 +22,18 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.commerce.platform.core.domain.enums.PaymentStatus.PARTIAL_CANCELED;
+
 /**
  * TOSS PG
  * 카드, 간편결제, 가상계좌 에 대해 동일한 승인/취소 API 사용
+ *
+ * 결제수단별 응답 메시지, 취소 요청 body 생성 필요
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class TossStrategy extends PgStrategy {
+public abstract class TossStrategy extends PgStrategy {
 
     private static final String TOSS_CONFIRM_URL = "https://api.tosspayments.com/v1/payments/confirm";
     private static final String TOSS_CANCEL_URL = "https://api.tosspayments.com/v1/payments/";
@@ -43,13 +48,13 @@ public class TossStrategy extends PgStrategy {
      */
     @Override
     public PgPayResponse processApproval(PayOrderCommand command) {
-        TossApprovalResponse response = callTossConfirmApi(
+        TossTransResponse response = callTossConfirmApi(
                 command.getJsonSubData(),
                 command.getOrderId().id(),
                 command.getApprovedAmount().value()
         );
 
-        return convertToResponse(command.getPayMethod(), response);
+        return convertToResponse(response);
     }
 
     /**
@@ -60,12 +65,7 @@ public class TossStrategy extends PgStrategy {
      */
     @Override
     public PgPayCancelResponse processCancel(PayCancelCommand command) {
-        TossCancelResponse tossCancelResponse = callTossCancelApi(
-                command.getPgTid(),
-                command.getCanceledAmount().value(),
-                command.getCancelReason(),
-                command.getRefundReceiveAccount()
-        );
+        TossCancelResponse tossCancelResponse = callTossCancelApi(command);
 
         boolean isSuccess = "DONE".equals(tossCancelResponse.cancelStatus());
 
@@ -85,18 +85,24 @@ public class TossStrategy extends PgStrategy {
     }
 
     /**
+     * TOSS 구현체 중 특정 결제서비스 빈 추출을 위함
+     * @return
+     */
+    @Override
+    public PayMethod getPgPayMethod() {
+        return getTossPayMethod();
+    }
+
+    /**
      * 승인 API 호출
      */
-    private TossApprovalResponse callTossConfirmApi(
+    private TossTransResponse callTossConfirmApi(
             String paymentKey,
             String orderId,
             Long amount
     ) {
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set(HttpHeaders.AUTHORIZATION, "Basic " + encodeSecretKey());
-
+            HttpHeaders headers = createHeaders();
             // 요청 바디
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("paymentKey", paymentKey);
@@ -104,13 +110,12 @@ public class TossStrategy extends PgStrategy {
             requestBody.put("amount", amount);
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-
             // api 호출
-           return restTemplate.exchange(
+            return restTemplate.exchange(
                     TOSS_CONFIRM_URL,
                     HttpMethod.POST,
                     request,
-                    TossApprovalResponse.class
+                    TossTransResponse.class
             ).getBody();
 
         } catch (HttpClientErrorException e) {
@@ -131,51 +136,38 @@ public class TossStrategy extends PgStrategy {
 
     /**
      * TOSS 결제 취소 API 호출 (통합)
-     *
-     * @param paymentKey 결제 키
-     * @param cancelAmount 취소 금액 (null이면 전액 취소)
-     * @param cancelReason 취소 사유
-     * @param refundAccount 환불 계좌 정보 (가상계좌 입금 후 취소 시 필수, 그 외 null)
      */
-    private TossCancelResponse callTossCancelApi(
-            String paymentKey,
-            Long cancelAmount,
-            String cancelReason,
-            PayCancelCommand.RefundReceiveAccount refundAccount
-    ) {
+    private TossCancelResponse callTossCancelApi(PayCancelCommand command) {
         try {
+            String paymentKey = command.getPgTid();                                                  // 결제 키
+            Long cancelAmount = command.getCanceledAmount().value();                                 // 취소 금액 (null이면 전액 취소)
+            String cancelReason = command.getCancelReason();
+
             String url = TOSS_CANCEL_URL + paymentKey + "/cancel";
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set(HttpHeaders.AUTHORIZATION, "Basic " + encodeSecretKey());
+            HttpHeaders headers = createHeaders();
 
+            // 취소 요청 데이터 공통부
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("cancelReason", cancelReason);
 
             // 부분 취소인 경우 금액 추가
-            if (cancelAmount != null) {
+            if (command.getPaymentStatus().equals(PARTIAL_CANCELED)) {
                 requestBody.put("cancelAmount", cancelAmount);
             }
 
-            // 가상계좌 환불 계좌 정보 추가
-            if (refundAccount != null) {
-                Map<String, String> refundInfo = new HashMap<>();
-                refundInfo.put("bank", refundAccount.getBankCode());
-                refundInfo.put("accountNumber", refundAccount.getAccountNumber());
-                refundInfo.put("holderName", refundAccount.getHolderName());
-                requestBody.put("refundReceiveAccount", refundInfo);
-            }
+            // 결제유혈병 요청 데이터 추가 세팅
+            generateCancelRequest(requestBody, command);
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            ResponseEntity<TossApprovalResponse> response = restTemplate.exchange(
+            ResponseEntity<TossTransResponse> response = restTemplate.exchange(
                     url,
                     HttpMethod.POST,
                     request,
-                    TossApprovalResponse.class
+                    TossTransResponse.class
             );
 
-            TossApprovalResponse.CancelInfo lastCancel = response.getBody()
+            TossTransResponse.CancelInfo lastCancel = response.getBody()
                     .cancels()
                     .get(response.getBody().cancels().size() - 1);
 
@@ -202,70 +194,12 @@ public class TossStrategy extends PgStrategy {
         }
     }
 
-    /**
-     * 결제수단별 응답 메시지 생성
-     */
-    private PgPayResponse convertToResponse(PayMethod payMethod, TossApprovalResponse response) {
-        // toss 에서 정상서리된 경우 상태값
-        boolean isSuccess = "DONE".equals(response.status())
-                || "WAITING_FOR_DEPOSIT".equals(response.status());
+    private HttpHeaders createHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set(HttpHeaders.AUTHORIZATION, "Basic " + encodeSecretKey());
 
-        return switch (payMethod) {
-            case CARD -> {
-                TossApprovalResponse.CardInfo cardResponse = response.card();
-                yield new PgPayResponse(
-                        response.paymentKey(),
-                        response.status(),
-                        response.status(),
-                        Money.create(response.totalAmount()),
-                        isSuccess,
-                        new PgPayResponse.Card(
-                                cardResponse.approveNo(),
-                                cardResponse.issuerCode(),
-                                cardResponse.cardType()
-                        ),
-                        null,
-                        null
-                );
-            }
-            case VIRTUAL_ACCOUNT -> {
-                TossApprovalResponse.VirtualAccountInfo virtualAccountInfo = response.virtualAccount();
-                yield new PgPayResponse(
-                        response.paymentKey(),
-                        response.status(),
-                        response.status(),
-                        Money.create(response.totalAmount()),
-                        isSuccess,
-                        null,
-                        null,
-                        new PgPayResponse.VirtualAccount(
-                                virtualAccountInfo.accountType(),
-                                virtualAccountInfo.accountNumber(),
-                                virtualAccountInfo.bankCode(),
-                                virtualAccountInfo.customerName(),
-                                virtualAccountInfo.dueDate()
-                        )
-                );
-            }
-            case EASY_PAY -> {
-                TossApprovalResponse.EasyPayInfo easyPayInfo = response.easyPay();
-                yield new PgPayResponse(
-                        response.paymentKey(),
-                        response.status(),
-                        response.status(),
-                        Money.create(response.totalAmount()),
-                        isSuccess,
-                        null,
-                        new PgPayResponse.EasyPay(
-                                easyPayInfo.provider(),
-                                easyPayInfo.amount(),
-                                easyPayInfo.discountAmount()
-                        ),
-                        null
-                );
-            }
-            default -> null;
-        };
+        return headers;
     }
 
     /**
@@ -275,5 +209,16 @@ public class TossStrategy extends PgStrategy {
         return Base64.getEncoder()
                 .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
     }
+
+    protected abstract PayMethod getTossPayMethod();
+    /**
+     * 결제수단별 응답 메시지 파싱
+     */
+    protected abstract PgPayResponse convertToResponse(TossTransResponse response);
+
+    /**
+     * 결제수단별 취소 요청 body 생성
+     */
+    protected abstract void generateCancelRequest(Map<String, Object> commonBody, PayCancelCommand command);
 }
 
