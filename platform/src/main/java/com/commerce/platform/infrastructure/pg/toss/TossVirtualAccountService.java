@@ -28,22 +28,20 @@ public class TossVirtualAccountService extends TossStrategy{
                 || "WAITING_FOR_DEPOSIT".equals(response.status());
 
         TossTransResponse.VirtualAccountInfo virtualAccountInfo = response.virtualAccount();
-        return new PgPayResponse(
-                response.paymentKey(),
-                response.status(),
-                response.status(),
-                Money.create(response.totalAmount()),
-                isSuccess,
-                null,
-                null,
-                new PgPayResponse.VirtualAccount(
-                        virtualAccountInfo.accountType(),
-                        virtualAccountInfo.accountNumber(),
-                        virtualAccountInfo.bankCode(),
-                        virtualAccountInfo.customerName(),
-                        virtualAccountInfo.dueDate()
-                )
-        );
+        return PgPayResponse.builder()
+                .pgTid(response.paymentKey())
+                .responseCode(response.status())
+                .responseMessage(response.status())
+                .amount(Money.create(response.totalAmount()))
+                .isSuccess(isSuccess)
+                .virtualAccount(PgPayResponse.VirtualAccount.builder()
+                        .accountType(virtualAccountInfo.accountType())
+                        .accountNumber(virtualAccountInfo.accountNumber())
+                        .bankCode(virtualAccountInfo.bankCode())
+                        .depositorName(virtualAccountInfo.customerName())
+                        .dueDate(virtualAccountInfo.dueDate())
+                        .build())
+                .build();
     }
 
     @Override

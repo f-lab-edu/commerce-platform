@@ -9,4 +9,9 @@ public class DanalPhoneService extends DanalStrategy{
     protected PayMethod getDanalPayMethod() {
         return PayMethod.PHONE;
     }
+
+    @Override
+    public Object initPayment() {
+        return null;
+    }
 }

@@ -26,20 +26,25 @@ public class TossEasyService extends TossStrategy{
         boolean isSuccess = "DONE".equals(response.status());
 
         TossTransResponse.EasyPayInfo easyPayInfo = response.easyPay();
-        return new PgPayResponse(
-                response.paymentKey(),
-                response.status(),
-                response.status(),
-                Money.create(response.totalAmount()),
-                isSuccess,
-                null,
-                new PgPayResponse.EasyPay(
-                        easyPayInfo.provider(),
-                        easyPayInfo.amount(),
-                        easyPayInfo.discountAmount()
-                ),
-                null
-        );
+        TossTransResponse.CardInfo card = response.card();
+
+        return PgPayResponse.builder()
+                .pgTid(response.paymentKey())
+                .responseCode(response.status())
+                .responseMessage(response.status())
+                .amount(Money.create(response.totalAmount()))
+                .isSuccess(isSuccess)
+                .card(PgPayResponse.Card.builder()
+                        .approveNo(card.approveNo())
+                        .issuerCode(card.issuerCode())
+                        .cardType(card.cardType())
+                        .build())
+                .easyPay(PgPayResponse.EasyPay.builder()
+                        .provider(easyPayInfo.provider())
+                        .amount(easyPayInfo.amount())
+                        .discountAmount(easyPayInfo.discountAmount())
+                        .build())
+                .build();
     }
 
     @Override

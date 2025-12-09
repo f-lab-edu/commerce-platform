@@ -26,20 +26,18 @@ public class TossCardService extends TossStrategy{
         boolean isSuccess = "DONE".equals(response.status());
 
         TossTransResponse.CardInfo cardResponse = response.card();
-        return new PgPayResponse(
-                response.paymentKey(),
-                response.status(),
-                response.status(),
-                Money.create(response.totalAmount()),
-                isSuccess,
-                new PgPayResponse.Card(
-                        cardResponse.approveNo(),
-                        cardResponse.issuerCode(),
-                        cardResponse.cardType()
-                ),
-                null,
-                null
-        );
+        return PgPayResponse.builder()
+                .pgTid(response.paymentKey())
+                .responseCode(response.status())
+                .responseMessage(response.status())
+                .amount(Money.create(response.totalAmount()))
+                .isSuccess(isSuccess)
+                .card(PgPayResponse.Card.builder()
+                        .approveNo(cardResponse.approveNo())
+                        .issuerCode(cardResponse.issuerCode())
+                        .cardType(cardResponse.cardType())
+                        .build())
+                .build();
     }
 
     @Override

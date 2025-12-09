@@ -7,20 +7,34 @@ import com.commerce.platform.core.application.out.dto.PgPayResponse;
 import com.commerce.platform.core.domain.enums.PayMethod;
 import com.commerce.platform.core.domain.enums.PgProvider;
 
+/**
+ * PG사별 결제를 위한 메소드 정의
+ */
 public abstract class PgStrategy {
 
     /**
-     * pg사별 요청에 따라 [Card | Easy | Phone]PayService 구현체 실행한다.
-     *
-     * @param command
-     * @return todo 결재응답dto
+     * 승인
      */
     public abstract PgPayResponse processApproval(PayOrderCommand command);
 
+    /**
+     * 취소
+     */
     public abstract PgPayCancelResponse processCancel(PayCancelCommand command);
 
+    /**
+     * PG사명
+     */
     public abstract PgProvider getPgProvider();
 
+    /**
+     * 결제유형
+     */
     public abstract PayMethod getPgPayMethod();
+
+    /**
+     * 결제창을 위한 초기화
+     */
+    public abstract Object initPayment();
 
 }

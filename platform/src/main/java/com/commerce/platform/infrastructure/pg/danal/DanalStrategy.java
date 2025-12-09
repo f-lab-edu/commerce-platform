@@ -8,6 +8,9 @@ import com.commerce.platform.core.application.out.dto.PgPayResponse;
 import com.commerce.platform.core.domain.enums.PayMethod;
 import com.commerce.platform.core.domain.enums.PgProvider;
 
+/**
+ * 여기서 필요에 따라 다날의 결제수단별 프로세스를 추상화한다.
+ */
 public abstract class DanalStrategy extends PgStrategy {
 
     @Override

@@ -1,10 +1,12 @@
 package com.commerce.platform.infrastructure.pg.nhn.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 
 /**
  * NHN 결제 승인 요청
  */
+@Builder
 public record NhnApprovalRequest(
         @JsonProperty("site_cd")
         String siteCd,  // siteCd 사이트코드 (5자리, 영문대문자+숫자)

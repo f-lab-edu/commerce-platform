@@ -28,7 +28,7 @@ import static com.commerce.platform.core.domain.enums.PaymentStatus.PARTIAL_CANC
  * TOSS PG
  * 카드, 간편결제, 가상계좌 에 대해 동일한 승인/취소 API 사용
  *
- * 결제수단별 응답 메시지, 취소 요청 body 생성 필요
+ * 여기서 필요에 따라 토스의 결제수단별 프로세스를 추상화한다.
  */
 @Slf4j
 @Component
@@ -91,6 +91,11 @@ public abstract class TossStrategy extends PgStrategy {
     @Override
     public PayMethod getPgPayMethod() {
         return getTossPayMethod();
+    }
+
+    @Override
+    public Object initPayment() {
+        return null;
     }
 
     /**
@@ -211,6 +216,7 @@ public abstract class TossStrategy extends PgStrategy {
     }
 
     protected abstract PayMethod getTossPayMethod();
+
     /**
      * 결제수단별 응답 메시지 파싱
      */
