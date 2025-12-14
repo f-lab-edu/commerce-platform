@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PaymentGrpcClient {
     
-    @GrpcClient("payment-service")
+    @GrpcClient("payments")
     private PaymentServiceGrpc.PaymentServiceBlockingStub paymentServiceStub;
     
     /**

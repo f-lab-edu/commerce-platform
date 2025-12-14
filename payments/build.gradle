@@ -1,6 +1,6 @@
 plugins {
     id 'myproject-convention'
-    id 'myproject-grpc'
+    id 'myproject-grpc-server'
 }
 
 dependencies {
