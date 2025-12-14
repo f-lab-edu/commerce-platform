@@ -1,7 +1,7 @@
 package com.commerce.platform.bootstrap.exception;
 
 import com.commerce.shared.exception.BusinessException;
-import com.commerce.platform.shared.exception.LockUnavailableException;
+import com.commerce.platform.exception.LockUnavailableException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;

@@ -1,7 +1,7 @@
 //package com.commerce.payments.application.service;
 //
-//import com.commerce.payments.PgPayCancelResponse;
-//import com.commerce.payments.PgPayResponse;
+//import com.commerce.payments.domain.vo.payments.PgPayCancelResponse;
+//import com.commerce.payments.domain.vo.payments.PgPayResponse;
 //import com.commerce.payments.application.port.in.command.PayCancelCommand;
 //import com.commerce.payments.application.port.in.command.PayOrderCommand;
 //import com.commerce.payments.application.port.out.PaymentOutPort;

@@ -1,10 +1,10 @@
 package com.commerce.payments.infrastructure.pg.toss;
 
-import com.commerce.payments.application.port.in.command.PayCancelCommand;
-import com.commerce.payments.application.port.in.command.PayOrderCommand;
+import com.commerce.payments.application.port.in.dto.PayCancelCommand;
+import com.commerce.payments.application.port.in.dto.PayOrderCommand;
 import com.commerce.payments.application.port.out.PgStrategy;
-import com.commerce.payments.PgPayCancelResponse;
-import com.commerce.payments.PgPayResponse;
+import com.commerce.payments.domain.vo.payments.PgPayCancelResponse;
+import com.commerce.payments.domain.vo.payments.PgPayResponse;
 import com.commerce.payments.domain.enums.PayMethod;
 import com.commerce.payments.domain.enums.PgProvider;
 import com.commerce.payments.infrastructure.pg.toss.dto.TossCancelResponse;

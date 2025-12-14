@@ -4,7 +4,7 @@ import com.commerce.platform.bootstrap.admin.ProductAdController;
 import com.commerce.platform.bootstrap.dto.product.CreateProductRequest;
 import com.commerce.platform.bootstrap.dto.product.UpdateStockRequest;
 import com.commerce.platform.bootstrap.exception.GlobalExceptionHandler;
-import com.commerce.platform.core.application.in.ProductUseCase;
+import com.commerce.platform.core.application.port.in.ProductUseCase;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.enums.StockOperation;
 import com.commerce.platform.core.domain.vo.ProductId;

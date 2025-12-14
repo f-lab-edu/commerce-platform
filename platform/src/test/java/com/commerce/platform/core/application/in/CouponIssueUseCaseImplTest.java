@@ -1,6 +1,7 @@
 package com.commerce.platform.core.application.in;
 
-import com.commerce.platform.core.application.in.dto.CouponView;
+import com.commerce.platform.core.application.port.in.CouponIssueUseCase;
+import com.commerce.platform.core.application.port.in.dto.CouponView;
 import com.commerce.platform.core.domain.aggreate.Coupon;
 import com.commerce.platform.core.domain.vo.CouponId;
 import com.commerce.platform.core.domain.vo.CouponIssueId;

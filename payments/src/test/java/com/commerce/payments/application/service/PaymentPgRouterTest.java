@@ -2,10 +2,10 @@ package com.commerce.payments.application.service;
 
 
 import com.commerce.payments.PaymentsApplication;
-import com.commerce.payments.domain.aggregate.Payment;
 import com.commerce.payments.domain.enums.PayMethod;
 import com.commerce.payments.domain.enums.PayProvider;
 import com.commerce.payments.domain.enums.PgProvider;
+import com.commerce.payments.domain.service.PaymentPgRouter;
 import com.commerce.payments.infrastructure.adaptor.PgCacheService;
 import com.commerce.payments.infrastructure.persistence.PgFeeInfo;
 import com.commerce.payments.infrastructure.persistence.PgFeeInfoRepository;

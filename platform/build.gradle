@@ -1,3 +1,7 @@
 plugins {
     id 'myproject-convention'
 }
+
+dependencies {
+    implementation project(':shared')
+}

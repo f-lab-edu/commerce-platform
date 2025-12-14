@@ -1,7 +1,7 @@
 package com.commerce.platform.bootstrap.customer;
 
-import com.commerce.platform.core.application.in.CouponIssueUseCase;
-import com.commerce.platform.core.application.in.dto.CouponView;
+import com.commerce.platform.core.application.port.in.CouponIssueUseCase;
+import com.commerce.platform.core.application.port.in.dto.CouponView;
 import com.commerce.platform.core.domain.vo.CouponId;
 import com.commerce.shared.vo.CustomerId;
 import lombok.RequiredArgsConstructor;

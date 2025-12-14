@@ -1,6 +1,6 @@
 package com.commerce.platform.infrastructure.adaptor;
 
-import com.commerce.platform.core.application.out.ProductOutputPort;
+import com.commerce.platform.core.application.port.out.ProductOutputPort;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.vo.ProductId;
 import com.commerce.platform.infrastructure.persistence.ProductRepository;

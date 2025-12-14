@@ -1,9 +1,9 @@
 package com.commerce.payments.domain.aggregate;
 
 
-import com.commerce.payments.PgPayCancelResponse;
-import com.commerce.payments.PgPayResponse;
-import com.commerce.payments.application.port.in.command.PayOrderCommand;
+import com.commerce.payments.domain.vo.payments.PgPayCancelResponse;
+import com.commerce.payments.domain.vo.payments.PgPayResponse;
+import com.commerce.payments.application.port.in.dto.PayOrderCommand;
 import com.commerce.payments.domain.enums.PayMethod;
 import com.commerce.payments.domain.enums.PayProvider;
 import com.commerce.payments.domain.enums.PaymentStatus;

@@ -1,6 +1,6 @@
 package com.commerce.platform.infrastructure.adaptor;
 
-import com.commerce.platform.core.application.out.CouponOutPort;
+import com.commerce.platform.core.application.port.out.CouponOutPort;
 import com.commerce.platform.core.domain.aggreate.Coupon;
 import com.commerce.platform.core.domain.vo.CouponId;
 import com.commerce.platform.infrastructure.persistence.CouponRepository;

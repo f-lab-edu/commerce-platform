@@ -1,6 +1,6 @@
 package com.commerce.payments.infrastructure.pg.nhn;
 
-import com.commerce.payments.PgPayResponse;
+import com.commerce.payments.domain.vo.payments.PgPayResponse;
 import com.commerce.payments.domain.enums.PayMethod;
 import com.commerce.payments.infrastructure.pg.nhn.dto.NhnEasyCardApprovalResponse;
 import com.commerce.shared.vo.Money;

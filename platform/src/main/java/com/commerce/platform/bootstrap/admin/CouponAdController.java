@@ -1,7 +1,7 @@
 package com.commerce.platform.bootstrap.admin;
 
 import com.commerce.platform.bootstrap.dto.coupon.CouponRequest;
-import com.commerce.platform.core.application.in.CouponUseCase;
+import com.commerce.platform.core.application.port.in.CouponUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

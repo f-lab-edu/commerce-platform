@@ -1,6 +1,6 @@
 package com.commerce.platform.infrastructure.adaptor;
 
-import com.commerce.platform.core.application.out.OrderOutputPort;
+import com.commerce.platform.core.application.port.out.OrderOutputPort;
 import com.commerce.platform.core.domain.aggreate.Order;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.platform.infrastructure.persistence.OrderRepository;
