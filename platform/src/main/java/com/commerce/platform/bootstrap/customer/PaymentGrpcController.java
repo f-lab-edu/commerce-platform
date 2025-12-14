@@ -2,9 +2,7 @@ package com.commerce.platform.bootstrap.customer;
 
 import com.commerce.platform.bootstrap.dto.payment.PaymentCancelRequest;
 import com.commerce.platform.bootstrap.dto.payment.PaymentRequest;
-import com.commerce.platform.grpc.proto.PaymentApprovalResponse;
-import com.commerce.platform.grpc.proto.PaymentCancelResponse;
-import com.commerce.platform.grpc.proto.PaymentPartialCancelResponse;
+
 import com.commerce.platform.infrastructure.grpc.PaymentGrpcClient;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
