@@ -4,7 +4,7 @@ import com.commerce.platform.core.application.in.dto.ProductDetail;
 import com.commerce.platform.core.application.in.dto.UpdateStockCommand;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.vo.ProductId;
-import com.commerce.platform.core.domain.vo.Quantity;
+import com.commerce.shared.vo.Quantity;
 
 import java.util.List;
 

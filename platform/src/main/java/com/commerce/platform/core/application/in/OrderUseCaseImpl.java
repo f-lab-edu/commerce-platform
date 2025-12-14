@@ -9,7 +9,10 @@ import com.commerce.platform.core.application.in.dto.OrderResponse;
 import com.commerce.platform.core.application.out.*;
 import com.commerce.platform.core.domain.aggreate.*;
 import com.commerce.platform.core.domain.vo.*;
-import com.commerce.platform.shared.exception.BusinessException;
+import com.commerce.shared.exception.BusinessException;
+import com.commerce.shared.vo.CustomerId;
+import com.commerce.shared.vo.Money;
+import com.commerce.shared.vo.OrderId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +21,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.commerce.platform.shared.exception.BusinessError.*;
+import static com.commerce.shared.exception.BusinessError.*;
 
 @RequiredArgsConstructor
 @Service
@@ -131,7 +134,7 @@ public class OrderUseCaseImpl implements OrderUseCase {
      * 쿠폰조회 및 적용
      */
     private Money applyCoupon(Order order, CouponId couponId) {
-        if(couponId == null) return Money.create(0);
+        if(couponId == null) return Money.of(0);
         CouponIssueId couponIssueId = new CouponIssueId(couponId, order.getCustomerId());
 
         // 발급된 쿠폰 확인
@@ -169,7 +172,7 @@ public class OrderUseCaseImpl implements OrderUseCase {
                     return product.getPrice()
                             .multiply(item.getQuantity());
                 })
-                .reduce(Money.create(0), Money::add);
+                .reduce(Money.of(0), Money::add);
     }
 
 }

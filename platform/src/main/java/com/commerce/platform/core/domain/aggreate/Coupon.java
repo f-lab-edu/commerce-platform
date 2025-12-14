@@ -1,10 +1,10 @@
 package com.commerce.platform.core.domain.aggreate;
 
 import com.commerce.platform.core.domain.vo.CouponId;
-import com.commerce.platform.core.domain.vo.Money;
-import com.commerce.platform.core.domain.vo.Quantity;
-import com.commerce.platform.core.domain.vo.ValidPeriod;
-import com.commerce.platform.shared.exception.BusinessException;
+import com.commerce.shared.vo.Quantity;
+import com.commerce.shared.vo.ValidPeriod;
+import com.commerce.shared.exception.BusinessException;
+import com.commerce.shared.vo.Money;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static com.commerce.platform.shared.exception.BusinessError.*;
+import static com.commerce.shared.exception.BusinessError.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -71,8 +71,8 @@ public class Coupon {
                 .couponName(couponName)
                 .code(code)
                 .discountPercent(discountPercent)
-                .minOrderAmt(Money.create(minOrderAmt))
-                .maxDiscountAmt(Money.create(maxDiscountAmt))
+                .minOrderAmt(Money.of(minOrderAmt))
+                .maxDiscountAmt(Money.of(maxDiscountAmt))
                 .validPeriod(ValidPeriod.create(frDt, toDt))
                 .totalQuantity(Quantity.create(totalQuantity))
                 .issuedQuantity(Quantity.create(0))
@@ -84,7 +84,7 @@ public class Coupon {
      */
     public void isAvailable(Money orderAmt) {
         // 주문금액 확인
-        if(this.minOrderAmt.value() > orderAmt.value()) throw new BusinessException(BELOW_LEAST_ORDER_AMT);
+        if(this.minOrderAmt.isGreaterThan(orderAmt)) throw new BusinessException(BELOW_LEAST_ORDER_AMT);
 
         // 유효기간 확인
         isValidPeriod();
@@ -115,7 +115,7 @@ public class Coupon {
 
         // 할인금액
         Money discountAmt = orderAmt.discount(this.discountPercent);
-        if(discountAmt.value() > this.maxDiscountAmt.value()) {
+        if(discountAmt.isGreaterThan(this.maxDiscountAmt)) {
             return this.maxDiscountAmt;
         }
 

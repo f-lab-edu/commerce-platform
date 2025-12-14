@@ -4,8 +4,8 @@ import com.commerce.platform.bootstrap.dto.order.OrderRefundRequest;
 import com.commerce.platform.core.application.in.dto.CreateOrderCommand;
 import com.commerce.platform.core.application.in.dto.OrderDetailResponse;
 import com.commerce.platform.core.application.in.dto.OrderResponse;
-import com.commerce.platform.core.domain.vo.CustomerId;
-import com.commerce.platform.core.domain.vo.OrderId;
+import com.commerce.shared.vo.CustomerId;
+import com.commerce.shared.vo.OrderId;
 
 import java.util.List;
 

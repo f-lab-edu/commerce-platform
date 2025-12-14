@@ -1,6 +1,6 @@
 package com.commerce.platform.core.domain.aggreate;
 
-import com.commerce.platform.core.domain.vo.CustomerId;
+import com.commerce.shared.vo.CustomerId;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;

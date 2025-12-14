@@ -2,9 +2,9 @@ package com.commerce.platform.core.application.in.dto;
 
 import com.commerce.platform.bootstrap.dto.order.OrderRequest;
 import com.commerce.platform.core.domain.vo.CouponId;
-import com.commerce.platform.core.domain.vo.CustomerId;
+import com.commerce.shared.vo.CustomerId;
 import com.commerce.platform.core.domain.vo.ProductId;
-import com.commerce.platform.core.domain.vo.Quantity;
+import com.commerce.shared.vo.Quantity;
 
 import java.util.List;
 

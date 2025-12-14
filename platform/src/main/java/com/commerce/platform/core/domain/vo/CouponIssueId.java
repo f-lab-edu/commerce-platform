@@ -1,5 +1,6 @@
 package com.commerce.platform.core.domain.vo;
 
+import com.commerce.shared.vo.CustomerId;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

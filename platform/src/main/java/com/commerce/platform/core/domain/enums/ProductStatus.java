@@ -1,6 +1,6 @@
 package com.commerce.platform.core.domain.enums;
 
-import com.commerce.platform.core.domain.vo.Quantity;
+import com.commerce.shared.vo.Quantity;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

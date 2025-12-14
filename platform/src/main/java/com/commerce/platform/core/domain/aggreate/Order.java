@@ -1,11 +1,10 @@
 package com.commerce.platform.core.domain.aggreate;
 
-import com.commerce.platform.core.application.out.dto.PgPayResponse;
 import com.commerce.platform.core.domain.enums.OrderStatus;
 import com.commerce.platform.core.domain.vo.CouponId;
-import com.commerce.platform.core.domain.vo.CustomerId;
-import com.commerce.platform.core.domain.vo.Money;
-import com.commerce.platform.core.domain.vo.OrderId;
+import com.commerce.shared.vo.CustomerId;
+import com.commerce.shared.vo.Money;
+import com.commerce.shared.vo.OrderId;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -86,9 +85,9 @@ public class Order {
                 .orderId(OrderId.create())
                 .customerId(customerId)
                 .couponId(couponId)
-                .discountAmt(Money.create(0))
-                .originAmt(Money.create(0))
-                .resultAmt(Money.create(0))
+                .discountAmt(Money.of(0))
+                .originAmt(Money.of(0))
+                .resultAmt(Money.of(0))
                 .status(OrderStatus.PENDING)
                 .orderedAt(LocalDateTime.now())
                 .build();
@@ -103,8 +102,8 @@ public class Order {
             throw new RuntimeException("주문완료처리 불가");
         }
 
-        if(total == Money.create(0)
-                || (this.couponId != null && discount == Money.create(0))
+        if(total == Money.of(0)
+                || (this.couponId != null && discount == Money.of(0))
         ) {
             throw new RuntimeException("주문생성 오류");
         }
@@ -143,11 +142,11 @@ public class Order {
         }
     }
 
-    public void changeStatusAfterPay(PgPayResponse pgPayResponse) {
-        if(!pgPayResponse.isSuccess()) return;
-
-        updateOrderStatus(PAID);
-    }
+//    public void changeStatusAfterPay(PgPayResponse pgPayResponse) {
+//        if(!pgPayResponse.isSuccess()) return;
+//
+//        updateOrderStatus(PAID);
+//    }
 
     /**
      * 주문상태, 수정시간 변경

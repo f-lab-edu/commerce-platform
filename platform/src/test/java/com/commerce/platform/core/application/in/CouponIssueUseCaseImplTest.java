@@ -4,7 +4,7 @@ import com.commerce.platform.core.application.in.dto.CouponView;
 import com.commerce.platform.core.domain.aggreate.Coupon;
 import com.commerce.platform.core.domain.vo.CouponId;
 import com.commerce.platform.core.domain.vo.CouponIssueId;
-import com.commerce.platform.core.domain.vo.CustomerId;
+import com.commerce.shared.vo.CustomerId;
 import com.commerce.platform.infrastructure.persistence.CouponIssueRepository;
 import com.commerce.platform.infrastructure.persistence.CouponRepository;
 import org.junit.jupiter.api.DisplayName;

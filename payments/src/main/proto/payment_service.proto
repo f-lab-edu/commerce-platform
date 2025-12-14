@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.commerce.payments.grpc.proto";
+option java_outer_classname = "PaymentServiceProto";
+
+package payment;
+
+service PaymentService {
+  // 결제 승인
+  rpc ApprovePayment (PaymentApprovalRequest) returns (PaymentApprovalResponse);
+  
+  // 전체 취소
+  rpc CancelPayment (PaymentCancelRequest) returns (PaymentCancelResponse);
+  
+  // 부분 취소
+  rpc PartialCancelPayment (PaymentPartialCancelRequest) returns (PaymentPartialCancelResponse);
+  
+  // 등록된 카드로 결제
+  rpc ApproveWithCard (CardPaymentRequest) returns (PaymentApprovalResponse);
+}
+
+// 결제 승인 요청
+message PaymentApprovalRequest {
+  string order_id = 1;
+  int64 approved_amount = 2;
+  int32 installment = 3;
+  string pay_method = 4;      // CARD, VIRTUAL_ACCOUNT, EASY_PAY
+  string pay_provider = 5;     // TOSS, NICEPAY, KSNET, KCP
+}
+
+// 결제 승인 응답
+message PaymentApprovalResponse {
+  bool success = 1;
+  string code = 2;
+  string message = 3;
+  PaymentData data = 4;
+}
+
+message PaymentData {
+  string payment_id = 1;
+  int64 approved_amount = 2;
+  string approved_at = 3;
+  string pay_method = 4;
+  string status = 5;
+}
+
+// 전체 취소 요청
+message PaymentCancelRequest {
+  string order_id = 1;
+}
+
+// 전체 취소 응답
+message PaymentCancelResponse {
+  bool success = 1;
+  string code = 2;
+  string message = 3;
+  CancelData data = 4;
+}
+
+message CancelData {
+  string payment_id = 1;
+  int64 canceled_amount = 2;
+  string canceled_at = 3;
+}
+
+// 부분 취소 요청
+message PaymentPartialCancelRequest {
+  string order_id = 1;
+  int64 order_item_id = 2;
+  int64 canceled_quantity = 3;
+}
+
+// 부분 취소 응답
+message PaymentPartialCancelResponse {
+  bool success = 1;
+  string code = 2;
+  string message = 3;
+  PartialCancelData data = 4;
+}
+
+message PartialCancelData {
+  int64 partial_cancel_id = 1;
+  int64 canceled_amount = 2;
+  int64 remain_amount = 3;
+  string canceled_at = 4;
+}
+
+// 등록된 카드 결제 요청
+message CardPaymentRequest {
+  int64 card_id = 1;
+  string order_id = 2;
+}

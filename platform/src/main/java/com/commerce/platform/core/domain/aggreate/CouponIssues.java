@@ -3,9 +3,9 @@ package com.commerce.platform.core.domain.aggreate;
 import com.commerce.platform.core.domain.enums.CouponIssueStatus;
 import com.commerce.platform.core.domain.vo.CouponId;
 import com.commerce.platform.core.domain.vo.CouponIssueId;
-import com.commerce.platform.core.domain.vo.CustomerId;
-import com.commerce.platform.core.domain.vo.OrderId;
-import com.commerce.platform.shared.exception.BusinessException;
+import com.commerce.shared.vo.CustomerId;
+import com.commerce.shared.exception.BusinessException;
+import com.commerce.shared.vo.OrderId;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
 
 import static com.commerce.platform.core.domain.enums.CouponIssueStatus.EXPIRED;
 import static com.commerce.platform.core.domain.enums.CouponIssueStatus.USED;
-import static com.commerce.platform.shared.exception.BusinessError.EXPIRED_ISSUED_COUPON;
-import static com.commerce.platform.shared.exception.BusinessError.USED_ISSUED_COUPON;
+import static com.commerce.shared.exception.BusinessError.EXPIRED_ISSUED_COUPON;
+import static com.commerce.shared.exception.BusinessError.USED_ISSUED_COUPON;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

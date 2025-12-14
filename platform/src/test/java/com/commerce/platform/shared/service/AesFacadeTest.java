@@ -1,5 +1,6 @@
 package com.commerce.platform.shared.service;
 
+import com.commerce.shared.service.AesCryptoFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -1,10 +1,10 @@
 package com.commerce.platform.core.domain.aggreate;
 
 import com.commerce.platform.core.domain.enums.ProductStatus;
-import com.commerce.platform.core.domain.vo.Money;
 import com.commerce.platform.core.domain.vo.ProductId;
-import com.commerce.platform.core.domain.vo.Quantity;
-import com.commerce.platform.shared.exception.BusinessException;
+import com.commerce.shared.vo.Quantity;
+import com.commerce.shared.exception.BusinessException;
+import com.commerce.shared.vo.Money;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 
 import static com.commerce.platform.core.domain.enums.ProductStatus.DISCONTINUED;
 import static com.commerce.platform.core.domain.enums.ProductStatus.OUT_OF_STOCK;
-import static com.commerce.platform.shared.exception.BusinessError.PRODUCT_NOT_AVAILABLE;
+import static com.commerce.shared.exception.BusinessError.PRODUCT_NOT_AVAILABLE;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

@@ -8,8 +8,8 @@ import com.commerce.platform.core.domain.aggreate.Coupon;
 import com.commerce.platform.core.domain.aggreate.CouponIssues;
 import com.commerce.platform.core.domain.vo.CouponId;
 import com.commerce.platform.core.domain.vo.CouponIssueId;
-import com.commerce.platform.core.domain.vo.CustomerId;
-import com.commerce.platform.shared.exception.BusinessException;
+import com.commerce.shared.vo.CustomerId;
+import com.commerce.shared.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.commerce.platform.shared.exception.BusinessError.DUPLICATE_ISSUED_COUPON;
-import static com.commerce.platform.shared.exception.BusinessError.INVALID_COUPON;
+import static com.commerce.shared.exception.BusinessError.DUPLICATE_ISSUED_COUPON;
+import static com.commerce.shared.exception.BusinessError.INVALID_COUPON;
 
 @Log4j2
 @RequiredArgsConstructor

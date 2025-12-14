@@ -5,14 +5,14 @@ import com.commerce.platform.core.application.out.ProductOutputPort;
 import com.commerce.platform.core.application.in.dto.UpdateStockCommand;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.vo.ProductId;
-import com.commerce.platform.core.domain.vo.Quantity;
-import com.commerce.platform.shared.exception.BusinessException;
+import com.commerce.shared.vo.Quantity;
+import com.commerce.shared.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.commerce.platform.shared.exception.BusinessError.PRODUCT_NOT_FOUND;
+import static com.commerce.shared.exception.BusinessError.PRODUCT_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Service
