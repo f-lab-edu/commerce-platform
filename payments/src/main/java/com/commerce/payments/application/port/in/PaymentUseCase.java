@@ -7,5 +7,4 @@ import com.commerce.payments.application.port.in.dto.PayOrderCommand;
 public interface PaymentUseCase {
     void doApproval(PayOrderCommand command);
     void doCancel(PayCancelCommand cancelCommand);
-    Long doPartCancel(PayCancelCommand cancelCommand);
 }

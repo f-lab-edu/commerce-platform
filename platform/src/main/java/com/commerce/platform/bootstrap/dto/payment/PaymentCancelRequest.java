@@ -2,6 +2,7 @@ package com.commerce.platform.bootstrap.dto.payment;
 
 import com.commerce.shared.vo.OrderId;
 import com.commerce.shared.vo.Quantity;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
 /**
@@ -11,10 +12,16 @@ public record PaymentCancelRequest(
         @NotBlank
         OrderId orderId,
 
+        @NotBlank
         Long orderItemId,   // 취소할 orderItem
 
+        @NotBlank
+        @Min(1)
         Quantity canceledQuantity, // 해당 orderItem의 취소 개수
 
         @NotBlank
-        String paymentStatus
+        String paymentStatus,
+
+        @NotBlank
+        String cancelReason
 ) {}

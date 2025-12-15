@@ -1,8 +1,8 @@
 package com.commerce.platform.infrastructure.grpc;
 
-import com.commerce.platform.grpc.proto.*;
+import com.commerce.platform.bootstrap.dto.payment.PaymentCancelRequest;
+import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
-import com.commerce.shared.vo.Quantity;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
@@ -10,9 +10,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Payment Service gRPC 클라이언트
- * 
- * 헥사고날 아키텍처의 Outbound Adapter
- * - platform 모듈에서 payments 서비스로 요청
+ *
  */
 @Slf4j
 @Component
@@ -25,7 +23,8 @@ public class PaymentGrpcClient {
      * 결제 승인
      */
     public PaymentApprovalResponse approvePayment(
-            String orderId,
+            OrderId orderId,
+            Money approvedAmount,
             int installment,
             String payMethod,
             String payProvider) {
@@ -34,7 +33,8 @@ public class PaymentGrpcClient {
         
         try {
             PaymentApprovalRequest request = PaymentApprovalRequest.newBuilder()
-                    .setOrderId(orderId)
+                    .setOrderId(orderId.id())
+                    .setApprovedAmount(approvedAmount)
                     .setInstallment(installment)
                     .setPayMethod(payMethod)
                     .setPayProvider(payProvider)
@@ -54,7 +54,7 @@ public class PaymentGrpcClient {
     }
     
     /**
-     * 전체 취소
+     * 전체/부분 취소
      */
     public PaymentCancelResponse cancelPayment(OrderId orderId) {
         
@@ -74,37 +74,6 @@ public class PaymentGrpcClient {
             
         } catch (StatusRuntimeException e) {
             log.error("[gRPC Client] 전체 취소 실패: {}", e.getStatus());
-            throw new RuntimeException("결제 서비스 통신 실패", e);
-        }
-    }
-    
-    /**
-     * 부분 취소
-     */
-    public PaymentPartialCancelResponse partialCancelPayment(
-            OrderId orderId,
-            long orderItemId,
-            Quantity canceledQuantity) {
-        
-        log.info("[gRPC Client] 부분 취소 요청: orderId={}, itemId={}", 
-                orderId, orderItemId);
-        
-        try {
-            PaymentPartialCancelRequest request = PaymentPartialCancelRequest.newBuilder()
-                    .setOrderId(orderId.id())
-                    .setOrderItemId(orderItemId)
-                    .setCanceledQuantity(canceledQuantity.value())
-                    .build();
-            
-            PaymentPartialCancelResponse response = paymentServiceStub.partialCancelPayment(request);
-            
-            log.info("[gRPC Client] 부분 취소 응답: success={}, code={}", 
-                    response.getSuccess(), response.getCode());
-            
-            return response;
-            
-        } catch (StatusRuntimeException e) {
-            log.error("[gRPC Client] 부분 취소 실패: {}", e.getStatus());
             throw new RuntimeException("결제 서비스 통신 실패", e);
         }
     }

@@ -1,5 +1,6 @@
 package com.commerce.platform.bootstrap.dto.payment;
 
+import com.commerce.shared.vo.OrderId;
 import jakarta.validation.constraints.NotBlank;
 
 /**
@@ -7,7 +8,7 @@ import jakarta.validation.constraints.NotBlank;
  */
 public record PaymentRequest(
         @NotBlank
-        String orderId,
+        OrderId orderId,
 
         @NotBlank
         String payMethod,
