@@ -8,7 +8,7 @@
 //import com.commerce.payments.application.port.out.PgStrategy;
 //import com.commerce.payments.domain.aggregate.Payment;
 //import com.commerce.payments.domain.enums.PayMethod;
-//import com.commerce.payments.domain.enums.PayProvider;
+//import com.commerce.shared.enums.PayProvider;
 //import com.commerce.payments.domain.enums.PaymentStatus;
 //import com.commerce.payments.domain.enums.PgProvider;
 //import com.commerce.payments.infrastructure.adaptor.PaymentAdaptor;

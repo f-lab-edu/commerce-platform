@@ -2,7 +2,7 @@ package com.commerce.payments.infrastructure.adaptor;
 
 
 import com.commerce.payments.domain.aggregate.CardBinPromotion;
-import com.commerce.payments.domain.enums.PayProvider;
+import com.commerce.shared.enums.PayProvider;
 import com.commerce.payments.domain.vo.promotion.ShinhanPromotionData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

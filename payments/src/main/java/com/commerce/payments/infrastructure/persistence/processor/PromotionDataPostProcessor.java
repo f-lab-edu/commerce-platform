@@ -2,7 +2,7 @@ package com.commerce.payments.infrastructure.persistence.processor;
 
 import com.commerce.payments.domain.aggregate.CardBinPromotion;
 import com.commerce.payments.domain.vo.promotion.*;
-import com.commerce.payments.domain.enums.PayProvider;
+import com.commerce.shared.enums.PayProvider;
 import com.commerce.payments.infrastructure.persistence.converter.PromotionDataConverter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

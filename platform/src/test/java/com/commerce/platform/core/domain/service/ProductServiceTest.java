@@ -6,6 +6,7 @@ import com.commerce.platform.core.application.port.out.ProductOutputPort;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.enums.ProductStatus;
 import com.commerce.platform.core.domain.vo.ProductId;
+import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.Quantity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ class ProductServiceTest {
     void getProduct() throws Exception {
         String productName = "mock 상품";
         Quantity quantity = Quantity.create(150);
-        Money money = Money.create(5000);
+        Money money = Money.of(5000);
 
         Product exProduct = Product.builder()
                 .productId(ProductId.create())

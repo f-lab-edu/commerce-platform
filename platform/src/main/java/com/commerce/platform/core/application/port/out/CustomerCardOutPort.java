@@ -1,6 +1,6 @@
-package com.commerce.payments.application.port.out;
+package com.commerce.platform.core.application.port.out;
 
-import com.commerce.payments.domain.aggregate.CustomerCard;
+import com.commerce.platform.core.domain.aggreate.CustomerCard;
 import com.commerce.shared.vo.CustomerId;
 
 import java.util.Optional;

@@ -1,7 +1,8 @@
-package com.commerce.payments.domain.aggregate;
+package com.commerce.platform.core.domain.aggreate;
 
-import com.commerce.payments.application.port.in.RegistryCardCommand;
-import com.commerce.payments.domain.enums.PayProvider;
+
+import com.commerce.platform.core.application.port.in.dto.RegistryCardCommand;
+import com.commerce.shared.enums.PayProvider;
 import com.commerce.shared.service.AesCryptoFacade;
 import com.commerce.shared.vo.CustomerId;
 import jakarta.persistence.*;

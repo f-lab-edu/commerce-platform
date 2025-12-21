@@ -1,14 +1,17 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "com.commerce.platform.grpc.proto";
+option java_package = "com.commerce.shared.grpc.proto";
 option java_outer_classname = "PaymentServiceProto";
 
 package payment;
 
 service PaymentService {
+  // 결제 승인
   rpc ApprovePayment (PaymentApprovalRequest) returns (PaymentApprovalResponse);
+  // 취소
   rpc CancelPayment (PaymentCancelRequest) returns (PaymentCancelResponse);
+  // 등록된 카드로 결제
   rpc ApproveWithCard (CardPaymentRequest) returns (PaymentApprovalResponse);
 }
 
@@ -17,7 +20,7 @@ message PaymentApprovalRequest {
   string order_id = 1;
   int64 approved_amount = 2;
   int32 installment = 3;
-  string pay_method = 4;      // CARD, VIRTUAL_ACCOUNT, EASY_PAY
+  string pay_method = 4;       // CARD, VIRTUAL_ACCOUNT, EASY_PAY
   string pay_provider = 5;     // TOSS, NICEPAY, KSNET, KCP
 }
 
@@ -64,4 +67,3 @@ message CardPaymentRequest {
   int64 card_id = 1;
   string order_id = 2;
 }
-

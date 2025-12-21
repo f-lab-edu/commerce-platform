@@ -4,9 +4,9 @@ import com.commerce.payments.application.port.in.PaymentUseCase;
 import com.commerce.payments.application.port.in.dto.PayCancelCommand;
 import com.commerce.payments.application.port.in.dto.PayOrderCommand;
 import com.commerce.payments.domain.enums.PayMethod;
-import com.commerce.payments.domain.enums.PayProvider;
+import com.commerce.shared.enums.PayProvider;
 import com.commerce.payments.domain.enums.PaymentStatus;
-import com.commerce.payments.grpc.proto.*;
+import com.commerce.shared.grpc.proto.*;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
@@ -26,7 +26,7 @@ public class PaymentGrpcServiceImpl extends PaymentServiceGrpc.PaymentServiceImp
     private final PaymentUseCase paymentUseCase;
 
     /**
-     * 결제 승인 - 기존 REST API를 gRPC로 변경
+     * 결제 승인
      */
     @Override
     public void approvePayment(
@@ -34,7 +34,7 @@ public class PaymentGrpcServiceImpl extends PaymentServiceGrpc.PaymentServiceImp
             StreamObserver<PaymentApprovalResponse> responseObserver) {
 
         try {
-            // gRPC Request → Domain Command
+            // gRPC → Domain
             PayOrderCommand command = PayOrderCommand.builder()
                     .orderId(OrderId.of(request.getOrderId()))
                     .approvedAmount(Money.of(request.getApprovedAmount()))

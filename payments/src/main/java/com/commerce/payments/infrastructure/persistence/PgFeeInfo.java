@@ -1,7 +1,7 @@
 package com.commerce.payments.infrastructure.persistence;
 
 import com.commerce.payments.domain.enums.PayMethod;
-import com.commerce.payments.domain.enums.PayProvider;
+import com.commerce.shared.enums.PayProvider;
 import com.commerce.payments.domain.enums.PgProvider;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

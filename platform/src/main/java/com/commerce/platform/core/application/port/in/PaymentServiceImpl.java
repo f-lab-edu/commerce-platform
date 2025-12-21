@@ -2,6 +2,7 @@ package com.commerce.platform.core.application.port.in;
 
 import com.commerce.platform.bootstrap.dto.payment.PaymentCancelRequest;
 import com.commerce.platform.bootstrap.dto.payment.PaymentRequest;
+import com.commerce.platform.core.application.port.out.CustomerCardOutPort;
 import com.commerce.platform.core.application.port.out.OrderItemOutPort;
 import com.commerce.platform.core.application.port.out.OrderOutputPort;
 import com.commerce.platform.core.application.port.out.ProductOutputPort;
@@ -9,6 +10,8 @@ import com.commerce.platform.core.domain.aggreate.Order;
 import com.commerce.platform.core.domain.aggreate.OrderItem;
 import com.commerce.platform.infrastructure.grpc.PaymentGrpcClient;
 import com.commerce.shared.exception.BusinessException;
+import com.commerce.shared.grpc.proto.PaymentApprovalResponse;
+import com.commerce.shared.grpc.proto.PaymentCancelResponse;
 import com.commerce.shared.vo.Money;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +28,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final OrderOutputPort orderOutputPort;
     private final OrderItemOutPort orderItemOutPort;
     private final ProductOutputPort productOutputPort;
-//    private final CustomerCardOutPort customerCardOutPort;
+    private final CustomerCardOutPort customerCardOutPort;
 
     @Override
     public void processApproval(PaymentRequest request) {

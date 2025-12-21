@@ -1,7 +1,9 @@
-package com.commerce.payments.application.port.in;
+package com.commerce.platform.core.application.in;
 
-import com.commerce.payments.domain.enums.PayProvider;
-import com.commerce.payments.infrastructure.persistence.CustomerCardRepository;
+import com.commerce.platform.core.application.port.in.CustomerUseCase;
+import com.commerce.platform.core.application.port.in.dto.RegistryCardCommand;
+import com.commerce.platform.infrastructure.persistence.CustomerCardRepository;
+import com.commerce.shared.enums.PayProvider;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.service.AesCryptoFacade;

@@ -1,7 +1,9 @@
-package com.commerce.payments.application.port.in;
+package com.commerce.platform.core.application.port.in;
 
-import com.commerce.payments.application.port.out.CustomerCardOutPort;
-import com.commerce.payments.domain.aggregate.CustomerCard;
+
+import com.commerce.platform.core.application.port.in.dto.RegistryCardCommand;
+import com.commerce.platform.core.application.port.out.CustomerCardOutPort;
+import com.commerce.platform.core.domain.aggreate.CustomerCard;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.service.AesCryptoFacade;
 import lombok.RequiredArgsConstructor;

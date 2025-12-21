@@ -1,6 +1,6 @@
 package com.commerce.platform.infrastructure.grpc;
 
-import com.commerce.platform.bootstrap.dto.payment.PaymentCancelRequest;
+import com.commerce.shared.grpc.proto.*;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
 import io.grpc.StatusRuntimeException;
@@ -34,7 +34,7 @@ public class PaymentGrpcClient {
         try {
             PaymentApprovalRequest request = PaymentApprovalRequest.newBuilder()
                     .setOrderId(orderId.id())
-                    .setApprovedAmount(approvedAmount)
+                    .setApprovedAmount(approvedAmount.value())
                     .setInstallment(installment)
                     .setPayMethod(payMethod)
                     .setPayProvider(payProvider)
@@ -61,7 +61,7 @@ public class PaymentGrpcClient {
         log.info("[gRPC Client] 전체 취소 요청: orderId={}", orderId);
         
         try {
-            PaymentCancelRequest request = PaymentCancelRequest.newBuilder()
+           PaymentCancelRequest request = PaymentCancelRequest.newBuilder()
                     .setOrderId(orderId.id())
                     .build();
             
