@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,7 +41,7 @@ class PaymentServiceImplTest {
 
     @Test
     @DisplayName("gRPC payments서버와 통신 성공")
-    void processApproval_RealGrpcCommunication() {
+    void processApproval() throws ExecutionException, InterruptedException {
         // given
         OrderId orderId = OrderId.of("O20251228150200000000");
         PaymentRequest request = new PaymentRequest(
@@ -54,7 +55,7 @@ class PaymentServiceImplTest {
         given(orderOutputPort.findById(orderId)).willReturn(Optional.of(mockOrder));
 
         // when
-        paymentService.processApproval(request);
+        String result = paymentService.processApproval(request).get();
 
         // then
         verify(orderOutputPort).findById(orderId);

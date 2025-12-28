@@ -10,13 +10,12 @@ import com.commerce.platform.core.domain.aggreate.Order;
 import com.commerce.platform.core.domain.aggreate.OrderItem;
 import com.commerce.platform.infrastructure.grpc.PaymentGrpcClient;
 import com.commerce.shared.exception.BusinessException;
-import com.commerce.shared.grpc.proto.PaymentApprovalResponse;
-import com.commerce.shared.grpc.proto.PaymentCancelResponse;
 import com.commerce.shared.vo.Money;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static com.commerce.shared.exception.BusinessError.INVALID_ORDER_ID;
 import static com.commerce.shared.exception.BusinessError.INVALID_ORDER_ITEM_ID;
@@ -31,45 +30,48 @@ public class PaymentServiceImpl implements PaymentService {
     private final CustomerCardOutPort customerCardOutPort;
 
     @Override
-    public void processApproval(PaymentRequest request) {
+    public CompletableFuture<String> processApproval(PaymentRequest request) {
         // 주문 결제처리
         Order orderEntity = orderOutputPort.findById(request.orderId())
                 .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
         orderEntity.validForPay();
 
         // payments 모듈에서 처리
-        PaymentApprovalResponse grpcResponse = paymentGrpcClient.approvePayment(
+        return paymentGrpcClient.approvePayment(
                 request.orderId(),
                 orderEntity.getResultAmt(),
                 request.installment(),
                 request.payMethod(),
                 request.payProvider()
-        );
+        ).thenApply(grpcResponse -> {
+            // 결제 성공이면
+            orderEntity.changeStatusAfterPay(grpcResponse.getSuccess());
+            return "성공";
+        });
 
-        // 결제 성공이면
-        orderEntity.changeStatusAfterPay(grpcResponse.getSuccess());
     }
 
     @Override
-    public void processCancel(PaymentCancelRequest request) {
+    public CompletableFuture<String> processCancel(PaymentCancelRequest request) {
         // 주문 검증
         Order orderEntity = orderOutputPort.findById(request.orderId())
                 .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
         orderEntity.validateForCancel();
 
         // payments 모듈에서 처리
-        PaymentCancelResponse paymentCancelResponse = paymentGrpcClient.cancelPayment(
+        return paymentGrpcClient.cancelPayment(
                 request.orderId(),
                 orderEntity.getResultAmt(),
                 request.cancelReason(),
                 "fullCanceled"
-                );
-
-        orderEntity.refund();
+        ).thenApply(grpcResponse -> {
+            orderEntity.refund();
+            return "성공";
+        });
     }
 
     @Override
-    public void processPartialCancel(PaymentCancelRequest request) {
+    public CompletableFuture<String> processPartialCancel(PaymentCancelRequest request) {
         // 주문 검증
         Order orderEntity = orderOutputPort.findById(request.orderId())
                 .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
@@ -92,11 +94,14 @@ public class PaymentServiceImpl implements PaymentService {
                 .getPrice().multiply(request.canceledQuantity());
 
         // payments 모듈에서 처리
-        PaymentCancelResponse paymentCancelResponse = paymentGrpcClient.cancelPayment(
+        return paymentGrpcClient.cancelPayment(
                 request.orderId(),
                 canceledAmt,
                 request.cancelReason(),
-                "partialCanceled");
+                "partialCanceled"
+        ).thenApply(grpcResponse -> {
+            return "성공";
+        });
 
     }
 }

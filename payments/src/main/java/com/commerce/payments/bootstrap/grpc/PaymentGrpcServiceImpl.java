@@ -34,6 +34,7 @@ public class PaymentGrpcServiceImpl extends PaymentServiceGrpc.PaymentServiceImp
             StreamObserver<PaymentApprovalResponse> responseObserver) {
 
         try {
+            log.info("payment approval request: {}", request);
             // gRPC → Domain
             PayOrderCommand command = PayOrderCommand.builder()
                     .orderId(OrderId.of(request.getOrderId()))
