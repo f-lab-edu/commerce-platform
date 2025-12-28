@@ -63,7 +63,7 @@ public class PaymentUseCaseImpl implements PaymentUseCase {
             paymentEntity.canceled(pgResponse);
 
         } else if(cancelCommand.getPaymentStatus().equals(PaymentStatus.PARTIAL_CANCELED)) {
-            Money remainAmt = validPartCancel(paymentEntity);
+            Money remainAmt = validPartCancel(paymentEntity, cancelCommand);
             PgPayCancelResponse pgResponse = processPgCancel(cancelCommand, paymentEntity);
             // 부분취소 저장
             afterPartCancel(cancelCommand, paymentEntity, remainAmt, pgResponse);
@@ -109,7 +109,7 @@ public class PaymentUseCaseImpl implements PaymentUseCase {
     /**
      * 부분취소 가능여부 확인
      */
-    private Money validPartCancel(Payment paymentEntity) {
+    private Money validPartCancel(Payment paymentEntity, PayCancelCommand cancelCommand) {
         // 부분취소 내역 조회
         Money remainAmt = null;
         boolean hasPartialCancel = paymentOutPort.existsPartCancelByPaymentId(paymentEntity.getPaymentId());
@@ -120,7 +120,8 @@ public class PaymentUseCaseImpl implements PaymentUseCase {
         }
 
         // 취소가능금액 검증
-        if(remainAmt.value() == 0) {
+        if(remainAmt.value() == 0
+                || cancelCommand.getCanceledAmount().isGreaterThan(remainAmt) ) {
             throw new BusinessException(PAYMENT_CANCEL_AMOUNT_EXCEEDED);
         }
 

@@ -21,6 +21,13 @@ spring:
       host: localhost
       port: 6379
 
+  docker:
+    compose:
+      enabled: true
+      file: docker-compose.yml
+      env-file: .env
+      lifecycle-management: start_only
+
 # gRPC Server 설정
 grpc:
   server:

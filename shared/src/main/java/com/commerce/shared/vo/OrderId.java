@@ -1,6 +1,8 @@
 package com.commerce.shared.vo;
 
 import com.commerce.shared.exception.BusinessException;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -16,9 +18,11 @@ public record OrderId (
         @Column(name = "id", length = 21)
         String id
 ) implements Serializable {
+
+    @JsonCreator
     public static OrderId of(String id) {
         if(StringUtils.isBlank(id)
-                || id.charAt(0) != 'P') throw new BusinessException(INVALID_ORDER_ID);
+                || id.charAt(0) != 'O') throw new BusinessException(INVALID_ORDER_ID);
         return new OrderId(id);
     }
 
@@ -30,6 +34,11 @@ public record OrderId (
     public OrderId {
         if(StringUtils.isBlank(id)
                 || id.charAt(0) != 'O') throw new BusinessException(INVALID_ORDER_ID);
+    }
+
+    @JsonValue
+    public String getId() {
+        return id;
     }
 }
 

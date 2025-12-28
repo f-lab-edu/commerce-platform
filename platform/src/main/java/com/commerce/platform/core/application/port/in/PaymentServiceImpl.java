@@ -47,7 +47,7 @@ public class PaymentServiceImpl implements PaymentService {
         );
 
         // 결제 성공이면
-        orderEntity.changeStatusAfterPay(grpcResponse.getSuccess()); //todo
+        orderEntity.changeStatusAfterPay(grpcResponse.getSuccess());
     }
 
     @Override
@@ -57,12 +57,15 @@ public class PaymentServiceImpl implements PaymentService {
                 .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
         orderEntity.validateForCancel();
 
-        // payments 모듈에서 처리 todo
-        PaymentCancelResponse paymentCancelResponse = paymentGrpcClient.cancelPayment(request.orderId());
+        // payments 모듈에서 처리
+        PaymentCancelResponse paymentCancelResponse = paymentGrpcClient.cancelPayment(
+                request.orderId(),
+                orderEntity.getResultAmt(),
+                request.cancelReason(),
+                "fullCanceled"
+                );
 
-        //todo 취소 성공하면
         orderEntity.refund();
-
     }
 
     @Override
@@ -83,12 +86,17 @@ public class PaymentServiceImpl implements PaymentService {
                 orderItemEntity.getQuantity().minus(request.canceledQuantity()));
         orderItemOutPort.saveAll(List.of(refreshOrderItem));
 
-        // todo 취소금액 계산, payments 호출
+        // 취소금액 계산
         Money canceledAmt = productOutputPort.findById(orderItemEntity.getProductId())
                 .get()
                 .getPrice().multiply(request.canceledQuantity());
 
-        PaymentCancelResponse paymentCancelResponse = paymentGrpcClient.cancelPayment(request.orderId());
+        // payments 모듈에서 처리
+        PaymentCancelResponse paymentCancelResponse = paymentGrpcClient.cancelPayment(
+                request.orderId(),
+                canceledAmt,
+                request.cancelReason(),
+                "partialCanceled");
 
     }
 }

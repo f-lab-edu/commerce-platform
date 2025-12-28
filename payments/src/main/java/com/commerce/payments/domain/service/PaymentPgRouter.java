@@ -82,6 +82,7 @@ public class PaymentPgRouter {
         }
         return strategy;
     }
+
     @Scheduled(cron = "0 * * * * *")
     private void refreshPgCache() {
         setPgFeeCache();

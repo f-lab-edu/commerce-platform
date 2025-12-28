@@ -28,9 +28,7 @@ public class PaymentGrpcClient {
             int installment,
             String payMethod,
             String payProvider) {
-        
-        log.info("[gRPC Client] 결제 승인 요청: orderId={}", orderId);
-        
+
         try {
             PaymentApprovalRequest request = PaymentApprovalRequest.newBuilder()
                     .setOrderId(orderId.id())
@@ -56,18 +54,21 @@ public class PaymentGrpcClient {
     /**
      * 전체/부분 취소
      */
-    public PaymentCancelResponse cancelPayment(OrderId orderId) {
-        
-        log.info("[gRPC Client] 전체 취소 요청: orderId={}", orderId);
-        
+    public PaymentCancelResponse cancelPayment(OrderId orderId,
+                                               Money canceledAmount,
+                                               String reason,
+                                               String paymentStatus) {
         try {
            PaymentCancelRequest request = PaymentCancelRequest.newBuilder()
-                    .setOrderId(orderId.id())
-                    .build();
+                   .setOrderId(orderId.id())
+                   .setCanceledAmount(canceledAmount.value())
+                   .setCancelReason(reason)
+                   .setPaymentStatus(paymentStatus)
+                   .build();
             
             PaymentCancelResponse response = paymentServiceStub.cancelPayment(request);
             
-            log.info("[gRPC Client] 전체 취소 응답: success={}, code={}", 
+            log.info("[gRPC Client] 취소 응답: success={}, code={}",
                     response.getSuccess(), response.getCode());
             
             return response;
@@ -82,9 +83,6 @@ public class PaymentGrpcClient {
      * 등록된 카드로 결제
      */
     public PaymentApprovalResponse approveWithCard(long cardId, String orderId) {
-        
-        log.info("[gRPC Client] 카드 결제 요청: cardId={}, orderId={}", cardId, orderId);
-        
         try {
             CardPaymentRequest request = CardPaymentRequest.newBuilder()
                     .setCardId(cardId)

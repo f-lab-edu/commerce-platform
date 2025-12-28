@@ -1,12 +1,11 @@
 package com.commerce.payments.application.port.in.dto;
 
 import com.commerce.payments.domain.enums.PayMethod;
-import com.commerce.shared.enums.PayProvider;
 import com.commerce.payments.domain.enums.PaymentStatus;
 import com.commerce.payments.domain.enums.PgProvider;
+import com.commerce.shared.enums.PayProvider;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
-import com.commerce.shared.vo.Quantity;
 import lombok.*;
 
 /**
@@ -18,8 +17,6 @@ import lombok.*;
 @Builder
 public class PayCancelCommand {
     private OrderId orderId;
-    private Long orderItemId;   // 취소할 orderItem
-    private Quantity canceledQuantity; // 해당 orderItem의 취소 개수
     private PaymentStatus paymentStatus;
     private String cancelReason;
 

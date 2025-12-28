@@ -4,10 +4,10 @@ import com.commerce.payments.application.port.in.PaymentUseCase;
 import com.commerce.payments.application.port.in.dto.PayCancelCommand;
 import com.commerce.payments.application.port.in.dto.PayOrderCommand;
 import com.commerce.payments.domain.enums.PayMethod;
-import com.commerce.shared.enums.PayProvider;
 import com.commerce.payments.domain.enums.PaymentStatus;
-import com.commerce.shared.grpc.proto.*;
+import com.commerce.shared.enums.PayProvider;
 import com.commerce.shared.exception.BusinessException;
+import com.commerce.shared.grpc.proto.*;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
 import io.grpc.stub.StreamObserver;
@@ -40,7 +40,7 @@ public class PaymentGrpcServiceImpl extends PaymentServiceGrpc.PaymentServiceImp
                     .approvedAmount(Money.of(request.getApprovedAmount()))
                     .installment(request.getInstallment())
                     .payMethod(PayMethod.valueOf(request.getPayMethod()))
-                    .payProvider(PayProvider.valueOf(request.getPayProvider()))
+                    .payProvider(PayProvider.getPayProviderByValue(request.getPayProvider()))
                     .build();
 
             paymentUseCase.doApproval(command);

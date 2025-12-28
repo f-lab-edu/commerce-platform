@@ -6,7 +6,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
 @SpringBootApplication(scanBasePackages = {
-        "com.commerce.shared"
+        "com.commerce.shared",
+        "com.commerce.platform"
 })
 public class PlatformApplication {
 
