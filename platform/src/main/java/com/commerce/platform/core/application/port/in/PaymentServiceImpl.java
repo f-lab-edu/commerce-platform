@@ -12,6 +12,7 @@ import com.commerce.platform.infrastructure.grpc.PaymentGrpcClient;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.vo.Money;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final ProductOutputPort productOutputPort;
     private final CustomerCardOutPort customerCardOutPort;
 
+    @Async
     @Override
     public CompletableFuture<String> processApproval(PaymentRequest request) {
         // 주문 결제처리
@@ -51,6 +53,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     }
 
+    @Async
     @Override
     public CompletableFuture<String> processCancel(PaymentCancelRequest request) {
         // 주문 검증
@@ -70,6 +73,7 @@ public class PaymentServiceImpl implements PaymentService {
         });
     }
 
+    @Async
     @Override
     public CompletableFuture<String> processPartialCancel(PaymentCancelRequest request) {
         // 주문 검증
