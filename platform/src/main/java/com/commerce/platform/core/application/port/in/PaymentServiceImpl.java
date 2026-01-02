@@ -46,9 +46,8 @@ public class PaymentServiceImpl implements PaymentService {
                 request.payMethod(),
                 request.payProvider()
         ).thenApply(grpcResponse -> {
-            // 결제 성공이면
             orderEntity.changeStatusAfterPay(grpcResponse.getSuccess());
-            return "성공";
+            return grpcResponse.getMessage();
         });
 
     }
