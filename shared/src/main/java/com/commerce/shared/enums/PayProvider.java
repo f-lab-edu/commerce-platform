@@ -1,4 +1,4 @@
-package com.commerce.payments.domain.enums;
+package com.commerce.shared.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -5,7 +5,7 @@ import com.commerce.payments.domain.vo.payments.PgPayCancelResponse;
 import com.commerce.payments.domain.vo.payments.PgPayResponse;
 import com.commerce.payments.application.port.in.dto.PayOrderCommand;
 import com.commerce.payments.domain.enums.PayMethod;
-import com.commerce.payments.domain.enums.PayProvider;
+import com.commerce.shared.enums.PayProvider;
 import com.commerce.payments.domain.enums.PaymentStatus;
 import com.commerce.payments.domain.enums.PgProvider;
 import com.commerce.shared.vo.Money;

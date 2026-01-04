@@ -1,7 +1,7 @@
 package com.commerce.payments.application.port.in.dto;
 
 import com.commerce.payments.domain.enums.PayMethod;
-import com.commerce.payments.domain.enums.PayProvider;
+import com.commerce.shared.enums.PayProvider;
 import com.commerce.payments.domain.enums.PaymentStatus;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;

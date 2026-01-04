@@ -1,101 +1,53 @@
-//package com.commerce.platform.bootstrap.customer;
-//
-//import com.commerce.platform.bootstrap.dto.payment.PaymentCancelRequest;
-//import com.commerce.platform.bootstrap.dto.payment.PaymentRequest;
-//import com.commerce.payments.application.port.in.PaymentUseCase;
-//import com.commerce.payments.application.port.in.command.PayCancelCommand;
-//import com.commerce.payments.application.port.in.command.PayOrderCommand;
-//import com.commerce.payments.application.port.in.command.PayResult;
-//import com.commerce.payments.domain.enums.PaymentStatus;
-//import com.commerce.shared.exception.BusinessException;
-//import com.commerce.shared.vo.OrderId;
-//import jakarta.validation.Valid;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.*;
-//
-//import java.util.Map;
-//
-//@RequiredArgsConstructor
-//@RequestMapping("/payments")
-//@RestController
-//public class PaymentController {
-//    private final PaymentUseCase paymentUseCase;
-//
-//    @PostMapping("/approval")
-//    public ResponseEntity<PayResult> createPayment(@Valid @RequestBody PaymentRequest paymentRequest) {
-//        PayResult result = null;
-//
-//        try {
-//            PayOrderCommand command = new PayOrderCommand(
-//                    OrderId.of(paymentRequest.orderId()),
-//                    null,
-//                    paymentRequest.installment(),
-//                    paymentRequest.payMethod(),
-//                    paymentRequest.payProvider(),
-//                    null
-//            );
-//
-//            paymentUseCase.doApproval(command);
-//        } catch (BusinessException e) {
-//            result = new PayResult.Failed(e.getCode(), e.getMessage());
-//        } catch (Exception e) {
-//            result = new PayResult.Failed("9999", "승인 처리 중 오류가 발생했습니다");
-//        }
-//
-//        return ResponseEntity.ok(result);
-//    }
-//
-//    @PatchMapping("/cancel")
-//    public ResponseEntity<PayResult> fullCancel(@Valid @RequestBody PaymentCancelRequest cancelRequest) {
-//        PayResult result = null;
-//
-//        try {
-//            PayCancelCommand cancelCommand = PayCancelCommand.builder()
-//                    .orderId(cancelRequest.orderId())
-//                    .paymentStatus(PaymentStatus.FULL_CANCELED)
-//                    .build();
-//
-//            paymentUseCase.doCancel(cancelCommand);
-//        } catch (BusinessException e) {
-//            result = new PayResult.Failed(e.getCode(), e.getMessage());
-//        } catch (Exception e) {
-//            result = new PayResult.Failed("9999", "전체취소 처리 중 오류가 발생했습니다");
-//        }
-//
-//        return ResponseEntity.ok(result);
-//    }
-//
-//    @PatchMapping("/partial-cancel")
-//    public ResponseEntity<PayResult> partialCancel(@Valid @RequestBody PaymentCancelRequest cancelRequest) {
-//        PayResult result = null;
-//
-//        try {
-//            PayCancelCommand cancelCommand = PayCancelCommand.builder()
-//                    .orderId(cancelRequest.orderId())
-//                    .orderItemId(cancelRequest.orderItemId())
-//                    .canceledQuantity(cancelRequest.canceledQuantity())
-//                    .paymentStatus(PaymentStatus.FULL_CANCELED)
-//                    .build();
-//
-//            paymentUseCase.doPartCancel(cancelCommand);
-//        } catch (BusinessException e) {
-//            result = new PayResult.Failed(e.getCode(), e.getMessage());
-//        } catch (Exception e) {
-//            result = new PayResult.Failed("9999", "부분취소 처리 중 오류가 발생했습니다");
-//        }
-//
-//        return ResponseEntity.ok(result);
-//    }
-//
-//    @PostMapping("/registry-card/{cardId}")
-//    public ResponseEntity<String> createPaymentWithRegistryCard(
-//            @PathVariable Long cardId,
-//            @RequestBody Map<String, String> body) {
-//
-//        // todo
-//        paymentUseCase.doApprovalWithCardId(cardId);
-//
-//        return ResponseEntity.ok("성공");
-//    }
-//}
+package com.commerce.platform.bootstrap.customer;
+
+import com.commerce.platform.bootstrap.dto.payment.PaymentCancelRequest;
+import com.commerce.platform.bootstrap.dto.payment.PaymentRequest;
+import com.commerce.platform.core.application.port.in.PaymentService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.CompletableFuture;
+
+@RequiredArgsConstructor
+@RequestMapping("/payments")
+@RestController
+public class PaymentController {
+    private final PaymentService paymentService;
+
+    @PostMapping("/approval")
+    public CompletableFuture<ResponseEntity<String>> createPayment(@Valid @RequestBody PaymentRequest paymentRequest) {
+        return paymentService.processApproval(paymentRequest)
+                .thenApply(ResponseEntity::ok)
+                .exceptionally(throwable -> {
+                    return ResponseEntity.ok("실패");
+                });
+    }
+
+    @PatchMapping("/cancel")
+    public CompletableFuture<ResponseEntity<String>> fullCancel(@Valid @RequestBody PaymentCancelRequest cancelRequest) {
+        return paymentService.processCancel(cancelRequest)
+                .thenApply(ResponseEntity::ok)
+                .exceptionally(ex -> {
+                    return ResponseEntity.ok("실패");
+                });
+    }
+
+    @PatchMapping("/partial-cancel")
+    public CompletableFuture<ResponseEntity<String>> partialCancel(@Valid @RequestBody PaymentCancelRequest cancelRequest) {
+        return paymentService.processPartialCancel(cancelRequest)
+                .thenApply(ResponseEntity::ok)
+                .exceptionally(ex -> {
+                    return ResponseEntity.ok("실패");
+                });
+    }
+
+ /*   @PostMapping("/registry-card/{cardId}")
+    public CompletableFuture<ResponseEntity<String>> createPaymentWithRegistryCard(
+            @PathVariable Long cardId,
+            @RequestBody Map<String, String> body) {
+                return paymentService.doApprovalWithCardId(cardId);
+
+    }*/
+}

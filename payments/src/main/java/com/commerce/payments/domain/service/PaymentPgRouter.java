@@ -2,7 +2,7 @@ package com.commerce.payments.domain.service;
 
 import com.commerce.payments.application.port.out.PgStrategy;
 import com.commerce.payments.domain.enums.PayMethod;
-import com.commerce.payments.domain.enums.PayProvider;
+import com.commerce.shared.enums.PayProvider;
 import com.commerce.payments.domain.enums.PgProvider;
 import com.commerce.payments.infrastructure.adaptor.PgCacheService;
 import com.commerce.payments.infrastructure.persistence.PgFeeInfo;
@@ -82,6 +82,7 @@ public class PaymentPgRouter {
         }
         return strategy;
     }
+
     @Scheduled(cron = "0 * * * * *")
     private void refreshPgCache() {
         setPgFeeCache();

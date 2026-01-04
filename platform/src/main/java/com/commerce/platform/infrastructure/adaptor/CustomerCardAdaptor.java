@@ -1,8 +1,9 @@
-package com.commerce.payments.infrastructure.adaptor;
+package com.commerce.platform.infrastructure.adaptor;
 
-import com.commerce.payments.application.port.out.CustomerCardOutPort;
-import com.commerce.payments.domain.aggregate.CustomerCard;
-import com.commerce.payments.infrastructure.persistence.CustomerCardRepository;
+
+import com.commerce.platform.core.application.port.out.CustomerCardOutPort;
+import com.commerce.platform.core.domain.aggreate.CustomerCard;
+import com.commerce.platform.infrastructure.persistence.CustomerCardRepository;
 import com.commerce.shared.vo.CustomerId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

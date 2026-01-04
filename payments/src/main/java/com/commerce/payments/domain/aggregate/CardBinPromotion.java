@@ -1,6 +1,6 @@
 package com.commerce.payments.domain.aggregate;
 
-import com.commerce.payments.domain.enums.PayProvider;
+import com.commerce.shared.enums.PayProvider;
 import com.commerce.payments.domain.vo.promotion.BasePromotionData;
 import com.commerce.payments.infrastructure.persistence.converter.PromotionDataConverter;
 import com.commerce.shared.vo.ValidPeriod;

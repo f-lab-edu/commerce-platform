@@ -28,9 +28,15 @@ spring:
       env-file: .env
       lifecycle-management: start_only
 
+server:
+  port: 8080
+
+aes256:
+  key: 61qDonoZcEtIEvUZVPkIKIYovHH82rXtK7T1g/rcc1k=
+
 # gRPC Client 설정
 grpc:
   client:
-    payment-service:
+    payments:
       address: 'static://localhost:9090'
       negotiationType: plaintext

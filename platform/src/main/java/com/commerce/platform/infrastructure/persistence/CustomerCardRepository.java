@@ -1,6 +1,6 @@
-package com.commerce.payments.infrastructure.persistence;
+package com.commerce.platform.infrastructure.persistence;
 
-import com.commerce.payments.domain.aggregate.CustomerCard;
+import com.commerce.platform.core.domain.aggreate.CustomerCard;
 import com.commerce.shared.vo.CustomerId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -142,11 +142,11 @@ public class Order {
         }
     }
 
-//    public void changeStatusAfterPay(PgPayResponse pgPayResponse) {
-//        if(!pgPayResponse.isSuccess()) return;
-//
-//        updateOrderStatus(PAID);
-//    }
+    public void changeStatusAfterPay(boolean successFLg) {
+        if(!successFLg) return;
+
+        updateOrderStatus(PAID);
+    }
 
     /**
      * 주문상태, 수정시간 변경
