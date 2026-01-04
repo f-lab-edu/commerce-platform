@@ -7,12 +7,15 @@ import com.commerce.platform.core.domain.enums.PgProvider;
 import com.commerce.platform.infrastructure.adaptor.PgCacheService;
 import com.commerce.platform.infrastructure.persistence.PgFeeInfo;
 import com.commerce.platform.infrastructure.persistence.PgFeeInfoRepository;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +36,7 @@ public class PaymentPgRouter {
     private final PgCacheService pgCacheService;
     private final PgFeeInfoRepository feeInfoRepository;
     //결제방식 + 카드사/통신사 별 수수료기준 정렬됨
-    private Map<PayMethod, Map<PayProvider, TreeSet<PgFeeInfo>>> pgFeeCache = null;
+    private Cache<PayMethod, Map<PayProvider, TreeSet<PgFeeInfo>>> pgFeeCache;
 
     public PaymentPgRouter(List<PgStrategy> list, PgCacheService pgCacheService, PgFeeInfoRepository feeInfoRepository) {
         this.pgStrategies = list.stream()
@@ -50,7 +53,11 @@ public class PaymentPgRouter {
 
     @EventListener(ApplicationStartedEvent.class)
     public void initPgCache() {
-        setPgFeeCache();
+        this.pgFeeCache = Caffeine.<PayMethod, Map<PayProvider, TreeSet<PgFeeInfo>>>newBuilder()
+                .expireAfterWrite(Duration.ofDays(1L))
+                .build();
+
+        loadAllPgFee();
     }
 
     /**
@@ -58,7 +65,7 @@ public class PaymentPgRouter {
      *  redis 캐싱된 health check
      */
     public PgStrategy routePg(PayMethod payMethod, PayProvider payProvider) {
-        PgProvider selectedPg = pgFeeCache.get(payMethod).get(payProvider)
+        PgProvider selectedPg = pgFeeCache.getIfPresent(payMethod).get(payProvider)
                 .stream()
                 .filter(pgFeeInfo -> pgCacheService.isHealthy(pgFeeInfo.getPgProvider()))
                 .toList()
@@ -84,11 +91,11 @@ public class PaymentPgRouter {
     }
     @Scheduled(cron = "0 * * * * *")
     private void refreshPgCache() {
-        setPgFeeCache();
+        loadAllPgFee();
     }
 
-    private void setPgFeeCache() {
-        pgFeeCache = feeInfoRepository.findAllActiveAndValid()
+    public void loadAllPgFee() {
+        Map<PayMethod, Map<PayProvider, TreeSet<PgFeeInfo>>> data = feeInfoRepository.findAllActiveAndValid()
                 .stream()
                 .collect(Collectors.groupingBy(PgFeeInfo::getPayMethod,
                         Collectors.groupingBy(PgFeeInfo::getPayProvider,
@@ -96,5 +103,7 @@ public class PaymentPgRouter {
                                         new TreeSet<>(Comparator.comparing(PgFeeInfo::getFeeRate))
                                 )
                         )));
+
+        pgFeeCache.putAll(data);
     }
 }
