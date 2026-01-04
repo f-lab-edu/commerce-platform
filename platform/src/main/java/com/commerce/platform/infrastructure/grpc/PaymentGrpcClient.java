@@ -45,6 +45,7 @@ public class PaymentGrpcClient {
 
             ListenableFuture<PaymentApprovalResponse> listenableFuture = paymentServiceStub.approvePayment(request);
             // listenableFuture -> future
+            // todo 바로 바꿀 수 있는 방법을 찾아보고 해보자.
             CompletableFuture<PaymentApprovalResponse> future = new CompletableFuture<>();
             listenableFuture.addListener(() -> {
                 try {
