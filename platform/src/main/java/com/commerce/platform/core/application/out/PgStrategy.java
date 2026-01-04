@@ -2,27 +2,39 @@ package com.commerce.platform.core.application.out;
 
 import com.commerce.platform.core.application.in.dto.PayCancelCommand;
 import com.commerce.platform.core.application.in.dto.PayOrderCommand;
+import com.commerce.platform.core.application.out.dto.PgPayCancelResponse;
 import com.commerce.platform.core.application.out.dto.PgPayResponse;
+import com.commerce.platform.core.domain.enums.PayMethod;
 import com.commerce.platform.core.domain.enums.PgProvider;
 
+/**
+ * PG사별 결제를 위한 메소드 정의
+ */
 public abstract class PgStrategy {
 
     /**
-     * pg사별 요청에 따라 [Card | Easy | Phone]PayService 구현체 실행한다.
-     * @param request todo dto
-     * @return todo 결재응답dto
+     * 승인
      */
-    public abstract String process(String request);
+    public abstract PgPayResponse processApproval(PayOrderCommand command);
 
+    /**
+     * 취소
+     */
+    public abstract PgPayCancelResponse processCancel(PayCancelCommand command);
+
+    /**
+     * PG사명
+     */
     public abstract PgProvider getPgProvider();
 
-    // todo tmp
-    public PgPayResponse processApproval(PayOrderCommand payOrdercommand) {
-        return null;
-    }
+    /**
+     * 결제유형
+     */
+    public abstract PayMethod getPgPayMethod();
 
-    // todo tmp
-    public PgPayResponse processCancel(PayCancelCommand cancelCommand) {
-        return null;
-    }
+    /**
+     * 결제창을 위한 초기화
+     */
+    public abstract Object initPayment();
+
 }

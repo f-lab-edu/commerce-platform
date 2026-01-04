@@ -17,4 +17,5 @@ public class PayOrderCommand {
         private PayMethod payMethod;
         private PayProvider payProvider;
         private final PaymentStatus paymentStatus = PaymentStatus.APPROVED;
+        private String jsonSubData;  // pg사 요구 데이터
 }

@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 @Service
 public class PaymentPgRouter {
     
-    private final Map<PgProvider, PgStrategy> pgStrategies;
+    private final Map<PgProvider, Map<PayMethod, PgStrategy>> pgStrategies;
     private final PgCacheService pgCacheService;
     private final PgFeeInfoRepository feeInfoRepository;
     //결제방식 + 카드사/통신사 별 수수료기준 정렬됨
@@ -36,7 +37,13 @@ public class PaymentPgRouter {
 
     public PaymentPgRouter(List<PgStrategy> list, PgCacheService pgCacheService, PgFeeInfoRepository feeInfoRepository) {
         this.pgStrategies = list.stream()
-                .collect(Collectors.toMap(PgStrategy::getPgProvider, pg -> pg));
+                .collect(Collectors.groupingBy(
+                        PgStrategy::getPgProvider,
+                        Collectors.toMap(
+                                PgStrategy::getPgPayMethod,
+                                Function.identity()
+                        )
+                ));
         this.pgCacheService = pgCacheService;
         this.feeInfoRepository = feeInfoRepository;
     }
@@ -62,20 +69,19 @@ public class PaymentPgRouter {
             throw new IllegalStateException("현재 사용 가능한 PG사가 없습니다");
         }
         
-        return pgStrategies.get(selectedPg);
+        return pgStrategies.get(selectedPg).get(payMethod);
     }
 
     /**
-     * PG Provider => Strategy bean 추출
+     * PG Provider => Strategy 조회
      */
-    public PgStrategy getPgStrategyByProvider(PgProvider pgProvider) {
-        PgStrategy strategy = pgStrategies.get(pgProvider);
+    public PgStrategy getPgStrategyByProvider(PgProvider pgProvider, PayMethod payMethod) {
+        PgStrategy strategy = pgStrategies.get(pgProvider).get(payMethod);
         if (strategy == null) {
             throw new IllegalArgumentException("존재하지 않는 PG: " + pgProvider);
         }
         return strategy;
     }
-
     @Scheduled(cron = "0 * * * * *")
     private void refreshPgCache() {
         setPgFeeCache();
