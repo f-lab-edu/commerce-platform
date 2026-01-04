@@ -1,7 +1,7 @@
 package com.commerce.platform.core.domain.service;
 
-import com.commerce.platform.core.application.out.LockOutPort;
-import com.commerce.platform.shared.exception.LockUnavailableException;
+import com.commerce.platform.core.application.port.out.LockOutPort;
+import com.commerce.platform.exception.LockUnavailableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;

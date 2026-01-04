@@ -1,6 +1,6 @@
 package com.commerce.platform.infrastructure.persistence;
 
-import com.commerce.platform.core.application.out.LockOutPort;
+import com.commerce.platform.core.application.port.out.LockOutPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;

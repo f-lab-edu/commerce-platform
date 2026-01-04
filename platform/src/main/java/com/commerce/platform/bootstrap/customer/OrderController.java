@@ -2,12 +2,12 @@ package com.commerce.platform.bootstrap.customer;
 
 import com.commerce.platform.bootstrap.dto.order.OrderRefundRequest;
 import com.commerce.platform.bootstrap.dto.order.OrderRequest;
-import com.commerce.platform.core.application.in.OrderUseCase;
-import com.commerce.platform.core.application.in.dto.CreateOrderCommand;
-import com.commerce.platform.core.application.in.dto.OrderDetailResponse;
-import com.commerce.platform.core.application.in.dto.OrderResponse;
-import com.commerce.platform.core.domain.vo.CustomerId;
-import com.commerce.platform.core.domain.vo.OrderId;
+import com.commerce.platform.core.application.port.in.OrderUseCase;
+import com.commerce.platform.core.application.port.in.dto.CreateOrderCommand;
+import com.commerce.platform.core.application.port.in.dto.OrderDetailResponse;
+import com.commerce.platform.core.application.port.in.dto.OrderResponse;
+import com.commerce.shared.vo.CustomerId;
+import com.commerce.shared.vo.OrderId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -2,10 +2,10 @@ package com.commerce.platform.bootstrap.admin;
 
 import com.commerce.platform.bootstrap.dto.product.CreateProductRequest;
 import com.commerce.platform.bootstrap.dto.product.UpdateStockRequest;
-import com.commerce.platform.core.application.in.ProductUseCase;
-import com.commerce.platform.core.application.in.dto.UpdateStockCommand;
+import com.commerce.platform.core.application.port.in.ProductUseCase;
+import com.commerce.platform.core.application.port.in.dto.UpdateStockCommand;
 import com.commerce.platform.core.domain.vo.ProductId;
-import com.commerce.platform.core.domain.vo.Quantity;
+import com.commerce.shared.vo.Quantity;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

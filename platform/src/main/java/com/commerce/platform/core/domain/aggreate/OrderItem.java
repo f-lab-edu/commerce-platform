@@ -1,16 +1,16 @@
 package com.commerce.platform.core.domain.aggreate;
 
-import com.commerce.platform.core.domain.vo.OrderId;
 import com.commerce.platform.core.domain.vo.ProductId;
-import com.commerce.platform.core.domain.vo.Quantity;
-import com.commerce.platform.shared.exception.BusinessException;
+import com.commerce.shared.vo.Quantity;
+import com.commerce.shared.exception.BusinessException;
+import com.commerce.shared.vo.OrderId;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import static com.commerce.platform.shared.exception.BusinessError.INVALID_CANCELED_QUANTITY;
+import static com.commerce.shared.exception.BusinessError.INVALID_CANCELED_QUANTITY;
 
 @Getter
 @Entity

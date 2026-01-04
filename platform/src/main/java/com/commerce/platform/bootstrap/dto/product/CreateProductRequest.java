@@ -2,9 +2,9 @@ package com.commerce.platform.bootstrap.dto.product;
 
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.enums.ProductStatus;
-import com.commerce.platform.core.domain.vo.Money;
 import com.commerce.platform.core.domain.vo.ProductId;
-import com.commerce.platform.core.domain.vo.Quantity;
+import com.commerce.shared.vo.Money;
+import com.commerce.shared.vo.Quantity;
 import jakarta.validation.constraints.*;
 
 public record CreateProductRequest(
@@ -33,7 +33,7 @@ public record CreateProductRequest(
                         .productId(ProductId.create())
                         .productName(request.name())
                         .description(request.description())
-                        .price(Money.create(request.price()))
+                        .price(Money.of(request.price()))
                         .stockQuantity(quantity)
                         .status(ProductStatus.fromStockQuantity(quantity))
                         .build();

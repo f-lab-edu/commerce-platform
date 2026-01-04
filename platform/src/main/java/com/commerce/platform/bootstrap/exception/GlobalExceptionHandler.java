@@ -1,7 +1,7 @@
 package com.commerce.platform.bootstrap.exception;
 
-import com.commerce.platform.shared.exception.BusinessException;
-import com.commerce.platform.shared.exception.LockUnavailableException;
+import com.commerce.shared.exception.BusinessException;
+import com.commerce.platform.exception.LockUnavailableException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.commerce.platform.shared.exception.BusinessError.INVALID_REQUEST_VALUE;
-import static com.commerce.platform.shared.exception.BusinessError.UNKNOWN_ERROR;
+import static com.commerce.shared.exception.BusinessError.INVALID_REQUEST_VALUE;
+import static com.commerce.shared.exception.BusinessError.UNKNOWN_ERROR;
 
 @Log4j2
 @RestControllerAdvice

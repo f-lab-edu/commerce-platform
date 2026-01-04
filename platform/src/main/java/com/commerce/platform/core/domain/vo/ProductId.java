@@ -1,6 +1,6 @@
 package com.commerce.platform.core.domain.vo;
 
-import com.commerce.platform.shared.exception.BusinessException;
+import com.commerce.shared.exception.BusinessException;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static com.commerce.platform.shared.exception.BusinessError.INVALID_PRODUCT_ID;
+import static com.commerce.shared.exception.BusinessError.INVALID_PRODUCT_ID;
 
 @Embeddable
 public record ProductId (

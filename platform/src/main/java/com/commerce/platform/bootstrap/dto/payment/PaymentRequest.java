@@ -1,7 +1,5 @@
 package com.commerce.platform.bootstrap.dto.payment;
 
-import com.commerce.platform.core.domain.enums.PayMethod;
-import com.commerce.platform.core.domain.enums.PayProvider;
 import jakarta.validation.constraints.NotBlank;
 
 /**
@@ -12,11 +10,11 @@ public record PaymentRequest(
         String orderId,
 
         @NotBlank
-        PayMethod payMethod,
+        String payMethod,
 
         @NotBlank
-        PayProvider payProvider,
+        String payProvider,
 
         @NotBlank
-        String installment
+        int installment
 ) { }

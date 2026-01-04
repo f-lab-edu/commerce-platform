@@ -1,8 +1,5 @@
 package com.commerce.platform.bootstrap.dto.customer;
 
-import com.commerce.platform.core.application.in.dto.RegistryCardCommand;
-import com.commerce.platform.core.domain.enums.PayProvider;
-import com.commerce.platform.core.domain.vo.CustomerId;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -38,16 +35,16 @@ public record RegistryCardRequest(
         @Size(min = 1, max = 20)
         String cardNickName
 ) {
-        public RegistryCardCommand to() {
-                return new RegistryCardCommand(
-                        CustomerId.of(this.customerId),
-                        PayProvider.getPayProviderByValue(this.payProvider),
-                        this.cardNumber,
-                        this.password,
-                        this.expiryMonth,
-                        this.expiryYear,
-                        this.birthDate,
-                        this.cardNickName
-                );
-        }
+//        public RegistryCardCommand to() {
+//                return new RegistryCardCommand(
+//                        CustomerId.of(this.customerId),
+//                        PayProvider.getPayProviderByValue(this.payProvider),
+//                        this.cardNumber,
+//                        this.password,
+//                        this.expiryMonth,
+//                        this.expiryYear,
+//                        this.birthDate,
+//                        this.cardNickName
+//                );
+//        }
 }

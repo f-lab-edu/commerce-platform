@@ -1,8 +1,8 @@
 package com.commerce.platform.bootstrap.customer;
 
 import com.commerce.platform.bootstrap.dto.product.ProductInfo;
-import com.commerce.platform.core.application.in.ProductUseCase;
-import com.commerce.platform.core.application.in.dto.ProductDetail;
+import com.commerce.platform.core.application.port.in.ProductUseCase;
+import com.commerce.platform.core.application.port.in.dto.ProductDetail;
 import com.commerce.platform.core.domain.vo.ProductId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

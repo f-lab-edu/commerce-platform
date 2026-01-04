@@ -1,13 +1,12 @@
 package com.commerce.platform.core.domain.service;
 
-import com.commerce.platform.core.application.in.ProductUseCaseImpl;
-import com.commerce.platform.core.application.in.dto.ProductDetail;
-import com.commerce.platform.core.application.out.ProductOutputPort;
+import com.commerce.platform.core.application.port.in.ProductUseCaseImpl;
+import com.commerce.platform.core.application.port.in.dto.ProductDetail;
+import com.commerce.platform.core.application.port.out.ProductOutputPort;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.enums.ProductStatus;
-import com.commerce.platform.core.domain.vo.Money;
 import com.commerce.platform.core.domain.vo.ProductId;
-import com.commerce.platform.core.domain.vo.Quantity;
+import com.commerce.shared.vo.Quantity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

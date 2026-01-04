@@ -1,8 +1,8 @@
 package com.commerce.platform.infrastructure.persistence;
 
 import com.commerce.platform.core.domain.aggreate.OrderItem;
-import com.commerce.platform.core.domain.vo.OrderId;
 import com.commerce.platform.core.domain.vo.ProductId;
+import com.commerce.shared.vo.OrderId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

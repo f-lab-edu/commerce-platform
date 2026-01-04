@@ -1,8 +1,7 @@
 package com.commerce.platform.bootstrap.dto.payment;
 
-import com.commerce.platform.core.domain.enums.PaymentStatus;
-import com.commerce.platform.core.domain.vo.OrderId;
-import com.commerce.platform.core.domain.vo.Quantity;
+import com.commerce.shared.vo.OrderId;
+import com.commerce.shared.vo.Quantity;
 import jakarta.validation.constraints.NotBlank;
 
 /**
@@ -17,5 +16,5 @@ public record PaymentCancelRequest(
         Quantity canceledQuantity, // 해당 orderItem의 취소 개수
 
         @NotBlank
-        PaymentStatus paymentStatus
+        String paymentStatus
 ) {}

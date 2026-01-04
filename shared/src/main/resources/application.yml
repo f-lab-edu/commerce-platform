@@ -1,0 +1,5 @@
+server:
+  port: 8082
+
+aes256:
+  key: 61qDonoZcEtIEvUZVPkIKIYovHH82rXtK7T1g/rcc1k=
