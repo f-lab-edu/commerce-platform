@@ -29,6 +29,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final ProductOutputPort productOutputPort;
     private final CustomerCardOutPort customerCardOutPort;
 
+//    @Async tomcat thread 아닌 경우 advice에서 잡히지 않는다.
     @Override
     public CompletableFuture<String> processApproval(PaymentRequest request) {
         // 주문 결제처리
