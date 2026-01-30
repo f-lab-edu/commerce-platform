@@ -12,7 +12,6 @@ import java.util.Optional;
 
 /**
  * JPA를 사용하여 재고 저장소 포트를 구현하는 어댑터
- * 핵사고날 아키텍처: Infrastructure가 Application의 포트를 구현
  */
 @Component
 @RequiredArgsConstructor
