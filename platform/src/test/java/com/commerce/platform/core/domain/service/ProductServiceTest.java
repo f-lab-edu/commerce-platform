@@ -5,7 +5,7 @@ import com.commerce.platform.core.application.port.in.dto.ProductDetail;
 import com.commerce.platform.core.application.port.out.ProductOutputPort;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.enums.ProductStatus;
-import com.commerce.platform.core.domain.vo.ProductId;
+import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.Quantity;
 import org.junit.jupiter.api.DisplayName;

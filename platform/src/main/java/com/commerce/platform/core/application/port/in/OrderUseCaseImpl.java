@@ -8,11 +8,13 @@ import com.commerce.platform.core.application.port.in.dto.OrderDetailResponse.Or
 import com.commerce.platform.core.application.port.in.dto.OrderResponse;
 import com.commerce.platform.core.application.port.out.*;
 import com.commerce.platform.core.domain.aggreate.*;
-import com.commerce.platform.core.domain.vo.*;
 import com.commerce.shared.exception.BusinessException;
+import com.commerce.shared.vo.CouponId;
+import com.commerce.shared.vo.CouponIssueId;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
+import com.commerce.shared.vo.ProductId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,6 +1,6 @@
 package com.commerce.payments.infrastructure.persistence;
 
-import com.commerce.payments.domain.enums.PayMethod;
+import com.commerce.payments.core.domain.enums.PayMethod;
 import com.commerce.shared.enums.PayProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

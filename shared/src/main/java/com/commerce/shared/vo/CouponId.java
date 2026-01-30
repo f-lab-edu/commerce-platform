@@ -1,0 +1,33 @@
+package com.commerce.shared.vo;
+
+import com.commerce.shared.exception.BusinessException;
+import io.micrometer.common.util.StringUtils;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import static com.commerce.shared.exception.BusinessError.INVALID_COUPON;
+
+@Embeddable
+public record CouponId(
+        @Column(name = "id", length = 21)
+        String id
+) implements Serializable  {
+    public static CouponId create() {
+        return new CouponId("C" + LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS")));
+    }
+
+    public static CouponId of(String couponId) {
+        if(couponId == null) return null;
+        return new CouponId(couponId);
+    }
+
+    public CouponId {
+        if(!StringUtils.isBlank(id)
+                && id.charAt(0) != 'C') throw new BusinessException(INVALID_COUPON);
+    }
+}

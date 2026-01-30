@@ -1,8 +1,8 @@
 package com.commerce.payments.infrastructure.pg.toss;
 
-import com.commerce.payments.domain.vo.payments.PgPayResponse;
-import com.commerce.payments.application.port.in.dto.PayCancelCommand;
-import com.commerce.payments.domain.enums.PayMethod;
+import com.commerce.payments.core.domain.vo.payments.PgPayResponse;
+import com.commerce.payments.core.application.port.in.dto.PayCancelCommand;
+import com.commerce.payments.core.domain.enums.PayMethod;
 import com.commerce.payments.infrastructure.pg.toss.dto.TossTransResponse;
 import com.commerce.shared.vo.Money;
 import org.springframework.stereotype.Service;

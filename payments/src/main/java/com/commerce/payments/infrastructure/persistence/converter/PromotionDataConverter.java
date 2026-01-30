@@ -1,6 +1,6 @@
 package com.commerce.payments.infrastructure.persistence.converter;
 
-import com.commerce.payments.domain.vo.promotion.BasePromotionData;
+import com.commerce.payments.core.domain.vo.promotion.BasePromotionData;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

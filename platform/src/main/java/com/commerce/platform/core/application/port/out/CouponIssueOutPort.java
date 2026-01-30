@@ -1,7 +1,7 @@
 package com.commerce.platform.core.application.port.out;
 
 import com.commerce.platform.core.domain.aggreate.CouponIssues;
-import com.commerce.platform.core.domain.vo.CouponIssueId;
+import com.commerce.shared.vo.CouponIssueId;
 import com.commerce.shared.vo.CustomerId;
 
 import java.util.List;

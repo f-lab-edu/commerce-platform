@@ -1,10 +1,10 @@
 package com.commerce.payments.bootstrap.grpc;
 
-import com.commerce.payments.application.port.in.PaymentUseCase;
-import com.commerce.payments.application.port.in.dto.PayCancelCommand;
-import com.commerce.payments.application.port.in.dto.PayOrderCommand;
-import com.commerce.payments.domain.enums.PayMethod;
-import com.commerce.payments.domain.enums.PaymentStatus;
+import com.commerce.payments.core.application.port.in.PaymentUseCase;
+import com.commerce.payments.core.application.port.in.dto.PayCancelCommand;
+import com.commerce.payments.core.application.port.in.dto.PayOrderCommand;
+import com.commerce.payments.core.domain.enums.PayMethod;
+import com.commerce.payments.core.domain.enums.PaymentStatus;
 import com.commerce.shared.enums.PayProvider;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.grpc.proto.*;

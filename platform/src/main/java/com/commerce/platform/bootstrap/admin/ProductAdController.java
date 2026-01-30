@@ -4,7 +4,7 @@ import com.commerce.platform.bootstrap.dto.product.CreateProductRequest;
 import com.commerce.platform.bootstrap.dto.product.UpdateStockRequest;
 import com.commerce.platform.core.application.port.in.ProductUseCase;
 import com.commerce.platform.core.application.port.in.dto.UpdateStockCommand;
-import com.commerce.platform.core.domain.vo.ProductId;
+import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Quantity;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

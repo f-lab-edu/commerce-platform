@@ -7,7 +7,7 @@ import com.commerce.platform.bootstrap.exception.GlobalExceptionHandler;
 import com.commerce.platform.core.application.port.in.ProductUseCase;
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.enums.StockOperation;
-import com.commerce.platform.core.domain.vo.ProductId;
+import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Quantity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;

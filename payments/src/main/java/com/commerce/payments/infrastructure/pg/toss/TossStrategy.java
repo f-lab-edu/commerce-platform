@@ -1,12 +1,12 @@
 package com.commerce.payments.infrastructure.pg.toss;
 
-import com.commerce.payments.application.port.in.dto.PayCancelCommand;
-import com.commerce.payments.application.port.in.dto.PayOrderCommand;
-import com.commerce.payments.application.port.out.PgStrategy;
-import com.commerce.payments.domain.vo.payments.PgPayCancelResponse;
-import com.commerce.payments.domain.vo.payments.PgPayResponse;
-import com.commerce.payments.domain.enums.PayMethod;
-import com.commerce.payments.domain.enums.PgProvider;
+import com.commerce.payments.core.application.port.in.dto.PayCancelCommand;
+import com.commerce.payments.core.application.port.in.dto.PayOrderCommand;
+import com.commerce.payments.core.application.port.out.PgStrategy;
+import com.commerce.payments.core.domain.vo.payments.PgPayCancelResponse;
+import com.commerce.payments.core.domain.vo.payments.PgPayResponse;
+import com.commerce.payments.core.domain.enums.PayMethod;
+import com.commerce.payments.core.domain.enums.PgProvider;
 import com.commerce.payments.infrastructure.pg.toss.dto.TossCancelResponse;
 import com.commerce.payments.infrastructure.pg.toss.dto.TossTransResponse;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.commerce.payments.domain.enums.PaymentStatus.PARTIAL_CANCELED;
+import static com.commerce.payments.core.domain.enums.PaymentStatus.PARTIAL_CANCELED;
 
 /**
  * TOSS PG

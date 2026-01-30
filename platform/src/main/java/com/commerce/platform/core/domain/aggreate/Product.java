@@ -1,7 +1,7 @@
 package com.commerce.platform.core.domain.aggreate;
 
 import com.commerce.platform.core.domain.enums.ProductStatus;
-import com.commerce.platform.core.domain.vo.ProductId;
+import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Quantity;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.vo.Money;
@@ -35,7 +35,7 @@ public class Product {
 
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "stock_quantity"))
-    private Quantity stockQuantity;
+    private Quantity stockQuantity; // todo 재고는 inventory에서 하도록 한다.
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 4)

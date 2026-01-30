@@ -1,6 +1,6 @@
 package com.commerce.payments.infrastructure.adaptor;
 
-import com.commerce.payments.domain.enums.PgProvider;
+import com.commerce.payments.core.domain.enums.PgProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;

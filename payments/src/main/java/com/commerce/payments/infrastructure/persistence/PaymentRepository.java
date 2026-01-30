@@ -1,6 +1,6 @@
 package com.commerce.payments.infrastructure.persistence;
 
-import com.commerce.payments.domain.aggregate.Payment;
+import com.commerce.payments.core.domain.aggregate.Payment;
 import com.commerce.shared.vo.OrderId;
 import com.commerce.shared.vo.PaymentId;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,7 +1,7 @@
 package com.commerce.platform.core.domain.aggreate;
 
 import com.commerce.platform.core.domain.enums.OrderStatus;
-import com.commerce.platform.core.domain.vo.CouponId;
+import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;

@@ -1,6 +1,6 @@
 package com.commerce.platform.core.domain.aggreate;
 
-import com.commerce.platform.core.domain.vo.ProductId;
+import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Quantity;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.vo.OrderId;

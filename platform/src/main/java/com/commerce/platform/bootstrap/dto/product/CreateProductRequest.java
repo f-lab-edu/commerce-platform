@@ -2,7 +2,7 @@ package com.commerce.platform.bootstrap.dto.product;
 
 import com.commerce.platform.core.domain.aggreate.Product;
 import com.commerce.platform.core.domain.enums.ProductStatus;
-import com.commerce.platform.core.domain.vo.ProductId;
+import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.Quantity;
 import jakarta.validation.constraints.*;
