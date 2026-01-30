@@ -1,15 +1,18 @@
-package com.commerce.payments.domain.service;
+package com.commerce.payments.core.domain.service;
 
-import com.commerce.payments.domain.enums.PaymentStatus;
-import com.commerce.payments.domain.vo.payments.PgPayCancelResponse;
-import com.commerce.payments.domain.vo.payments.PgPayResponse;
-import com.commerce.payments.application.port.in.PaymentUseCase;
-import com.commerce.payments.application.port.in.dto.PayCancelCommand;
-import com.commerce.payments.application.port.in.dto.PayOrderCommand;
-import com.commerce.payments.application.port.out.PaymentOutPort;
-import com.commerce.payments.application.port.out.PgStrategy;
-import com.commerce.payments.domain.aggregate.Payment;
-import com.commerce.payments.domain.aggregate.PaymentPartCancel;
+import com.commerce.payments.core.application.port.out.PaymentOutPort;
+import com.commerce.payments.core.domain.enums.PaymentStatus;
+import com.commerce.payments.core.domain.vo.payments.PgPayCancelResponse;
+import com.commerce.payments.core.domain.vo.payments.PgPayResponse;
+import com.commerce.payments.core.application.port.in.PaymentUseCase;
+import com.commerce.payments.core.application.port.in.dto.PayCancelCommand;
+import com.commerce.payments.core.application.port.in.dto.PayOrderCommand;
+import com.commerce.payments.core.application.port.out.PaymentEventPublisher;
+import com.commerce.payments.core.application.port.out.event.OrderCompletedEvent;
+import com.commerce.payments.core.application.port.out.event.PaymentCompletedEvent;
+import com.commerce.payments.core.application.port.out.PgStrategy;
+import com.commerce.payments.core.domain.aggregate.Payment;
+import com.commerce.payments.core.domain.aggregate.PaymentPartCancel;
 import com.commerce.shared.exception.BusinessError;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.vo.Money;
@@ -26,6 +29,7 @@ import static com.commerce.shared.exception.BusinessError.*;
 public class PaymentUseCaseImpl implements PaymentUseCase {
     private final PaymentPgRouter pgRouter;
     private final PaymentOutPort paymentOutPort;
+    private final PaymentEventPublisher paymentEventPublisher;
 
     @Override
     @Transactional
@@ -43,6 +47,43 @@ public class PaymentUseCaseImpl implements PaymentUseCase {
         // 승인거래 저장
         paymentEntity.approved(pgResponse);
         paymentOutPort.savePayment(paymentEntity);
+
+        // 결제 완료 이벤트 발행
+        PaymentCompletedEvent paymentCompletedEvent = PaymentCompletedEvent.of(
+                paymentEntity.getOrderId(),
+                paymentEntity.getApprovedAmt(),
+                paymentEntity.getPayMethod().name(),
+                paymentEntity.getPgTid()
+        );
+
+        paymentEventPublisher.publishPaymentCompleted(paymentCompletedEvent);
+        log.info("Payment completed event published for orderId: {}", paymentEntity.getOrderId());
+    }
+
+    /**
+     * 주문 완료 이벤트를 받아서 실제 결제를 처리
+     * platform에서 발행한 order.completed 이벤트 구독
+     */
+    @Override
+    @Transactional
+    public void processOrderPayment(OrderCompletedEvent event) {
+        log.info("Processing order payment from event: orderId={}", event.getOrderId());
+        
+        // TODO: event에서 필요한 결제 정보를 추출하여 PayOrderCommand 생성
+        // 현재 OrderCompletedEvent에는 결제수단, PG사 등 정보가 없어서
+        // 추가 정보가 필요하거나, 별도 테이블에서 조회해야 함
+        
+        // 임시로 로그만 남기고, 실제 구현은 요구사항에 맞게 수정 필요
+        log.warn("processOrderPayment needs implementation: orderId={}", event.getOrderId());
+        
+        // 예시: PayOrderCommand 생성하여 doApproval 호출
+        // PayOrderCommand command = PayOrderCommand.builder()
+        //     .orderId(event.getOrderId())
+        //     .approvedAmount(조회한 금액)
+        //     .payMethod(조회한 결제수단)
+        //     .payProvider(조회한 PG사)
+        //     .build();
+        // doApproval(command);
     }
 
     /**

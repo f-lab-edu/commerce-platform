@@ -2,3 +2,4 @@ rootProject.name = 'demo'
 include(':platform')
 include(':payments')
 include(':shared')
+include(':inventory')
