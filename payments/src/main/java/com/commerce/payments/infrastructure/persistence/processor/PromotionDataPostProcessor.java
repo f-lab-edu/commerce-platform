@@ -1,7 +1,15 @@
 package com.commerce.payments.infrastructure.persistence.processor;
 
-import com.commerce.payments.domain.aggregate.CardBinPromotion;
-import com.commerce.payments.domain.vo.promotion.*;
+import com.commerce.payments.core.domain.aggregate.CardBinPromotion;
+import com.commerce.payments.core.domain.vo.promotion.BasePromotionData;
+import com.commerce.payments.core.domain.vo.promotion.BcPromotionData;
+import com.commerce.payments.core.domain.vo.promotion.HanaPromotionData;
+import com.commerce.payments.core.domain.vo.promotion.HyundaiPromotionData;
+import com.commerce.payments.core.domain.vo.promotion.KbPromotionData;
+import com.commerce.payments.core.domain.vo.promotion.LottePromotionData;
+import com.commerce.payments.core.domain.vo.promotion.NhPromotionData;
+import com.commerce.payments.core.domain.vo.promotion.SamsungPromotionData;
+import com.commerce.payments.core.domain.vo.promotion.ShinhanPromotionData;
 import com.commerce.shared.enums.PayProvider;
 import com.commerce.payments.infrastructure.persistence.converter.PromotionDataConverter;
 import com.fasterxml.jackson.core.JsonProcessingException;

@@ -1,6 +1,6 @@
 package com.commerce.payments.infrastructure.persistence;
 
-import com.commerce.payments.domain.aggregate.PaymentPartCancel;
+import com.commerce.payments.core.domain.aggregate.PaymentPartCancel;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.PaymentId;
 import org.springframework.data.jpa.repository.JpaRepository;

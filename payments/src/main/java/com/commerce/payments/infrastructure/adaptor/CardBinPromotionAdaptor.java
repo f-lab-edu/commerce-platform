@@ -1,8 +1,8 @@
 package com.commerce.payments.infrastructure.adaptor;
 
 
-import com.commerce.payments.application.port.out.CardBinPromotionOutPort;
-import com.commerce.payments.domain.aggregate.CardBinPromotion;
+import com.commerce.payments.core.application.port.out.CardBinPromotionOutPort;
+import com.commerce.payments.core.domain.aggregate.CardBinPromotion;
 import com.commerce.payments.infrastructure.persistence.CardBinPromotionRepository;
 import com.commerce.payments.infrastructure.persistence.processor.PromotionDataPostProcessor;
 import lombok.RequiredArgsConstructor;

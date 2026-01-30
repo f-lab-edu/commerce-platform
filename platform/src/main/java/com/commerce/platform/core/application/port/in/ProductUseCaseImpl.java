@@ -4,7 +4,7 @@ import com.commerce.platform.core.application.port.in.dto.ProductDetail;
 import com.commerce.platform.core.application.port.out.ProductOutputPort;
 import com.commerce.platform.core.application.port.in.dto.UpdateStockCommand;
 import com.commerce.platform.core.domain.aggreate.Product;
-import com.commerce.platform.core.domain.vo.ProductId;
+import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Quantity;
 import com.commerce.shared.exception.BusinessException;
 import lombok.RequiredArgsConstructor;

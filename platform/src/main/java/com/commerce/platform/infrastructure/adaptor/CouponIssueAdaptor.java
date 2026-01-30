@@ -2,7 +2,7 @@ package com.commerce.platform.infrastructure.adaptor;
 
 import com.commerce.platform.core.application.port.out.CouponIssueOutPort;
 import com.commerce.platform.core.domain.aggreate.CouponIssues;
-import com.commerce.platform.core.domain.vo.CouponIssueId;
+import com.commerce.shared.vo.CouponIssueId;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.platform.infrastructure.persistence.CouponIssueRepository;
 import lombok.RequiredArgsConstructor;

@@ -1,8 +1,8 @@
 package com.commerce.payments.infrastructure.adaptor;
 
-import com.commerce.payments.application.port.out.PaymentOutPort;
-import com.commerce.payments.domain.aggregate.Payment;
-import com.commerce.payments.domain.aggregate.PaymentPartCancel;
+import com.commerce.payments.core.application.port.out.PaymentOutPort;
+import com.commerce.payments.core.domain.aggregate.Payment;
+import com.commerce.payments.core.domain.aggregate.PaymentPartCancel;
 import com.commerce.payments.infrastructure.persistence.PaymentPartCancelRepository;
 import com.commerce.payments.infrastructure.persistence.PaymentRepository;
 import com.commerce.shared.vo.Money;
