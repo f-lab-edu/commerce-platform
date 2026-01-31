@@ -1,5 +1,8 @@
 plugins {
     id 'myproject-convention'
-    id 'myproject-grpc-base'
     id 'myproject-kafka'
+}
+
+dependencies {
+    implementation project(':shared')
 }
