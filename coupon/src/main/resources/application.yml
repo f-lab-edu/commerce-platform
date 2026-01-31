@@ -1,6 +1,6 @@
 spring:
   application:
-    name: platform
+    name: coupon-service
 
   datasource:
     hikari:
@@ -29,11 +29,15 @@ spring:
       acks: all
       retries: 3
     consumer:
-      group-id: platform-service
+      group-id: coupon-service
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
       enable-auto-commit: false
+
+
+aes256:
+  key: 61qDonoZcEtIEvUZVPkIKIYovHH82rXtK7T1g/rcc1k=
 
   docker:
     compose:
@@ -43,14 +47,4 @@ spring:
       lifecycle-management: start_only
 
 server:
-  port: 8080
-
-aes256:
-  key: 61qDonoZcEtIEvUZVPkIKIYovHH82rXtK7T1g/rcc1k=
-
-# gRPC Client 설정
-grpc:
-  client:
-    payments:
-      address: 'static://localhost:9090'
-      negotiationType: plaintext
+  port: 8083

@@ -3,14 +3,12 @@ package com.commerce.platform.core.application.port.in;
 import com.commerce.platform.bootstrap.dto.payment.PaymentCancelRequest;
 import com.commerce.platform.bootstrap.dto.payment.PaymentRequest;
 import com.commerce.platform.core.application.port.out.CustomerCardOutPort;
-import com.commerce.platform.core.application.port.out.OrderEventPublisher;
 import com.commerce.platform.core.application.port.out.OrderItemOutPort;
 import com.commerce.platform.core.application.port.out.OrderOutputPort;
 import com.commerce.platform.core.application.port.out.ProductOutputPort;
 import com.commerce.platform.core.domain.aggreate.Order;
 import com.commerce.platform.core.domain.aggreate.OrderItem;
 import com.commerce.platform.infrastructure.grpc.PaymentGrpcClient;
-import com.commerce.shared.event.dto.OrderCompletedEvent;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.ProductId;
@@ -34,7 +32,6 @@ public class PaymentServiceImpl implements PaymentService {
     private final OrderItemOutPort orderItemOutPort;
     private final ProductOutputPort productOutputPort;
     private final CustomerCardOutPort customerCardOutPort;
-    private final OrderEventPublisher orderEventPublisher;
 
 //    @Async tomcat thread 아닌 경우 advice에서 잡히지 않는다.
     @Override
@@ -57,14 +54,6 @@ public class PaymentServiceImpl implements PaymentService {
                         OrderItem::getProductId,
                         OrderItem::getQuantity
                 ));
-
-        // "주문결제(order.completed)" 이벤트 Kafka로 발행
-        OrderCompletedEvent event = OrderCompletedEvent.of(
-                orderEntity.getOrderId(),
-                productIds,
-                quantities
-        );
-        orderEventPublisher.publishOrderCompleted(event);
 
         // gRPC 호출
         /*

@@ -14,11 +14,6 @@ import org.springframework.kafka.listener.ContainerProperties;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Kafka Consumer 설정
- * 참고: https://kafka.apache.org/documentation/#consumerconfigs
- * 토스 기술블로그: https://toss.tech/article/how-to-work-asynchronously
- */
 @EnableKafka
 @Configuration
 public class KafkaConsumerConfig {
