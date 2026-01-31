@@ -1,8 +1,9 @@
-package com.commerce.platform.core.application.port.in;
+package com.commerce.coupon.core.application.port.in;
 
-import com.commerce.platform.bootstrap.dto.coupon.CouponRequest;
-import com.commerce.platform.core.application.port.out.CouponOutPort;
-import com.commerce.platform.core.domain.aggreate.Coupon;
+
+import com.commerce.coupon.bootstrap.dto.CouponRequest;
+import com.commerce.coupon.core.application.port.out.CouponOutPort;
+import com.commerce.coupon.core.domain.aggregate.Coupon;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

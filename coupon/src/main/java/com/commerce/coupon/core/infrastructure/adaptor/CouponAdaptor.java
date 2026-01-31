@@ -1,9 +1,9 @@
-package com.commerce.platform.infrastructure.adaptor;
+package com.commerce.coupon.core.infrastructure.adaptor;
 
-import com.commerce.platform.core.application.port.out.CouponOutPort;
-import com.commerce.platform.core.domain.aggreate.Coupon;
+import com.commerce.coupon.core.application.port.out.CouponOutPort;
+import com.commerce.coupon.core.domain.aggregate.Coupon;
+import com.commerce.coupon.core.infrastructure.persistence.CouponRepository;
 import com.commerce.shared.vo.CouponId;
-import com.commerce.platform.infrastructure.persistence.CouponRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

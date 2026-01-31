@@ -1,11 +1,11 @@
-package com.commerce.platform.core.application.port.in;
+package com.commerce.coupon.core.application.port.in;
 
-import com.commerce.platform.core.application.port.in.dto.CouponView;
-import com.commerce.platform.core.application.port.out.CouponIssueOutPort;
-import com.commerce.platform.core.application.port.out.CouponOutPort;
-import com.commerce.platform.core.domain.service.LockFacade;
-import com.commerce.platform.core.domain.aggreate.Coupon;
-import com.commerce.platform.core.domain.aggreate.CouponIssues;
+
+import com.commerce.coupon.core.application.port.in.dto.CouponView;
+import com.commerce.coupon.core.application.port.out.CouponIssueOutPort;
+import com.commerce.coupon.core.application.port.out.CouponOutPort;
+import com.commerce.coupon.core.domain.aggregate.Coupon;
+import com.commerce.coupon.core.domain.aggregate.CouponIssues;
 import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.CouponIssueId;
 import com.commerce.shared.vo.CustomerId;
@@ -30,7 +30,7 @@ import static com.commerce.shared.exception.BusinessError.INVALID_COUPON;
 public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
     private final CouponOutPort couponOutPort;
     private final CouponIssueOutPort couponIssueOutPort;
-    private final LockFacade lockFacade;
+//    private final LockFacade lockFacade;
 
     @Override
     @Transactional(readOnly = true)
@@ -71,7 +71,8 @@ public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
 
         // 발행
         // 여기 내부에서 새로운 트랜잭션으로 실행된다.
-        lockFacade.executeWithLock("COUPON_ISSUE_", couponId.id(), () -> {
+        // todo
+        /*lockFacade.executeWithLock("COUPON_ISSUE_", couponId.id(), () -> {
             Coupon coupon = couponOutPort.findById(couponId)
                     .orElseThrow(() -> new BusinessException(INVALID_COUPON));
             log.info("coupon issuedQuantity : " + coupon.getIssuedQuantity().value());
@@ -80,7 +81,7 @@ public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
             // 발급 이력 저장
             couponIssueOutPort.save(CouponIssues.create(couponId, customerId));
             return null;
-        });
+        });*/
 
     }
 }

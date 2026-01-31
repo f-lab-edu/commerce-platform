@@ -1,4 +1,4 @@
-package com.commerce.platform.bootstrap.dto.coupon;
+package com.commerce.coupon.bootstrap.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

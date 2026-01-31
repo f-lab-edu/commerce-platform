@@ -1,6 +1,6 @@
-package com.commerce.platform.core.application.port.out;
+package com.commerce.coupon.core.application.port.out;
 
-import com.commerce.platform.core.domain.aggreate.CouponIssues;
+import com.commerce.coupon.core.domain.aggregate.CouponIssues;
 import com.commerce.shared.vo.CouponIssueId;
 import com.commerce.shared.vo.CustomerId;
 

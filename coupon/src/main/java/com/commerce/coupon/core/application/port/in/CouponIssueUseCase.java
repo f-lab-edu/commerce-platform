@@ -1,6 +1,6 @@
-package com.commerce.platform.core.application.port.in;
+package com.commerce.coupon.core.application.port.in;
 
-import com.commerce.platform.core.application.port.in.dto.CouponView;
+import com.commerce.coupon.core.application.port.in.dto.CouponView;
 import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.CustomerId;
 

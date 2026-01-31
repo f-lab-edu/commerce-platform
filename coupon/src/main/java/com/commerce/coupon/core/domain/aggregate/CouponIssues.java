@@ -1,6 +1,6 @@
-package com.commerce.platform.core.domain.aggreate;
+package com.commerce.coupon.core.domain.aggregate;
 
-import com.commerce.platform.core.domain.enums.CouponIssueStatus;
+import com.commerce.coupon.core.domain.enums.CouponIssueStatus;
 import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.CouponIssueId;
 import com.commerce.shared.vo.CustomerId;
@@ -14,8 +14,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-import static com.commerce.platform.core.domain.enums.CouponIssueStatus.EXPIRED;
-import static com.commerce.platform.core.domain.enums.CouponIssueStatus.USED;
+
 import static com.commerce.shared.exception.BusinessError.EXPIRED_ISSUED_COUPON;
 import static com.commerce.shared.exception.BusinessError.USED_ISSUED_COUPON;
 
@@ -55,14 +54,14 @@ public class CouponIssues {
      * 쿠폰 사용처리
      */
     public void use(OrderId orderId) {
-        this.status = USED;
+        this.status = CouponIssueStatus.USED;
         this.usedAt = LocalDateTime.now();
         this.orderId = orderId;
     }
 
     public void valid() {
-        if(this.status == USED) throw new BusinessException(USED_ISSUED_COUPON);
-        else if(this.status == EXPIRED) throw new BusinessException(EXPIRED_ISSUED_COUPON);
+        if(this.status == CouponIssueStatus.USED) throw new BusinessException(USED_ISSUED_COUPON);
+        else if(this.status == CouponIssueStatus.EXPIRED) throw new BusinessException(EXPIRED_ISSUED_COUPON);
     }
 
     @Builder

@@ -1,4 +1,4 @@
-package com.commerce.platform.core.domain.aggreate;
+package com.commerce.coupon.core.domain.aggregate;
 
 import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.Quantity;

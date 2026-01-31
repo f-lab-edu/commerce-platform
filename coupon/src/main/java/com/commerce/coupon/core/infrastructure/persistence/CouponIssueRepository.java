@@ -1,6 +1,6 @@
-package com.commerce.platform.infrastructure.persistence;
+package com.commerce.coupon.core.infrastructure.persistence;
 
-import com.commerce.platform.core.domain.aggreate.CouponIssues;
+import com.commerce.coupon.core.domain.aggregate.CouponIssues;
 import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.CouponIssueId;
 import com.commerce.shared.vo.CustomerId;

@@ -1,6 +1,6 @@
-package com.commerce.platform.core.application.port.out;
+package com.commerce.coupon.core.application.port.out;
 
-import com.commerce.platform.core.domain.aggreate.Coupon;
+import com.commerce.coupon.core.domain.aggregate.Coupon;
 import com.commerce.shared.vo.CouponId;
 
 import java.util.List;

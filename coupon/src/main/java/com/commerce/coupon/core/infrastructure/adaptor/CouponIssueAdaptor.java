@@ -1,10 +1,10 @@
-package com.commerce.platform.infrastructure.adaptor;
+package com.commerce.coupon.core.infrastructure.adaptor;
 
-import com.commerce.platform.core.application.port.out.CouponIssueOutPort;
-import com.commerce.platform.core.domain.aggreate.CouponIssues;
+import com.commerce.coupon.core.application.port.out.CouponIssueOutPort;
+import com.commerce.coupon.core.domain.aggregate.CouponIssues;
+import com.commerce.coupon.core.infrastructure.persistence.CouponIssueRepository;
 import com.commerce.shared.vo.CouponIssueId;
 import com.commerce.shared.vo.CustomerId;
-import com.commerce.platform.infrastructure.persistence.CouponIssueRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Component
-public class CouponIssueAdaptor implements CouponIssueOutPort{
+public class CouponIssueAdaptor implements CouponIssueOutPort {
     private final CouponIssueRepository repository;
 
     @Override

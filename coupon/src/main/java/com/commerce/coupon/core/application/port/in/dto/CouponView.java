@@ -1,4 +1,4 @@
-package com.commerce.platform.core.application.port.in.dto;
+package com.commerce.coupon.core.application.port.in.dto;
 
 public record CouponView(
         String couponName,
