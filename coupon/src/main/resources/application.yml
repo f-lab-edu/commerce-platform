@@ -1,26 +1,26 @@
 spring:
   application:
-    name: payments-service
-    
+    name: coupon-service
+
   datasource:
     hikari:
       maximum-pool-size: 20
       connection-timeout: 3000
-    
+
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
-        show_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
-        
+
   data:
     redis:
       host: localhost
       port: 6379
-  
+
   kafka:
     bootstrap-servers: localhost:9092
     producer:
@@ -29,11 +29,15 @@ spring:
       acks: all
       retries: 3
     consumer:
-      group-id: payment-service
+      group-id: coupon-service
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
       enable-auto-commit: false
+
+
+aes256:
+  key: 61qDonoZcEtIEvUZVPkIKIYovHH82rXtK7T1g/rcc1k=
 
   docker:
     compose:
@@ -42,19 +46,5 @@ spring:
       env-file: .env
       lifecycle-management: start_only
 
-# gRPC Server 설정
-grpc:
-  server:
-    port: 9090
-    
 server:
-  port: 8081
-
-logging:
-  level:
-    com.commerce.payments: DEBUG
-    io.grpc: INFO
-    org.hibernate.tool.schema: DEBUG
-
-aes256:
-  key: 61qDonoZcEtIEvUZVPkIKIYovHH82rXtK7T1g/rcc1k=
+  port: 8083

@@ -1,0 +1,23 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    // Spring Kafka Core - Producer 기본 기능
+    implementation 'org.springframework.kafka:spring-kafka'
+    
+    // Kafka Clients - Producer API (메시지 발행 핵심 기능)
+    implementation 'org.apache.kafka:kafka-clients:3.6.1'
+    
+    // JSON 직렬화 - Producer가 메시지를 JSON으로 변환
+    // 도메인 이벤트 객체를 바이트 배열로 직렬화하여 Kafka에 전송
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'  // LocalDateTime 등 Java 8 시간 API 지원
+    
+    // Micrometer - Producer 메트릭 수집 (처리량, 지연시간, 에러율 등)
+    implementation 'io.micrometer:micrometer-core'
+    
+    // 테스트 - Producer 통합 테스트
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    testImplementation 'org.testcontainers:kafka:1.19.3'  // 실제 Kafka 컨테이너로 통합 테스트
+}
