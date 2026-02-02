@@ -39,9 +39,12 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         
         // Offset 리셋 정책: earliest - 가장 처음부터 읽기
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        // latest : 가장 최근부터 가져온다.
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         
         // 자동 커밋 비활성화 (수동 커밋으로 메시지 유실 방지)
+        // true: 오프셋을 주기적으로 커밋해서 관리하지 않아도 된다. (중복가능 있음)
+        // false : 동기방식이다. 속도는 느리지만, 메시지 손실이 거의 말생하지 않는다. (중복가능 있음)
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         
         // 한 번에 가져올 최대 레코드 수

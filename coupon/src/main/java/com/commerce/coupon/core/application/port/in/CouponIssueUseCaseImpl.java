@@ -2,14 +2,17 @@ package com.commerce.coupon.core.application.port.in;
 
 
 import com.commerce.coupon.core.application.port.in.dto.CouponView;
+import com.commerce.coupon.core.application.port.out.CouponIssueCache;
 import com.commerce.coupon.core.application.port.out.CouponIssueOutPort;
 import com.commerce.coupon.core.application.port.out.CouponOutPort;
 import com.commerce.coupon.core.domain.aggregate.Coupon;
 import com.commerce.coupon.core.domain.aggregate.CouponIssues;
+import com.commerce.coupon.core.infrastructure.event.CouponIssueRequestEvent;
+import com.commerce.shared.exception.BusinessException;
+import com.commerce.shared.kafka.KafkaEventPublisher;
 import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.CouponIssueId;
 import com.commerce.shared.vo.CustomerId;
-import com.commerce.shared.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -23,14 +26,17 @@ import java.util.stream.Collectors;
 
 import static com.commerce.shared.exception.BusinessError.DUPLICATE_ISSUED_COUPON;
 import static com.commerce.shared.exception.BusinessError.INVALID_COUPON;
+import static com.commerce.shared.kafka.event.topic.EventTopic.COUPON_ISSUE_TOPIC;
 
+@Transactional
 @Log4j2
 @RequiredArgsConstructor
 @Service
 public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
     private final CouponOutPort couponOutPort;
     private final CouponIssueOutPort couponIssueOutPort;
-//    private final LockFacade lockFacade;
+    private final KafkaEventPublisher eventPublisher;
+    private final CouponIssueCache couponIssueCache;
 
     @Override
     @Transactional(readOnly = true)
@@ -62,26 +68,36 @@ public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
 
     @Override
     public void issueCoupon(CouponId couponId, CustomerId customerId) {
+        // 캐싱데이터 조회
+        if(isIssued(couponId, customerId)) return;
+
+        // db에서 발행여부 조회
         CouponIssueId couponIssueId = new CouponIssueId(couponId, customerId);
-        // 이미 다운받았는지 확인
         couponIssueOutPort.findByCouponIssueId(couponIssueId)
                 .ifPresent(exist -> {
                     throw new BusinessException(DUPLICATE_ISSUED_COUPON);
                 });
 
         // 발행
-        // 여기 내부에서 새로운 트랜잭션으로 실행된다.
-        // todo
-        /*lockFacade.executeWithLock("COUPON_ISSUE_", couponId.id(), () -> {
-            Coupon coupon = couponOutPort.findById(couponId)
-                    .orElseThrow(() -> new BusinessException(INVALID_COUPON));
-            log.info("coupon issuedQuantity : " + coupon.getIssuedQuantity().value());
-            // 쿠폰 발급
-            coupon.issueCoupon();
-            // 발급 이력 저장
-            couponIssueOutPort.save(CouponIssues.create(couponId, customerId));
-            return null;
-        });*/
+        Coupon coupon = couponOutPort.findById(couponId)
+                .orElseThrow(() -> new BusinessException(INVALID_COUPON));
+        log.info("coupon issuedQuantity : " + coupon.getIssuedQuantity().value());
 
+        coupon.issueCoupon();
+        couponIssueOutPort.save(CouponIssues.create(couponId, customerId));
+
+        // 발급완료된 고객 저장
+        couponIssueCache.save(couponId, customerId);
+    }
+
+    @Override
+    public void requestIssueCoupon(CouponId couponId, CustomerId customerId) {
+        CouponIssueRequestEvent event = CouponIssueRequestEvent.of(couponId, customerId);
+        eventPublisher.publish(COUPON_ISSUE_TOPIC, event);
+    }
+
+    @Override
+    public boolean isIssued(CouponId couponId, CustomerId customerId) {
+        return couponIssueCache.isIssued(couponId, customerId);
     }
 }

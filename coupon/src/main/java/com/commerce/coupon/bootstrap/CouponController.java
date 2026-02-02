@@ -6,7 +6,11 @@ import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.CustomerId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -17,14 +21,34 @@ public class CouponController {
     private final CouponIssueUseCase couponIssueUseCase;
 
     @PostMapping("/{couponId}/issue/{customerId}")
-    public ResponseEntity<String> issueCoupon(@PathVariable String couponId) {
-        couponIssueUseCase.issueCoupon(CouponId.of(couponId), CustomerId.of("test1")); // todo tmp customerId
-        return ResponseEntity.ok("발급 성공");
+    public ResponseEntity<String> issueCoupon(
+            @PathVariable String couponId,
+            @PathVariable String customerId
+    ) {
+        couponIssueUseCase.requestIssueCoupon(CouponId.of(couponId), CustomerId.of(customerId));
+        return ResponseEntity.ok("발급 요청 완료");
     }
 
     @GetMapping("/users/{customerId}")
     public ResponseEntity<List<CouponView>> getMyCoupons(@PathVariable String customerId) {
         List<CouponView> myCoupons = couponIssueUseCase.getMyCoupons(CustomerId.of(customerId));
         return ResponseEntity.ok(myCoupons);
+    }
+
+    /**
+     * 쿠폰 발급 확인 API
+     * Redis에서 발급 여부 확인
+     */
+    @GetMapping("/{couponId}/issued/{customerId}")
+    public ResponseEntity<String> checkIssued(
+            @PathVariable String couponId,
+            @PathVariable String customerId
+    ) {
+        boolean isIssued = couponIssueUseCase.isIssued(
+                CouponId.of(couponId),
+                CustomerId.of(customerId)
+        );
+
+        return ResponseEntity.ok(isIssued ? "발행완료" : "미발행");
     }
 }

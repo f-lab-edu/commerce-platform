@@ -9,7 +9,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum EventTopic {
-    ORDER_COMPLETED_TOPIC("order.completed");
+    ORDER_COMPLETED_TOPIC("order.completed"),
+    COUPON_ISSUE_TOPIC("coupon-issue-request")
+    ;
 
     private final String value;
 }
