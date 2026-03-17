@@ -31,8 +31,8 @@ public class OrderUseCaseImpl implements OrderUseCase {
     private final OrderOutputPort orderOutputPort;
     private final OrderItemOutPort orderItemOutPort;
     private final ProductOutputPort productOutputPort;
-    private final CouponOutPort couponOutPort;
-    private final CouponIssueOutPort couponIssueOutPort;
+//    private final CouponOutPort couponOutPort; // todo 이런 부분은 어떻게 하지?
+//    private final CouponIssueOutPort couponIssueOutPort;
 
     @Override
     public OrderResponse createOrder(CreateOrderCommand orderCommand) {
@@ -59,7 +59,8 @@ public class OrderUseCaseImpl implements OrderUseCase {
         Money totalAmt = calculateTotalAmountFromProducts(orderItems);
 
         // 쿠폰적용
-        Money discountAmt = applyCoupon(order, orderCommand.couponId());
+        Money discountAmt = Money.of(0L);
+//        Money discountAmt = applyCoupon(order, orderCommand.couponId());
 
         // 주문완료
         order.confirm(totalAmt, discountAmt);
@@ -133,9 +134,10 @@ public class OrderUseCaseImpl implements OrderUseCase {
     }
 
     /**
+     * Todo 여긴 어떻게 ,,,,,
      * 쿠폰조회 및 적용
      */
-    private Money applyCoupon(Order order, CouponId couponId) {
+    /*private Money applyCoupon(Order order, CouponId couponId) {
         if(couponId == null) return Money.of(0);
         CouponIssueId couponIssueId = new CouponIssueId(couponId, order.getCustomerId());
 
@@ -154,7 +156,7 @@ public class OrderUseCaseImpl implements OrderUseCase {
         couponIssueOutPort.save(issuedCoupon);
 
         return discountAmt;
-    }
+    }*/
 
     /**
      * 총 주문금액 계산

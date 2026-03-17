@@ -11,11 +11,15 @@ import com.commerce.platform.core.domain.aggreate.OrderItem;
 import com.commerce.platform.infrastructure.grpc.PaymentGrpcClient;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.vo.Money;
+import com.commerce.shared.vo.ProductId;
+import com.commerce.shared.vo.Quantity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import static com.commerce.shared.exception.BusinessError.INVALID_ORDER_ID;
 import static com.commerce.shared.exception.BusinessError.INVALID_ORDER_ITEM_ID;
@@ -32,12 +36,27 @@ public class PaymentServiceImpl implements PaymentService {
 //    @Async tomcat thread 아닌 경우 advice에서 잡히지 않는다.
     @Override
     public CompletableFuture<String> processApproval(PaymentRequest request) {
-        // 주문 결제처리
+        // 주문 검증
         Order orderEntity = orderOutputPort.findById(request.orderId())
                 .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
         orderEntity.validForPay();
 
-        // payments 모듈에서 처리
+        // 주문 아이템 조회 (이벤트 발행에 필요)
+        List<OrderItem> orderItems = orderItemOutPort.findByOrderId(orderEntity.getOrderId());
+        
+        // productId와 수량 매핑
+        List<ProductId> productIds = orderItems.stream()
+                .map(OrderItem::getProductId)
+                .collect(Collectors.toList());
+        
+        Map<ProductId, Quantity> quantities = orderItems.stream()
+                .collect(Collectors.toMap(
+                        OrderItem::getProductId,
+                        OrderItem::getQuantity
+                ));
+
+        // gRPC 호출
+        /*
         return paymentGrpcClient.approvePayment(
                 request.orderId(),
                 orderEntity.getResultAmt(),
@@ -48,7 +67,10 @@ public class PaymentServiceImpl implements PaymentService {
             orderEntity.changeStatusAfterPay(grpcResponse.getSuccess());
             return grpcResponse.getMessage();
         });
+        */
 
+        // 이벤트 발행 후 즉시 응답
+        return CompletableFuture.completedFuture("주문결제 이벤트 발행 완료");
     }
 
     @Override

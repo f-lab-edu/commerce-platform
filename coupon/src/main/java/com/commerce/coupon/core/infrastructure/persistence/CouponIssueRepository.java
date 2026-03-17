@@ -1,0 +1,21 @@
+package com.commerce.coupon.core.infrastructure.persistence;
+
+import com.commerce.coupon.core.domain.aggregate.CouponIssues;
+import com.commerce.shared.vo.CouponId;
+import com.commerce.shared.vo.CouponIssueId;
+import com.commerce.shared.vo.CustomerId;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface CouponIssueRepository extends JpaRepository<CouponIssues, CouponIssueId> {
+
+    @Query("SELECT COUNT(ci) FROM CouponIssues ci WHERE ci.couponIssueId.couponId = :couponId")
+    Long countByCouponId(CouponId couponId);
+
+    @Query("SELECT ci FROM CouponIssues ci WHERE ci.couponIssueId.customerId = :customerId")
+    List<CouponIssues> findAllByCustomerId(CustomerId customerId);
+}
