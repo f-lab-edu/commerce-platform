@@ -91,7 +91,7 @@ class CouponIssueConcurrencyIntegrationTest {
         int issuedCount = 0;
         for (int i = 1; i <= threadCount; i++) {
             String customerId = "test" + i;
-            boolean issued = couponIssueUseCase.isIssued(
+            boolean issued = couponIssueUseCase.checkCouponIssueStatus(
                     CouponId.of(couponId), 
                     CustomerId.of(customerId)
             );
@@ -141,7 +141,7 @@ class CouponIssueConcurrencyIntegrationTest {
         Thread.sleep(5000);
         
         // then: Redis에 1번만 저장됨
-        boolean issued = couponIssueUseCase.isIssued(
+        boolean issued = couponIssueUseCase.checkCouponIssueStatus(
                 CouponId.of(couponId), 
                 CustomerId.of(customerId)
         );

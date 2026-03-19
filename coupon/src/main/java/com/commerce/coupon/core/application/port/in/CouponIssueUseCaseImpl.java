@@ -68,15 +68,15 @@ public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
 
     @Override
     public void issueCoupon(CouponId couponId, CustomerId customerId) {
-        // todo 큐이기 때문에 중복 요청이 올 수 있다. redis 검증로직이 필요하다.
-        // todo 발행실패인 경우, 멱등성있게 처리하는 방법이 필요하다.
-        // todo 테스트코드 수정
-        
-        // 발행
+        // 쿠폰 검증
         Coupon coupon = couponOutPort.findById(couponId)
                 .orElseThrow(() -> new BusinessException(INVALID_COUPON));
         log.info("coupon issuedQuantity : " + coupon.getIssuedQuantity().value());
 
+        // 큐이기 때문에 중복 요청이 올 수 있다. redis 검증로직이 필요
+        if(checkCouponIssueStatus(couponId, customerId)) return;
+
+        // 유저에게 발행
         coupon.issueCoupon();
         couponIssueOutPort.save(CouponIssues.create(couponId, customerId));
 
