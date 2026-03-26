@@ -10,5 +10,5 @@ public interface CouponIssueUseCase {
     List<CouponView> getMyCoupons(CustomerId customerId);
     void issueCoupon(CouponId couponId, CustomerId customerId);
     void requestIssueCoupon(CouponId couponId, CustomerId customerId);
-    boolean isIssued(CouponId of, CustomerId of1);
+    boolean checkCouponIssueStatus(CouponId couponId, CustomerId customerId);
 }

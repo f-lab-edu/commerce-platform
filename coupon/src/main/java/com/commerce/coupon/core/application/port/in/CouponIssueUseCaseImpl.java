@@ -21,10 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.commerce.shared.exception.BusinessError.DUPLICATE_ISSUED_COUPON;
 import static com.commerce.shared.exception.BusinessError.INVALID_COUPON;
 import static com.commerce.shared.kafka.event.topic.EventTopic.COUPON_ISSUE_TOPIC;
 
@@ -68,21 +68,15 @@ public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
 
     @Override
     public void issueCoupon(CouponId couponId, CustomerId customerId) {
-        // 캐싱데이터 조회
-        if(isIssued(couponId, customerId)) return;
-
-        // db에서 발행여부 조회
-        CouponIssueId couponIssueId = new CouponIssueId(couponId, customerId);
-        couponIssueOutPort.findByCouponIssueId(couponIssueId)
-                .ifPresent(exist -> {
-                    throw new BusinessException(DUPLICATE_ISSUED_COUPON);
-                });
-
-        // 발행
+        // 쿠폰 검증
         Coupon coupon = couponOutPort.findById(couponId)
                 .orElseThrow(() -> new BusinessException(INVALID_COUPON));
         log.info("coupon issuedQuantity : " + coupon.getIssuedQuantity().value());
 
+        // 큐이기 때문에 중복 요청이 올 수 있다. redis 검증로직이 필요
+        if(checkCouponIssueStatus(couponId, customerId)) return;
+
+        // 유저에게 발행
         coupon.issueCoupon();
         couponIssueOutPort.save(CouponIssues.create(couponId, customerId));
 
@@ -97,7 +91,22 @@ public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
     }
 
     @Override
-    public boolean isIssued(CouponId couponId, CustomerId customerId) {
-        return couponIssueCache.isIssued(couponId, customerId);
+    public boolean checkCouponIssueStatus(CouponId couponId, CustomerId customerId) {
+        // 쿠폰발행 캐싱 확인
+        AtomicBoolean issued = new AtomicBoolean(couponIssueCache.isIssued(couponId, customerId));
+
+        if(issued.get()){
+            return true;
+        }
+
+        // cache miss or 미발행
+        CouponIssueId couponIssueId = new CouponIssueId(couponId, customerId);
+        couponIssueOutPort.findByCouponIssueId(couponIssueId)
+                .ifPresent(exist -> {
+                    couponIssueCache.save(couponId, customerId);
+                    issued.set(true);
+                });
+
+        return issued.get();
     }
 }

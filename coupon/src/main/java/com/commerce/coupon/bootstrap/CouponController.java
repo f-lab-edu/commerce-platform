@@ -25,7 +25,16 @@ public class CouponController {
             @PathVariable String couponId,
             @PathVariable String customerId
     ) {
-        couponIssueUseCase.requestIssueCoupon(CouponId.of(couponId), CustomerId.of(customerId));
+        CouponId couId = CouponId.of(couponId);
+        CustomerId cusId = CustomerId.of(customerId);
+
+        boolean issued = couponIssueUseCase.checkCouponIssueStatus(couId, cusId);
+        if(issued) {
+            return ResponseEntity.ok("이미 발급된 쿠폰입니다.");
+        }
+
+        // 미발행된 경우에만 이벤트 발행
+        couponIssueUseCase.requestIssueCoupon(couId, cusId);
         return ResponseEntity.ok("발급 요청 완료");
     }
 
@@ -44,7 +53,7 @@ public class CouponController {
             @PathVariable String couponId,
             @PathVariable String customerId
     ) {
-        boolean isIssued = couponIssueUseCase.isIssued(
+        boolean isIssued = couponIssueUseCase.checkCouponIssueStatus(
                 CouponId.of(couponId),
                 CustomerId.of(customerId)
         );
