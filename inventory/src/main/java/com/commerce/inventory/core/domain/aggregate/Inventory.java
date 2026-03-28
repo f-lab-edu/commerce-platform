@@ -51,4 +51,12 @@ public class Inventory {
         this.quantity = this.quantity.add(Quantity.create(amount));
         this.updatedAt = LocalDateTime.now();
     }
+
+    /**
+     * 재고 설정
+     */
+    public void setQuantity(Quantity quantity) {
+        this.quantity = quantity;
+        this.updatedAt = LocalDateTime.now();
+    }
 }
