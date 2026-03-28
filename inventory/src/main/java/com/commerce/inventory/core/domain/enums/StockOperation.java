@@ -1,4 +1,4 @@
-package com.commerce.platform.core.domain.enums;
+package com.commerce.inventory.core.domain.enums;
 
 import io.micrometer.common.util.StringUtils;
 

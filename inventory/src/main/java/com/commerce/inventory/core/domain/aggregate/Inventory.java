@@ -1,4 +1,4 @@
-package com.commerce.inventory.domain.aggregate;
+package com.commerce.inventory.core.domain.aggregate;
 
 import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Quantity;
@@ -49,6 +49,14 @@ public class Inventory {
      */
     public void increaseQuantity(long amount) {
         this.quantity = this.quantity.add(Quantity.create(amount));
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 재고 설정
+     */
+    public void setQuantity(Quantity quantity) {
+        this.quantity = quantity;
         this.updatedAt = LocalDateTime.now();
     }
 }

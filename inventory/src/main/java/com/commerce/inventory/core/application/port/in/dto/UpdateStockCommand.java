@@ -1,6 +1,6 @@
-package com.commerce.platform.core.application.port.in.dto;
+package com.commerce.inventory.core.application.port.in.dto;
 
-import com.commerce.platform.core.domain.enums.StockOperation;
+import com.commerce.inventory.core.domain.enums.StockOperation;
 import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Quantity;
 

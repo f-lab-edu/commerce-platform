@@ -1,8 +1,8 @@
-package com.commerce.inventory.infrastructure.adaptor;
+package com.commerce.inventory.core.infrastructure.adaptor;
 
-import com.commerce.inventory.application.port.out.InventoryOutport;
-import com.commerce.inventory.domain.aggregate.Inventory;
-import com.commerce.inventory.infrastructure.persistence.InventoryRepository;
+import com.commerce.inventory.core.application.port.out.InventoryOutport;
+import com.commerce.inventory.core.domain.aggregate.Inventory;
+import com.commerce.inventory.core.infrastructure.persistence.InventoryRepository;
 import com.commerce.shared.vo.ProductId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

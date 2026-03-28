@@ -1,6 +1,6 @@
-package com.commerce.inventory.application.port.out;
+package com.commerce.inventory.core.application.port.out;
 
-import com.commerce.inventory.domain.aggregate.Inventory;
+import com.commerce.inventory.core.domain.aggregate.Inventory;
 import com.commerce.shared.vo.ProductId;
 
 import java.util.List;
