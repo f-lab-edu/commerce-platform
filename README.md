@@ -23,6 +23,7 @@
     - 비동기 통신으로 처리량 증가.
 - **모놀리식 -> MSA 전환하기**
     - buildSrc Convention Plugin으로 설정 중앙관리.
+    - JPA의 편의성이 MSA의 독립성과 충돌을 느꼈습니다. (ID참조로 우회) 😂
 <br><br>
 ## 📋 진행 중인 것
 - **kafka 도입**
