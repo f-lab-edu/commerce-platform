@@ -1,0 +1,8 @@
+plugins {
+    id 'myproject-convention'
+    id 'myproject-kafka'
+}
+
+dependencies {
+    implementation project(':shared')
+}
