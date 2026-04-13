@@ -1,4 +1,4 @@
-package com.commerce.platform.infrastructure.persistence;
+package com.commerce.order.infrastructure.persistence;
 
 import com.commerce.platform.core.domain.aggreate.Order;
 import com.commerce.shared.vo.CustomerId;

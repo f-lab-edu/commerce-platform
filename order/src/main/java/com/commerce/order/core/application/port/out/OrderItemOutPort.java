@@ -1,4 +1,4 @@
-package com.commerce.platform.core.application.port.out;
+package com.commerce.order.core.application.port.out;
 
 import com.commerce.platform.core.domain.aggreate.OrderItem;
 import com.commerce.shared.vo.OrderId;

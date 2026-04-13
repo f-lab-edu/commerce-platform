@@ -1,4 +1,4 @@
-package com.commerce.platform.infrastructure.adaptor;
+package com.commerce.order.infrastructure.adaptor;
 
 import com.commerce.platform.core.application.port.out.OrderItemOutPort;
 import com.commerce.platform.core.domain.aggreate.OrderItem;

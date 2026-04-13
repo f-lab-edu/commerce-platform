@@ -1,4 +1,4 @@
-package com.commerce.platform.core.application.port.in.dto;
+package com.commerce.order.core.application.port.in.dto;
 
 import java.util.List;
 
