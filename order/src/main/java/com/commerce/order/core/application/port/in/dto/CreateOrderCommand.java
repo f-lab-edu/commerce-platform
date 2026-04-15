@@ -1,6 +1,6 @@
-package com.commerce.platform.core.application.port.in.dto;
+package com.commerce.order.core.application.port.in.dto;
 
-import com.commerce.platform.bootstrap.dto.order.OrderRequest;
+import com.commerce.order.bootstrap.dto.OrderRequest;
 import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.ProductId;

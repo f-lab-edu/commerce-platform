@@ -1,4 +1,4 @@
-package com.commerce.platform.core.domain.aggreate;
+package com.commerce.order.core.domain.aggregate;
 
 import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Quantity;

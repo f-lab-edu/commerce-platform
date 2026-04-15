@@ -1,6 +1,6 @@
-package com.commerce.platform.core.domain.aggreate;
+package com.commerce.order.core.domain.aggregate;
 
-import com.commerce.platform.core.domain.enums.OrderStatus;
+import com.commerce.order.core.domain.enums.OrderStatus;
 import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
@@ -10,10 +10,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
-
-import static com.commerce.platform.core.domain.enums.OrderStatus.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -111,7 +108,7 @@ public class Order {
         this.originAmt = total;
         this.discountAmt = discount;
         this.resultAmt = total.subtract(discount);
-        updateOrderStatus(CONFIRMED);
+        updateOrderStatus(OrderStatus.CONFIRMED);
     }
 
     /** 주문 취소 **/
@@ -120,12 +117,12 @@ public class Order {
             throw new RuntimeException("주문 취소처리 불가");
         }
 
-        updateOrderStatus(CANCELED);
+        updateOrderStatus(OrderStatus.CANCELED);
     }
 
     /** 주문 환불 **/
     public void refund() {
-        updateOrderStatus(REFUND);
+        updateOrderStatus(OrderStatus.REFUND);
     }
 
     /** 환불가능여부 확인 **/
@@ -145,7 +142,7 @@ public class Order {
     public void changeStatusAfterPay(boolean successFLg) {
         if(!successFLg) return;
 
-        updateOrderStatus(PAID);
+        updateOrderStatus(OrderStatus.PAID);
     }
 
     /**

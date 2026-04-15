@@ -1,4 +1,4 @@
-package com.commerce.platform.bootstrap.dto.order;
+package com.commerce.order.bootstrap.dto;
 
 public record OrderRefundRequest (
     String reason,

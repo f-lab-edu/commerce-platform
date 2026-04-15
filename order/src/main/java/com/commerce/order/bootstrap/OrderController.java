@@ -1,11 +1,11 @@
-package com.commerce.platform.bootstrap.customer;
+package com.commerce.order.bootstrap;
 
-import com.commerce.platform.bootstrap.dto.order.OrderRefundRequest;
-import com.commerce.platform.bootstrap.dto.order.OrderRequest;
-import com.commerce.platform.core.application.port.in.OrderUseCase;
-import com.commerce.platform.core.application.port.in.dto.CreateOrderCommand;
-import com.commerce.platform.core.application.port.in.dto.OrderDetailResponse;
-import com.commerce.platform.core.application.port.in.dto.OrderResponse;
+import com.commerce.order.bootstrap.dto.OrderRefundRequest;
+import com.commerce.order.bootstrap.dto.OrderRequest;
+import com.commerce.order.core.application.port.in.OrderUseCase;
+import com.commerce.order.core.application.port.in.dto.CreateOrderCommand;
+import com.commerce.order.core.application.port.in.dto.OrderDetailResponse;
+import com.commerce.order.core.application.port.in.dto.OrderResponse;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.OrderId;
 import lombok.RequiredArgsConstructor;

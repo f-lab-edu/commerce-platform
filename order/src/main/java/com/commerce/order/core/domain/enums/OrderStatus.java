@@ -1,4 +1,4 @@
-package com.commerce.platform.core.domain.enums;
+package com.commerce.order.core.domain.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
