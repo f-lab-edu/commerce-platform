@@ -1,6 +1,6 @@
 package com.commerce.order.core.domain.aggregate;
 
-import com.commerce.platform.core.domain.enums.OrderStatus;
+import com.commerce.order.core.domain.enums.OrderStatus;
 import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
@@ -10,10 +10,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
-
-import static com.commerce.platform.core.domain.enums.OrderStatus.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

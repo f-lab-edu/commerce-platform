@@ -1,13 +1,13 @@
 package com.commerce.order.core.application.port.in;
 
-import com.commerce.platform.bootstrap.dto.order.OrderRefundRequest;
-import com.commerce.platform.core.application.port.in.dto.CreateOrderCommand;
-import com.commerce.platform.core.application.port.in.dto.CreateOrderCommand.OrderItemCommand;
-import com.commerce.platform.core.application.port.in.dto.OrderDetailResponse;
-import com.commerce.platform.core.application.port.in.dto.OrderDetailResponse.OrderItemResponse;
-import com.commerce.platform.core.application.port.in.dto.OrderResponse;
-import com.commerce.platform.core.application.port.out.*;
-import com.commerce.platform.core.domain.aggreate.*;
+import com.commerce.order.bootstrap.dto.OrderRefundRequest;
+import com.commerce.order.core.application.port.in.dto.CreateOrderCommand;
+import com.commerce.order.core.application.port.in.dto.OrderDetailResponse;
+import com.commerce.order.core.application.port.in.dto.OrderResponse;
+import com.commerce.order.core.application.port.out.OrderItemOutPort;
+import com.commerce.order.core.application.port.out.OrderOutputPort;
+import com.commerce.order.core.domain.aggregate.Order;
+import com.commerce.order.core.domain.aggregate.OrderItem;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
@@ -35,7 +35,7 @@ public class OrderUseCaseImpl implements OrderUseCase {
     @Override
     public OrderResponse createOrder(CreateOrderCommand orderCommand) {
         Set<ProductId> pidSet = orderCommand.orderItemCommands().stream()
-                .map(OrderItemCommand::productId)
+                .map(CreateOrderCommand.OrderItemCommand::productId)
                 .collect(Collectors.toSet());
 
         // Order 생성 (주문대기)

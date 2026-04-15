@@ -1,7 +1,6 @@
 package com.commerce.order.core.application.port.in.dto;
 
-
-import com.commerce.platform.core.domain.aggreate.Order;
+import com.commerce.order.core.domain.aggregate.Order;
 
 import java.time.format.DateTimeFormatter;
 

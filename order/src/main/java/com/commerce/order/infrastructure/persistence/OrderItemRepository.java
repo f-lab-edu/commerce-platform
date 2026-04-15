@@ -1,6 +1,6 @@
 package com.commerce.order.infrastructure.persistence;
 
-import com.commerce.platform.core.domain.aggreate.OrderItem;
+import com.commerce.order.core.domain.aggregate.OrderItem;
 import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.OrderId;
 import org.springframework.data.jpa.repository.JpaRepository;

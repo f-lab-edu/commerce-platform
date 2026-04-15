@@ -1,9 +1,9 @@
 package com.commerce.order.infrastructure.adaptor;
 
-import com.commerce.platform.core.application.port.out.OrderOutputPort;
-import com.commerce.platform.core.domain.aggreate.Order;
+import com.commerce.order.core.application.port.out.OrderOutputPort;
+import com.commerce.order.core.domain.aggregate.Order;
+import com.commerce.order.infrastructure.persistence.OrderRepository;
 import com.commerce.shared.vo.CustomerId;
-import com.commerce.platform.infrastructure.persistence.OrderRepository;
 import com.commerce.shared.vo.OrderId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
