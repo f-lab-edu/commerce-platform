@@ -5,12 +5,10 @@ import com.commerce.platform.bootstrap.dto.payment.PaymentRequest;
 import com.commerce.platform.core.application.port.out.CustomerCardOutPort;
 import com.commerce.platform.core.application.port.out.OrderItemOutPort;
 import com.commerce.platform.core.application.port.out.OrderOutputPort;
-import com.commerce.platform.core.application.port.out.ProductOutputPort;
 import com.commerce.platform.core.domain.aggreate.Order;
 import com.commerce.platform.core.domain.aggreate.OrderItem;
 import com.commerce.platform.infrastructure.grpc.PaymentGrpcClient;
 import com.commerce.shared.exception.BusinessException;
-import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Quantity;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +28,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentGrpcClient paymentGrpcClient;
     private final OrderOutputPort orderOutputPort;
     private final OrderItemOutPort orderItemOutPort;
-    private final ProductOutputPort productOutputPort;
+//    private final ProductOutputPort productOutputPort;
     private final CustomerCardOutPort customerCardOutPort;
 
 //    @Async tomcat thread 아닌 경우 advice에서 잡히지 않는다.
@@ -111,14 +109,14 @@ public class PaymentServiceImpl implements PaymentService {
         orderItemOutPort.saveAll(List.of(refreshOrderItem));
 
         // 취소금액 계산
-        Money canceledAmt = productOutputPort.findById(orderItemEntity.getProductId())
-                .get()
-                .getPrice().multiply(request.canceledQuantity());
+//        Money canceledAmt = productOutputPort.findById(orderItemEntity.getProductId())
+//                .get()
+//                .getPrice().multiply(request.canceledQuantity());
 
         // payments 모듈에서 처리
         return paymentGrpcClient.cancelPayment(
                 request.orderId(),
-                canceledAmt,
+                null,
                 request.cancelReason(),
                 "partialCanceled"
         ).thenApply(grpcResponse -> {

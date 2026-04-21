@@ -1,0 +1,35 @@
+package com.commerce.product.bootstrap.customer;
+
+import com.commerce.product.bootstrap.dto.ProductInfo;
+import com.commerce.product.core.application.port.in.ProductUseCase;
+import com.commerce.product.core.application.port.in.dto.ProductDetail;
+import com.commerce.shared.vo.ProductId;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RequiredArgsConstructor
+@RequestMapping("/products")
+@RestController
+public class ProductController {
+    private final ProductUseCase productUseCase;
+
+    @GetMapping
+    public ResponseEntity<List<ProductInfo>> getProducts(@RequestParam(required = false, defaultValue = "0") int page) {
+        List<ProductInfo> productList = productUseCase.getProductList(page)
+                .stream()
+                .map(ProductInfo::from)
+                .toList();
+
+        return ResponseEntity.ok(productList);
+    }
+
+    @GetMapping("/{productId}")
+    public ResponseEntity<ProductDetail> getProduct(@PathVariable String productId) {
+        ProductDetail pd = productUseCase.getProduct(ProductId.of(productId));
+
+        return ResponseEntity.ok(pd);
+    }
+}
