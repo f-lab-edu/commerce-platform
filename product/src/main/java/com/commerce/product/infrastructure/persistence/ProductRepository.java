@@ -1,6 +1,6 @@
-package com.commerce.platform.infrastructure.persistence;
+package com.commerce.product.infrastructure.persistence;
 
-import com.commerce.platform.core.domain.aggreate.Product;
+import com.commerce.product.core.domain.aggregate.Product;
 import com.commerce.shared.vo.ProductId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

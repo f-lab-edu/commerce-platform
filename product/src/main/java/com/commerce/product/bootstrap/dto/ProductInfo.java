@@ -1,7 +1,6 @@
-package com.commerce.platform.bootstrap.dto.product;
+package com.commerce.product.bootstrap.dto;
 
-
-import com.commerce.platform.core.domain.aggreate.Product;
+import com.commerce.product.core.domain.aggregate.Product;
 
 public record ProductInfo (
         String productId,

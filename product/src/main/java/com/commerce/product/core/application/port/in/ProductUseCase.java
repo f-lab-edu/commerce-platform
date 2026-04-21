@@ -1,7 +1,7 @@
-package com.commerce.platform.core.application.port.in;
+package com.commerce.product.core.application.port.in;
 
-import com.commerce.platform.core.application.port.in.dto.ProductDetail;
-import com.commerce.platform.core.domain.aggreate.Product;
+import com.commerce.product.core.application.port.in.dto.ProductDetail;
+import com.commerce.product.core.domain.aggregate.Product;
 import com.commerce.shared.vo.ProductId;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.commerce.platform.core.domain.enums;
+package com.commerce.product.core.domain.enums;
 
 import com.commerce.shared.vo.Quantity;
 import lombok.Getter;

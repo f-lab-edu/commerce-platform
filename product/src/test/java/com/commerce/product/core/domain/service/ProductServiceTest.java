@@ -1,10 +1,10 @@
-package com.commerce.platform.core.domain.service;
+package com.commerce.product.core.domain.service;
 
-import com.commerce.platform.core.application.port.in.ProductUseCaseImpl;
-import com.commerce.platform.core.application.port.in.dto.ProductDetail;
-import com.commerce.platform.core.application.port.out.ProductOutputPort;
-import com.commerce.platform.core.domain.aggreate.Product;
-import com.commerce.platform.core.domain.enums.ProductStatus;
+import com.commerce.product.core.application.port.in.ProductUseCaseImpl;
+import com.commerce.product.core.application.port.in.dto.ProductDetail;
+import com.commerce.product.core.application.port.out.ProductOutputPort;
+import com.commerce.product.core.domain.aggregate.Product;
+import com.commerce.product.core.domain.enums.ProductStatus;
 import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.Quantity;
@@ -42,7 +42,6 @@ class ProductServiceTest {
                 .productName(productName)
                 .description("테스트용입니다")
                 .price(money)
-                .stockQuantity(quantity)
                 .status(ProductStatus.fromStockQuantity(quantity))
                 .build();
 
@@ -51,7 +50,6 @@ class ProductServiceTest {
                 .thenReturn(Optional.of(exProduct));
 
         // when
-
         ProductDetail dto = productService.getProduct(exProduct.getProductId());
 
         // then

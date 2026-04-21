@@ -1,7 +1,7 @@
-package com.commerce.platform.bootstrap.dto.product;
+package com.commerce.product.bootstrap.dto;
 
-import com.commerce.platform.core.domain.aggreate.Product;
-import com.commerce.platform.core.domain.enums.ProductStatus;
+import com.commerce.product.core.domain.aggregate.Product;
+import com.commerce.product.core.domain.enums.ProductStatus;
 import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.Quantity;
@@ -34,7 +34,6 @@ public record CreateProductRequest(
                         .productName(request.name())
                         .description(request.description())
                         .price(Money.of(request.price()))
-                        .stockQuantity(quantity)
                         .status(ProductStatus.fromStockQuantity(quantity))
                         .build();
         }

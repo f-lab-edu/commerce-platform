@@ -1,7 +1,7 @@
-package com.commerce.platform.bootstrap.admin;
+package com.commerce.product.bootstrap.admin;
 
-import com.commerce.platform.bootstrap.dto.product.CreateProductRequest;
-import com.commerce.platform.core.application.port.in.ProductUseCase;
+import com.commerce.product.bootstrap.dto.CreateProductRequest;
+import com.commerce.product.core.application.port.in.ProductUseCase;
 import com.commerce.shared.vo.ProductId;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

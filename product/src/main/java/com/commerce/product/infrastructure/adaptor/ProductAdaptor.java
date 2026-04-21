@@ -1,9 +1,9 @@
-package com.commerce.platform.infrastructure.adaptor;
+package com.commerce.product.infrastructure.adaptor;
 
-import com.commerce.platform.core.application.port.out.ProductOutputPort;
-import com.commerce.platform.core.domain.aggreate.Product;
+import com.commerce.product.core.application.port.out.ProductOutputPort;
+import com.commerce.product.core.domain.aggregate.Product;
 import com.commerce.shared.vo.ProductId;
-import com.commerce.platform.infrastructure.persistence.ProductRepository;
+import com.commerce.product.infrastructure.persistence.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

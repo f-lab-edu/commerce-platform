@@ -1,6 +1,6 @@
-package com.commerce.platform.core.domain.aggreate;
+package com.commerce.product.core.domain.aggregate;
 
-import com.commerce.platform.core.domain.enums.ProductStatus;
+import com.commerce.product.core.domain.enums.ProductStatus;
 import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Money;
 import jakarta.persistence.*;
