@@ -16,6 +16,7 @@ public enum BusinessError {
     // Order 관련
     INVALID_ORDER_ID("O001", "유효하지 않는 주문 ID"),
     INVALID_ORDER_ITEM_ID("O002", "유효하지 주문건 ID"),
+    INVALID_ORDER_STATUS("O003", "주문 상태 변경이 불가합니다"),
 
     // Quantity 관련
     INVALID_QUANTITY("Q001", "유효하지 않은 수량입니다"),
