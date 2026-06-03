@@ -10,11 +10,20 @@ import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
 import com.commerce.shared.vo.ProductId;
 import com.commerce.shared.vo.Quantity;
-import jakarta.persistence.*;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -170,27 +179,14 @@ public class Order {
     }
 
     /**
-     * 주문 취소 — PENDING 또는 CONFIRMED 상태에서만 CANCELED로 전이한다.
+     * 주문 취소 CONFIRMED 상태에서만 CANCELED로 전이한다.
      * 사용자 취소(cancelOrder)와 saga 거절 콜백(orderRejected) 모두에서 호출된다.
      */
     public void cancel() {
-        if (this.status != OrderStatus.PENDING && this.status != OrderStatus.CONFIRMED) {
+        if (this.status != OrderStatus.CONFIRMED) {
             throw new BusinessException(INVALID_ORDER_STATUS);
         }
         updateOrderStatus(OrderStatus.CANCELED);
-    }
-
-    /** 주문 환불 **/
-    public void refund() {
-        validateForCancel();
-        updateOrderStatus(OrderStatus.REFUND);
-    }
-
-    /** 환불가능여부 확인 **/
-    public void validateForCancel() {
-        if(this.status != OrderStatus.PAID) {
-            throw new BusinessException(INVALID_ORDER_STATUS);
-        }
     }
 
     /** 주문 결제 **/
@@ -198,12 +194,6 @@ public class Order {
         if(this.status != OrderStatus.CONFIRMED) {
             throw new BusinessException(INVALID_ORDER_STATUS);
         }
-    }
-
-    public void changeStatusAfterPay(boolean successFLg) {
-        if(!successFLg) return;
-
-        updateOrderStatus(OrderStatus.PAID);
     }
 
     /**

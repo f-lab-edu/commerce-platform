@@ -1,12 +1,10 @@
 package com.commerce.order.core.application.port.in;
 
-import com.commerce.order.bootstrap.dto.OrderRefundRequest;
 import com.commerce.order.core.application.port.in.dto.CreateOrderCommand;
 import com.commerce.order.core.application.port.in.dto.OrderDetailResponse;
 import com.commerce.order.core.application.port.in.dto.OrderResponse;
 import com.commerce.order.core.application.port.out.OrderOutputPort;
 import com.commerce.order.core.domain.aggregate.Order;
-import com.commerce.order.core.domain.enums.OrderStatus;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.kafka.TransactionalEventPublisher;
 import com.commerce.shared.kafka.event.topic.EventTopic;
@@ -80,48 +78,21 @@ public class OrderUseCaseImpl implements OrderUseCase {
         );
     }
 
-    @Override
     @Transactional
+    @Override
     public OrderResponse cancelOrder(OrderId orderId, String reason) {
         Order order = orderOutputPort.findById(orderId)
                 .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
-
         order.cancel();
-        return OrderResponse.ofCanceled(order);
-    }
-
-    @Override
-    public OrderResponse refundOrder(OrderId orderId, OrderRefundRequest request) {
-        Order order = orderOutputPort.findById(orderId)
-                .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
-
-        order.refund();
         return OrderResponse.ofCanceled(order);
     }
 
     @Transactional
     @Override
     public void orderCompleted(OrderId orderId, Money originAmt, Money discountAmt) {
-        Order order = orderOutputPort.findById(orderId).orElse(null);
-        if (order == null || order.getStatus() != OrderStatus.PENDING) {
-            return; // 이미 처리됨
-        }
-
+        Order order = orderOutputPort.findById(orderId)
+                .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
         order.applyAmounts(originAmt, discountAmt);
         order.confirm();
-        order.changeStatusAfterPay(true);
-        orderOutputPort.saveOrder(order);
-    }
-
-    @Transactional
-    @Override
-    public void orderRejected(OrderId orderId) {
-        Order order = orderOutputPort.findById(orderId).orElse(null);
-        if (order.getStatus() != OrderStatus.PENDING) {
-            return; // 멱등: 이미 처리됨
-        }
-
-        order.cancel();
-        orderOutputPort.saveOrder(order);
     }
 }

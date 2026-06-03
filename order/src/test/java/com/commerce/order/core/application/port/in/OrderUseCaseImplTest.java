@@ -27,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -75,39 +74,16 @@ class OrderUseCaseImplTest {
         assertThat(event.items().get(0).quantity()).isEqualTo(2);
     }
 
-    @DisplayName("orderCompleted는 PENDING 주문을 PAID로 전이한다")
+    @DisplayName("orderCompleted는 PENDING 주문을 CONFIRMED로 전이한다")
     @Test
-    void orderCompletedTransitionsToPaid() {
+    void orderCompletedTransitionsPendingToConfirmed() {
         Order order = Order.create(CustomerId.of("C001"), null, oneItem());
         given(orderOutputPort.findById(any())).willReturn(Optional.of(order));
 
         orderUseCaseImpl.orderCompleted(order.getOrderId(), Money.of(10000), Money.of(1000));
 
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.PAID);
-        verify(orderOutputPort).saveOrder(order);
-    }
-
-    @DisplayName("orderCompleted는 PENDING이 아닌 주문을 skip한다")
-    @Test
-    void orderCompletedSkipsNonPending() {
-        Order order = Order.create(CustomerId.of("C001"), null, oneItem());
-        order.cancel();
-        given(orderOutputPort.findById(any())).willReturn(Optional.of(order));
-
-        orderUseCaseImpl.orderCompleted(order.getOrderId(), Money.of(10000), Money.of(1000));
-
-        verify(orderOutputPort, never()).saveOrder(any());
-    }
-
-    @DisplayName("orderRejected는 PENDING 주문을 CANCELED로 전이한다")
-    @Test
-    void orderRejectedTransitionsToCanceled() {
-        Order order = Order.create(CustomerId.of("C001"), null, oneItem());
-        given(orderOutputPort.findById(any())).willReturn(Optional.of(order));
-
-        orderUseCaseImpl.orderRejected(order.getOrderId());
-
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELED);
-        verify(orderOutputPort).saveOrder(order);
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
+        assertThat(order.getOriginAmt().value()).isEqualTo(10000);
+        assertThat(order.getResultAmt().value()).isEqualTo(9000);
     }
 }

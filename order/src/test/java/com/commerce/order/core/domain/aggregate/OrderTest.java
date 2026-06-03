@@ -118,15 +118,14 @@ class OrderTest {
         assertThatThrownBy(order::confirm).isInstanceOf(BusinessException.class);
     }
 
-    @DisplayName("cancel()은 PENDING 상태에서 CANCELED로 전이한다")
+    @DisplayName("cancel()은 PENDING 상태에서 예외를 던진다")
     @Test
-    void cancelFromPending() {
+    void cancelFromPendingFails() {
         Order order = Order.create(CustomerId.of("C001"), null, oneItem());
-        order.cancel();
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELED);
+        assertThatThrownBy(order::cancel).isInstanceOf(BusinessException.class);
     }
 
-    @DisplayName("cancel()은 CONFIRMED 상태에서도 CANCELED로 전이한다")
+    @DisplayName("cancel()은 CONFIRMED 상태에서 CANCELED로 전이한다")
     @Test
     void cancelFromConfirmed() {
         Order order = Order.create(CustomerId.of("C001"), null, oneItem());
@@ -134,15 +133,5 @@ class OrderTest {
         order.confirm();
         order.cancel();
         assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELED);
-    }
-
-    @DisplayName("cancel()은 PAID 상태에서 예외를 던진다")
-    @Test
-    void cancelFromPaidFails() {
-        Order order = Order.create(CustomerId.of("C001"), null, oneItem());
-        order.applyAmounts(Money.of(10000), Money.of(0));
-        order.confirm();
-        order.changeStatusAfterPay(true);
-        assertThatThrownBy(order::cancel).isInstanceOf(BusinessException.class);
     }
 }

@@ -11,7 +11,9 @@ import java.util.List;
 public record CreateOrderCommand(
         CustomerId customerId,
         CouponId couponId,
-        List<OrderItemCommand> orderItemCommands
+        List<OrderItemCommand> orderItemCommands,
+        String payMethod,
+        String payProvider
 ) {
     public record OrderItemCommand(
             ProductId productId,
@@ -30,7 +32,9 @@ public record CreateOrderCommand(
         return new CreateOrderCommand(
                 CustomerId.of(orderRequest.customerId()),
                 CouponId.of(orderRequest.couponId()),
-                itemCommands
+                itemCommands,
+                orderRequest.payMethod(),
+                orderRequest.payProvider()
         );
 
     }
