@@ -2,6 +2,8 @@ package com.commerce.order.infrastructure.adaptor;
 
 import com.commerce.order.core.application.port.out.OrderOutputPort;
 import com.commerce.order.core.domain.aggregate.Order;
+import com.commerce.order.core.domain.aggregate.OrderItem;
+import com.commerce.order.infrastructure.persistence.OrderItemRepository;
 import com.commerce.order.infrastructure.persistence.OrderRepository;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.OrderId;
@@ -15,9 +17,20 @@ import java.util.Optional;
 @Component
 public class OrderAdaptor implements OrderOutputPort {
     private final OrderRepository repository;
+    private final OrderItemRepository orderItemRepository;
+
+    /**
+     * Order 애그리거트를 atomically 저장한다. createOrder 흐름에서는 items가 채워져 있고,
+     * 그 외(상태 전이 후 저장 등)에는 비어있어 Order row만 갱신된다.
+     */
     @Override
     public Order saveOrder(Order order) {
-        return repository.save(order);
+        Order saved = repository.save(order);
+        List<OrderItem> items = order.getItems();
+        if (!items.isEmpty()) {
+            orderItemRepository.saveAll(items);
+        }
+        return saved;
     }
 
     @Override

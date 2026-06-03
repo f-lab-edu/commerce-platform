@@ -40,3 +40,12 @@ out/
 
 ### Claude Code ###
 .claude/
+CLAUDE.md
+**/CLAUDE.md
+/docs
+
+### Superpowers ###
+.superpowers/
+**/.superpowers/
+superpowers/
+

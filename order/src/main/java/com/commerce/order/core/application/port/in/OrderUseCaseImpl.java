@@ -1,68 +1,49 @@
 package com.commerce.order.core.application.port.in;
 
-import com.commerce.order.bootstrap.dto.OrderRefundRequest;
 import com.commerce.order.core.application.port.in.dto.CreateOrderCommand;
 import com.commerce.order.core.application.port.in.dto.OrderDetailResponse;
 import com.commerce.order.core.application.port.in.dto.OrderResponse;
-import com.commerce.order.core.application.port.out.OrderItemOutPort;
 import com.commerce.order.core.application.port.out.OrderOutputPort;
 import com.commerce.order.core.domain.aggregate.Order;
-import com.commerce.order.core.domain.aggregate.OrderItem;
 import com.commerce.shared.exception.BusinessException;
+import com.commerce.shared.kafka.TransactionalEventPublisher;
+import com.commerce.shared.kafka.event.topic.EventTopic;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
-import com.commerce.shared.vo.ProductId;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
-import static com.commerce.shared.exception.BusinessError.*;
+import static com.commerce.shared.exception.BusinessError.INVALID_ORDER_ID;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class OrderUseCaseImpl implements OrderUseCase {
     private final OrderOutputPort orderOutputPort;
-    private final OrderItemOutPort orderItemOutPort;
-    private final ProductOutputPort productOutputPort;
-//    private final CouponOutPort couponOutPort; // todo 이런 부분은 어떻게 하지?
-//    private final CouponIssueOutPort couponIssueOutPort;
+    private final TransactionalEventPublisher transactionalEventPublisher;
 
     @Override
+    @Transactional
     public OrderResponse createOrder(CreateOrderCommand orderCommand) {
-        Set<ProductId> pidSet = orderCommand.orderItemCommands().stream()
-                .map(CreateOrderCommand.OrderItemCommand::productId)
-                .collect(Collectors.toSet());
-
-        // Order 생성 (주문대기)
-        Order order = Order.create(orderCommand.customerId(),
-                orderCommand.couponId());
-
-        // OrderItems 생성
-        List<OrderItem> orderItems = orderCommand.orderItemCommands().stream()
-                .map(item -> {
-                    return OrderItem.create(
-                            order.getOrderId(),
-                            item.productId(),
-                            item.quantity());
-                })
+        List<Order.ItemSpec> itemSpecs = orderCommand.orderItemCommands().stream()
+                .map(item -> new Order.ItemSpec(item.productId(), item.quantity()))
                 .toList();
-        orderItemOutPort.saveAll(orderItems);
 
-        // 원금액 계산
-        Money totalAmt = calculateTotalAmountFromProducts(orderItems);
-
-        // 쿠폰적용
-        Money discountAmt = Money.of(0L);
-//        Money discountAmt = applyCoupon(order, orderCommand.couponId());
-
-        // 주문완료
-        order.confirm(totalAmt, discountAmt);
+        Order order = Order.create(orderCommand.customerId(), orderCommand.couponId(), itemSpecs);
         orderOutputPort.saveOrder(order);
+
+        transactionalEventPublisher.publish(
+                EventTopic.ORDER_CREATED_TOPIC,
+                order.toCreatedEvent(orderCommand.payMethod(), orderCommand.payProvider())
+        );
 
         return OrderResponse.from(order);
     }
@@ -83,24 +64,8 @@ public class OrderUseCaseImpl implements OrderUseCase {
         Order order = orderOutputPort.findById(orderId)
                 .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
 
-        List<OrderItem> orderItems = orderItemOutPort.findByOrderId(order.getOrderId());
-
-        List<ProductId> productIds = orderItems.stream()
-                .map(oi -> oi.getProductId())
-                .toList();
-
-        Map<ProductId, Product> productMap = productOutputPort.findByIdIn(productIds).stream()
-                .collect(Collectors.toMap(Product::getProductId, Function.identity()));
-
-        List<OrderItemResponse> items = orderItems.stream()
-                .map(item -> {
-                    Product product = productMap.get(item);
-                    return new OrderItemResponse(product.getProductId().id(),
-                            product.getProductName(),
-                            product.getPrice().value(),
-                            item.getQuantity().value());
-                })
-                .toList();
+        // todo: Task 4 이후 상품 정보는 이벤트 기반으로 대체 예정
+        List<OrderDetailResponse.OrderItemResponse> items = List.of();
 
         return new OrderDetailResponse(
                 orderId.id(),
@@ -113,68 +78,21 @@ public class OrderUseCaseImpl implements OrderUseCase {
         );
     }
 
+    @Transactional
     @Override
     public OrderResponse cancelOrder(OrderId orderId, String reason) {
         Order order = orderOutputPort.findById(orderId)
                 .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
-
         order.cancel();
         return OrderResponse.ofCanceled(order);
     }
 
+    @Transactional
     @Override
-    public OrderResponse refundOrder(OrderId orderId, OrderRefundRequest request) {
+    public void orderCompleted(OrderId orderId, Money originAmt, Money discountAmt) {
         Order order = orderOutputPort.findById(orderId)
                 .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
-
-        order.refund();
-        return OrderResponse.ofCanceled(order);
+        order.applyAmounts(originAmt, discountAmt);
+        order.confirm();
     }
-
-    /**
-     * Todo 여긴 어떻게 ,,,,,
-     * 쿠폰조회 및 적용
-     */
-    /*private Money applyCoupon(Order order, CouponId couponId) {
-        if(couponId == null) return Money.of(0);
-        CouponIssueId couponIssueId = new CouponIssueId(couponId, order.getCustomerId());
-
-        // 발급된 쿠폰 확인
-        CouponIssues issuedCoupon = couponIssueOutPort.findByCouponIssueId(couponIssueId)
-                .orElseThrow(() -> new BusinessException(NOT_ISSUED_COUPON));
-        issuedCoupon.valid();
-
-        // 쿠폰 정보 조회
-        Coupon coupon = couponOutPort.findById(issuedCoupon.getCouponIssueId().couponId())
-                .orElseThrow(() -> new BusinessException(INVALID_COUPON));
-        Money discountAmt = coupon.calculateDiscountAmt(order.getOriginAmt());
-
-        // 발급쿠폰 적용
-        issuedCoupon.use(order.getOrderId());
-        couponIssueOutPort.save(issuedCoupon);
-
-        return discountAmt;
-    }*/
-
-    /**
-     * 총 주문금액 계산
-     */
-    private Money calculateTotalAmountFromProducts(List<OrderItem> orderItems) {
-        List<ProductId> productIds = orderItems.stream()
-                .map(oi -> oi.getProductId())
-                .toList();
-
-        Map<ProductId, Product> productMap = productOutputPort.findByIdIn(productIds).stream()
-                .collect(Collectors.toMap(Product::getProductId, Function.identity()));
-
-        return orderItems.stream()
-                .map(item -> {
-                    Product product = productMap.get(item.getProductId());
-                    product.decreaseStock(item.getQuantity()); // todo 재고 소진 테스트
-                    return product.getPrice()
-                            .multiply(item.getQuantity());
-                })
-                .reduce(Money.of(0), Money::add);
-    }
-
 }

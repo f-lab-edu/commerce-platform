@@ -1,6 +1,5 @@
 package com.commerce.order.bootstrap;
 
-import com.commerce.order.bootstrap.dto.OrderRefundRequest;
 import com.commerce.order.bootstrap.dto.OrderRequest;
 import com.commerce.order.core.application.port.in.OrderUseCase;
 import com.commerce.order.core.application.port.in.dto.CreateOrderCommand;
@@ -8,9 +7,17 @@ import com.commerce.order.core.application.port.in.dto.OrderDetailResponse;
 import com.commerce.order.core.application.port.in.dto.OrderResponse;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.OrderId;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -21,7 +28,7 @@ public class OrderController {
     private final OrderUseCase orderUseCase;
 
     @PostMapping
-    public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest orderRequest) {
+    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest orderRequest) {
         CreateOrderCommand orderCommand = CreateOrderCommand.from(orderRequest);
         OrderResponse order = orderUseCase.createOrder(orderCommand);
 
@@ -45,15 +52,8 @@ public class OrderController {
 
     @PatchMapping("/{orderId}/cancel")
     public ResponseEntity<OrderResponse> cancelOrder(@PathVariable String orderId,
-                                     @RequestBody String reson) {
-        OrderResponse canceledOrder = orderUseCase.cancelOrder(OrderId.of(orderId), reson);
+                                     @RequestBody String reason) {
+        OrderResponse canceledOrder = orderUseCase.cancelOrder(OrderId.of(orderId), reason);
         return ResponseEntity.ok(canceledOrder);
-    }
-
-    @PostMapping("/{orderId}/refund")
-    public ResponseEntity<OrderResponse> refundOrder(@PathVariable String orderId,
-                                           @RequestBody OrderRefundRequest request) {
-        OrderResponse refundedOrder = orderUseCase.refundOrder(OrderId.of(orderId), request);
-        return ResponseEntity.ok(refundedOrder);
     }
 }
