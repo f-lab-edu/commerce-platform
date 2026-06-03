@@ -10,7 +10,6 @@ import com.commerce.shared.vo.OrderId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,10 +41,5 @@ public class OrderAdaptor implements OrderOutputPort {
     @Override
     public List<Order> findByCustomerId(CustomerId customerId) {
         return repository.findByCustomerId(customerId);
-    }
-
-    @Override
-    public List<Order> findPendingOrdersBefore(LocalDateTime threshold) {
-        return repository.findByStatusPendingAndOrderedAtBefore(threshold);
     }
 }
