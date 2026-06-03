@@ -27,6 +27,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.commerce.order.core.domain.enums.OrderStatus.CANCELED;
+import static com.commerce.order.core.domain.enums.OrderStatus.CONFIRMED;
+import static com.commerce.order.core.domain.enums.OrderStatus.PENDING;
+import static com.commerce.shared.exception.BusinessError.INVALID_ORDER_CANCEL;
+import static com.commerce.shared.exception.BusinessError.INVALID_ORDER_CONFIRM;
 import static com.commerce.shared.exception.BusinessError.INVALID_ORDER_STATUS;
 import static com.commerce.shared.exception.BusinessError.INVALID_REQUEST_VALUE;
 
@@ -102,7 +107,7 @@ public class Order {
     public static Order create(
             CustomerId customerId,
             CouponId couponId,
-            List<ItemSpec> itemSpecs
+            List<ItemEntry> itemSpecs
     ) {
         if (itemSpecs == null || itemSpecs.isEmpty()) {
             throw new BusinessException(INVALID_REQUEST_VALUE);
@@ -120,7 +125,7 @@ public class Order {
                 .discountAmt(Money.of(0))
                 .originAmt(Money.of(0))
                 .resultAmt(Money.of(0))
-                .status(OrderStatus.PENDING)
+                .status(PENDING)
                 .orderedAt(LocalDateTime.now())
                 .build();
         order.items = items;
@@ -136,7 +141,7 @@ public class Order {
      */
     public OrderCreatedEvent toCreatedEvent(String payMethod, String payProvider) {
         List<ItemEntry> entries = items.stream()
-                .map(oi -> new ItemEntry(oi.getProductId().id(), oi.getQuantity().value()))
+                .map(oi -> new ItemEntry(oi.getProductId(), oi.getQuantity()))
                 .toList();
         return new OrderCreatedEvent(
                 orderId.id(),
@@ -150,14 +155,12 @@ public class Order {
         );
     }
 
-    public record ItemSpec(ProductId productId, Quantity quantity) {}
-
     /**
      * 결제 완료 통지 시 금액을 세팅한다.
      * 외부에서 전달받은 원금/할인 금액을 Order에 반영하고 결제 금액을 계산한다.
      */
     public void applyAmounts(Money originAmt, Money discountAmt) {
-        if (this.status != OrderStatus.PENDING) {
+        if (this.status != PENDING) {
             throw new BusinessException(INVALID_ORDER_STATUS);
         }
         this.originAmt = originAmt;
@@ -169,31 +172,23 @@ public class Order {
      * 주문 확정 - 금액이 세팅된 상태에서 CONFIRMED로 전이
      */
     public void confirm() {
-        if (this.status != OrderStatus.PENDING) {
-            throw new BusinessException(INVALID_ORDER_STATUS);
+        if (this.status == CANCELED) {
+            throw new BusinessException(INVALID_ORDER_CANCEL);
+        } else if (this.status == CONFIRMED) {
+            throw new BusinessException(INVALID_ORDER_CONFIRM);
         }
-        if (this.originAmt.value() == 0) {
-            throw new BusinessException(INVALID_ORDER_STATUS);
-        }
-        updateOrderStatus(OrderStatus.CONFIRMED);
+        updateOrderStatus(CONFIRMED);
     }
 
     /**
      * 주문 취소 CONFIRMED 상태에서만 CANCELED로 전이한다.
-     * 사용자 취소(cancelOrder)와 saga 거절 콜백(orderRejected) 모두에서 호출된다.
+     * 사용자 취소(cancelOrder)와 saga 거절 콜백에서 호출된다.
      */
     public void cancel() {
-        if (this.status != OrderStatus.CONFIRMED) {
-            throw new BusinessException(INVALID_ORDER_STATUS);
+        if(this.status == CANCELED) {
+            throw new BusinessException(INVALID_ORDER_CANCEL);
         }
-        updateOrderStatus(OrderStatus.CANCELED);
-    }
-
-    /** 주문 결제 **/
-    public void validForPay() {
-        if(this.status != OrderStatus.CONFIRMED) {
-            throw new BusinessException(INVALID_ORDER_STATUS);
-        }
+        updateOrderStatus(CANCELED);
     }
 
     /**

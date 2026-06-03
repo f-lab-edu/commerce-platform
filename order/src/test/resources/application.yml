@@ -26,6 +26,16 @@ spring:
       port: 6379
       password: je1234
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: order-service-test
+      auto-offset-reset: latest
+      enable-auto-commit: false
+
   docker:
     compose:
       enabled: false
+
+aes256:
+  key: 61qDonoZcEtIEvUZVPkIKIYovHH82rXtK7T1g/rcc1k=

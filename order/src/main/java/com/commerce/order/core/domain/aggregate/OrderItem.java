@@ -1,10 +1,17 @@
 package com.commerce.order.core.domain.aggregate;
 
-import com.commerce.shared.vo.ProductId;
-import com.commerce.shared.vo.Quantity;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.vo.OrderId;
-import jakarta.persistence.*;
+import com.commerce.shared.vo.ProductId;
+import com.commerce.shared.vo.Quantity;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
