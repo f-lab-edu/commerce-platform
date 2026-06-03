@@ -6,6 +6,7 @@ import com.commerce.order.core.application.port.out.OrderOutputPort;
 import com.commerce.order.core.domain.aggregate.Order;
 import com.commerce.order.core.domain.enums.OrderStatus;
 import com.commerce.shared.kafka.TransactionalEventPublisher;
+import com.commerce.shared.kafka.event.dto.ItemEntry;
 import com.commerce.shared.kafka.event.dto.OrderCreatedEvent;
 import com.commerce.shared.kafka.event.topic.EventTopic;
 import com.commerce.shared.vo.CustomerId;
@@ -37,8 +38,8 @@ class OrderUseCaseImplTest {
 
     @InjectMocks OrderUseCaseImpl orderUseCaseImpl;
 
-    private static List<Order.ItemSpec> oneItem() {
-        return List.of(new Order.ItemSpec(ProductId.of("P001"), Quantity.create(2)));
+    private static List<ItemEntry> oneItem() {
+        return List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(2)));
     }
 
     @DisplayName("createOrder는 Order 애그리거트를 한 번에 저장하고 OrderCreatedEvent를 발행한다")
@@ -70,8 +71,8 @@ class OrderUseCaseImplTest {
         assertThat(event.payMethod()).isEqualTo("CARD");
         assertThat(event.payProvider()).isEqualTo("shinHan");
         assertThat(event.items()).hasSize(1);
-        assertThat(event.items().get(0).productId()).isEqualTo("P001");
-        assertThat(event.items().get(0).quantity()).isEqualTo(2);
+        assertThat(event.items().get(0).productId()).isEqualTo(ProductId.of("P001"));
+        assertThat(event.items().get(0).quantity()).isEqualTo(Quantity.create(2));
     }
 
     @DisplayName("orderCompleted는 PENDING 주문을 CONFIRMED로 전이한다")

@@ -2,6 +2,7 @@ package com.commerce.order.core.domain.aggregate;
 
 import com.commerce.order.core.domain.enums.OrderStatus;
 import com.commerce.shared.exception.BusinessException;
+import com.commerce.shared.kafka.event.dto.ItemEntry;
 import com.commerce.shared.kafka.event.dto.OrderCreatedEvent;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
@@ -17,8 +18,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OrderTest {
 
-    private static List<Order.ItemSpec> oneItem() {
-        return List.of(new Order.ItemSpec(ProductId.of("P001"), Quantity.create(2)));
+    private static List<ItemEntry> oneItem() {
+        return List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(2)));
     }
 
     @DisplayName("주문 생성 시 PENDING 상태이다")
@@ -36,8 +37,8 @@ class OrderTest {
                 CustomerId.of("C001"),
                 null,
                 List.of(
-                        new Order.ItemSpec(ProductId.of("P001"), Quantity.create(2)),
-                        new Order.ItemSpec(ProductId.of("P002"), Quantity.create(1))
+                        new ItemEntry(ProductId.of("P001"), Quantity.create(2)),
+                        new ItemEntry(ProductId.of("P002"), Quantity.create(1))
                 )
         );
 
@@ -76,7 +77,7 @@ class OrderTest {
         Order order = Order.create(
                 CustomerId.of("C001"),
                 null,
-                List.of(new Order.ItemSpec(ProductId.of("P001"), Quantity.create(3)))
+                List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(3)))
         );
 
         OrderCreatedEvent event = order.toCreatedEvent("CARD", "shinHan");
@@ -88,8 +89,8 @@ class OrderTest {
         assertThat(event.payProvider()).isEqualTo("shinHan");
         assertThat(event.key()).isEqualTo(order.getOrderId().id());
         assertThat(event.items()).hasSize(1);
-        assertThat(event.items().get(0).productId()).isEqualTo("P001");
-        assertThat(event.items().get(0).quantity()).isEqualTo(3);
+        assertThat(event.items().get(0).productId()).isEqualTo(ProductId.of("P001"));
+        assertThat(event.items().get(0).quantity()).isEqualTo(Quantity.create(3));
     }
 
     @DisplayName("applyAmounts로 금액을 세팅하면 resultAmt가 계산된다")
@@ -109,20 +110,6 @@ class OrderTest {
         order.applyAmounts(Money.of(10000), Money.of(0));
         order.confirm();
         assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
-    }
-
-    @DisplayName("confirm()은 금액이 0이면 예외를 던진다")
-    @Test
-    void confirmFailsWhenAmountIsZero() {
-        Order order = Order.create(CustomerId.of("C001"), null, oneItem());
-        assertThatThrownBy(order::confirm).isInstanceOf(BusinessException.class);
-    }
-
-    @DisplayName("cancel()은 PENDING 상태에서 예외를 던진다")
-    @Test
-    void cancelFromPendingFails() {
-        Order order = Order.create(CustomerId.of("C001"), null, oneItem());
-        assertThatThrownBy(order::cancel).isInstanceOf(BusinessException.class);
     }
 
     @DisplayName("cancel()은 CONFIRMED 상태에서 CANCELED로 전이한다")

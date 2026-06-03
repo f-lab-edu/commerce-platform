@@ -7,6 +7,7 @@ import com.commerce.order.core.application.port.out.OrderOutputPort;
 import com.commerce.order.core.domain.aggregate.Order;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.kafka.TransactionalEventPublisher;
+import com.commerce.shared.kafka.event.dto.ItemEntry;
 import com.commerce.shared.kafka.event.topic.EventTopic;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
@@ -33,8 +34,8 @@ public class OrderUseCaseImpl implements OrderUseCase {
     @Override
     @Transactional
     public OrderResponse createOrder(CreateOrderCommand orderCommand) {
-        List<Order.ItemSpec> itemSpecs = orderCommand.orderItemCommands().stream()
-                .map(item -> new Order.ItemSpec(item.productId(), item.quantity()))
+        List<ItemEntry> itemSpecs = orderCommand.orderItemCommands().stream()
+                .map(item -> new ItemEntry(item.productId(), item.quantity()))
                 .toList();
 
         Order order = Order.create(orderCommand.customerId(), orderCommand.couponId(), itemSpecs);
@@ -78,6 +79,9 @@ public class OrderUseCaseImpl implements OrderUseCase {
         );
     }
 
+    /**
+     * 사용자 취소, 주문 보상트랜잭션
+     */
     @Transactional
     @Override
     public OrderResponse cancelOrder(OrderId orderId, String reason) {
