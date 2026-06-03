@@ -1,16 +1,25 @@
 package com.commerce.order.core.domain.aggregate;
 
 import com.commerce.order.core.domain.enums.OrderStatus;
+import com.commerce.shared.exception.BusinessException;
+import com.commerce.shared.kafka.event.dto.ItemEntry;
+import com.commerce.shared.kafka.event.dto.OrderCreatedEvent;
 import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
+import com.commerce.shared.vo.ProductId;
+import com.commerce.shared.vo.Quantity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.List;
+
+import static com.commerce.shared.exception.BusinessError.INVALID_ORDER_STATUS;
+import static com.commerce.shared.exception.BusinessError.INVALID_REQUEST_VALUE;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -41,7 +50,7 @@ public class Order {
     private Money resultAmt;     // 최종금액
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 4)
+    @Column(name = "status", nullable = false, length = 20)
     private OrderStatus status;
 
     @Column(name = "ordered_at", nullable = false)
@@ -49,6 +58,13 @@ public class Order {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    /**
+     * 애그리거트 내부 컬렉션. JPA 매핑 대신 도메인이 메모리에서만 보유한다.
+     * createOrder 흐름에서만 채워지며, JPA로 로드한 Order에서는 비어있다.
+     */
+    @Transient
+    private List<OrderItem> items = List.of();
 
 
     @Builder
@@ -76,10 +92,20 @@ public class Order {
 
     public static Order create(
             CustomerId customerId,
-            CouponId couponId
+            CouponId couponId,
+            List<ItemSpec> itemSpecs
     ) {
-        return Order.builder()
-                .orderId(OrderId.create())
+        if (itemSpecs == null || itemSpecs.isEmpty()) {
+            throw new BusinessException(INVALID_REQUEST_VALUE);
+        }
+
+        OrderId orderId = OrderId.create();
+        List<OrderItem> items = itemSpecs.stream()
+                .map(spec -> OrderItem.create(orderId, spec.productId(), spec.quantity()))
+                .toList();
+
+        Order order = Order.builder()
+                .orderId(orderId)
                 .customerId(customerId)
                 .couponId(couponId)
                 .discountAmt(Money.of(0))
@@ -88,54 +114,89 @@ public class Order {
                 .status(OrderStatus.PENDING)
                 .orderedAt(LocalDateTime.now())
                 .build();
+        order.items = items;
+        return order;
+    }
+
+    public List<OrderItem> getItems() {
+        return List.copyOf(items);
     }
 
     /**
-     * 주문 완료처리
-     * 할인금액, 최종금액 계산
+     * 주문 생성 이벤트 페이로드 조립. 외부 컨텍스트(결제 수단/PG)만 인자로 받는다.
      */
-    public void confirm(Money total, Money discount) {
-        if(this.status != OrderStatus.PENDING) {
-            throw new RuntimeException("주문완료처리 불가");
-        }
+    public OrderCreatedEvent toCreatedEvent(String payMethod, String payProvider) {
+        List<ItemEntry> entries = items.stream()
+                .map(oi -> new ItemEntry(oi.getProductId().id(), oi.getQuantity().value()))
+                .toList();
+        return new OrderCreatedEvent(
+                orderId.id(),
+                customerId.id(),
+                couponId != null ? couponId.id() : null,
+                entries,
+                payMethod,
+                payProvider,
+                orderId.id(),
+                LocalDateTime.now()
+        );
+    }
 
-        if(total == Money.of(0)
-                || (this.couponId != null && discount == Money.of(0))
-        ) {
-            throw new RuntimeException("주문생성 오류");
-        }
+    public record ItemSpec(ProductId productId, Quantity quantity) {}
 
-        this.originAmt = total;
-        this.discountAmt = discount;
-        this.resultAmt = total.subtract(discount);
+    /**
+     * 결제 완료 통지 시 금액을 세팅한다.
+     * 외부에서 전달받은 원금/할인 금액을 Order에 반영하고 결제 금액을 계산한다.
+     */
+    public void applyAmounts(Money originAmt, Money discountAmt) {
+        if (this.status != OrderStatus.PENDING) {
+            throw new BusinessException(INVALID_ORDER_STATUS);
+        }
+        this.originAmt = originAmt;
+        this.discountAmt = discountAmt;
+        this.resultAmt = originAmt.subtract(discountAmt);
+    }
+
+    /**
+     * 주문 확정 - 금액이 세팅된 상태에서 CONFIRMED로 전이
+     */
+    public void confirm() {
+        if (this.status != OrderStatus.PENDING) {
+            throw new BusinessException(INVALID_ORDER_STATUS);
+        }
+        if (this.originAmt.value() == 0) {
+            throw new BusinessException(INVALID_ORDER_STATUS);
+        }
         updateOrderStatus(OrderStatus.CONFIRMED);
     }
 
-    /** 주문 취소 **/
+    /**
+     * 주문 취소 — PENDING 또는 CONFIRMED 상태에서만 CANCELED로 전이한다.
+     * 사용자 취소(cancelOrder)와 saga 거절 콜백(orderRejected) 모두에서 호출된다.
+     */
     public void cancel() {
-        if(this.status != OrderStatus.CONFIRMED) {
-            throw new RuntimeException("주문 취소처리 불가");
+        if (this.status != OrderStatus.PENDING && this.status != OrderStatus.CONFIRMED) {
+            throw new BusinessException(INVALID_ORDER_STATUS);
         }
-
         updateOrderStatus(OrderStatus.CANCELED);
     }
 
     /** 주문 환불 **/
     public void refund() {
+        validateForCancel();
         updateOrderStatus(OrderStatus.REFUND);
     }
 
     /** 환불가능여부 확인 **/
     public void validateForCancel() {
         if(this.status != OrderStatus.PAID) {
-            throw new RuntimeException("환불 불가능한 주문 상태입니다");
+            throw new BusinessException(INVALID_ORDER_STATUS);
         }
     }
 
     /** 주문 결제 **/
     public void validForPay() {
         if(this.status != OrderStatus.CONFIRMED) {
-            throw new RuntimeException("결제처리 불가");
+            throw new BusinessException(INVALID_ORDER_STATUS);
         }
     }
 
