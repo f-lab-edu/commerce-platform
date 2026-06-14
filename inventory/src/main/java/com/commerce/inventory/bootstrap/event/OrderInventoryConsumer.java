@@ -8,6 +8,7 @@ import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.kafka.TransactionalEventPublisher;
 import com.commerce.shared.kafka.event.dto.InventoryDeductFailedEvent;
 import com.commerce.shared.kafka.event.dto.InventoryDeductedEvent;
+import com.commerce.shared.kafka.event.dto.InventoryRestoredEvent;
 import com.commerce.shared.kafka.event.topic.EventTopic;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -81,6 +82,13 @@ public class OrderInventoryConsumer {
 
         boolean restored = inventoryUseCase.release(event.orderId(), List.of(event.item()));
         if (restored) {
+            // Redis가 실제 복원한 주문만 원장에 전파한다(팬텀 가드는 release 내부 Lua가 이미 통과시킴).
+            transactionalEventPublisher.publish(EventTopic.INVENTORY_RESTORED_TOPIC,
+                    new InventoryRestoredEvent(
+                            event.orderId(), List.of(event.item()),
+                            event.orderId(), LocalDateTime.now()
+                    )
+            );
             log.info("[Inventory] 재고 복원 완료 - orderId: {}", event.orderId());
         } else {
             log.info("[Inventory] 재고 복원 skip(미차감 또는 이미 복원) - orderId: {}", event.orderId());
