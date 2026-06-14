@@ -1,5 +1,9 @@
 package com.commerce.shared.kafka.event.dto;
 
+import com.commerce.shared.vo.ProductId;
+import com.commerce.shared.vo.Quantity;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
@@ -10,7 +14,7 @@ class EventDtoTest {
     @DisplayName("OrderCreatedEvent는 DomainEvent 인터페이스를 구현한다")
     @Test
     void orderCreatedEventImplementsDomainEvent() {
-        List<ItemEntry> items = List.of(new ItemEntry("P001", 2));
+        List<ItemEntry> items = List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(2)));
         LocalDateTime now = LocalDateTime.now();
         OrderCreatedEvent event = new OrderCreatedEvent("O001", "C001", null, items, "CARD", "shinHan", "O001", now);
         assertThat(event).isInstanceOf(DomainEvent.class);
@@ -32,8 +36,27 @@ class EventDtoTest {
     @DisplayName("ItemEntry는 productId와 quantity를 포함한다")
     @Test
     void itemEntryContainsFields() {
-        ItemEntry entry = new ItemEntry("P001", 3);
-        assertThat(entry.productId()).isEqualTo("P001");
-        assertThat(entry.quantity()).isEqualTo(3);
+        ItemEntry entry = new ItemEntry(ProductId.of("P001"), Quantity.create(3));
+        assertThat(entry.productId()).isEqualTo(ProductId.of("P001"));
+        assertThat(entry.quantity()).isEqualTo(Quantity.create(3));
+    }
+
+    @Test
+    @DisplayName("StockCommandEvent는 주문 컨텍스트 스칼라를 운반하고 JSON 직렬화/역직렬화된다")
+    void stockCommandEvent_carriesOrderContext() throws Exception {
+        ObjectMapper om = new ObjectMapper().registerModule(new JavaTimeModule());
+        StockCommandEvent e = new StockCommandEvent(
+                StockCommandType.DEDUCT, "O1", "P1", 3L, 2,
+                "C1", "CP1", "CARD", "TOSS",
+                "P1", LocalDateTime.now());
+
+        String json = om.writeValueAsString(e);
+        StockCommandEvent back = om.readValue(json, StockCommandEvent.class);
+
+        assertThat(back.customerId()).isEqualTo("C1");
+        assertThat(back.couponId()).isEqualTo("CP1");
+        assertThat(back.payMethod()).isEqualTo("CARD");
+        assertThat(back.payProvider()).isEqualTo("TOSS");
+        assertThat(back.key()).isEqualTo("P1");
     }
 }
