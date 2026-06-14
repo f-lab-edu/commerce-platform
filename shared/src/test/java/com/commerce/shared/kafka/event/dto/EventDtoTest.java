@@ -42,6 +42,23 @@ class EventDtoTest {
     }
 
     @Test
+    @DisplayName("OrderAggregateEvent는 차감수량과 주문 컨텍스트를 운반한다")
+    void orderAggregateEvent_carriesQuantityAndContext() throws Exception {
+        ObjectMapper om = new ObjectMapper().registerModule(new JavaTimeModule());
+        OrderAggregateEvent e = new OrderAggregateEvent(
+                "O1", "P1", 3L, true, 2,
+                "C1", "CP1", "CARD", "TOSS",
+                "O1", LocalDateTime.now());
+
+        OrderAggregateEvent back = om.readValue(om.writeValueAsString(e), OrderAggregateEvent.class);
+
+        assertThat(back.quantity()).isEqualTo(3L);
+        assertThat(back.success()).isTrue();
+        assertThat(back.customerId()).isEqualTo("C1");
+        assertThat(back.key()).isEqualTo("O1");
+    }
+
+    @Test
     @DisplayName("StockCommandEvent는 주문 컨텍스트 스칼라를 운반하고 JSON 직렬화/역직렬화된다")
     void stockCommandEvent_carriesOrderContext() throws Exception {
         ObjectMapper om = new ObjectMapper().registerModule(new JavaTimeModule());
