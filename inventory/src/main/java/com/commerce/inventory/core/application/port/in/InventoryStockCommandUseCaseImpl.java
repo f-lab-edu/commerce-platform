@@ -69,9 +69,14 @@ public class InventoryStockCommandUseCaseImpl implements InventoryStockCommandUs
     }
 
     private void handleReplenish(StockCommandEvent event, ProductId productId) {
-        stockPort.replenish(productId, event.quantity());
-        log.info("[Inventory-B2] 보상 복원 - orderId: {}, productId: {}, qty: {}",
-                event.orderId(), event.productId(), event.quantity());
+        int affected = stockPort.replenish(productId, event.quantity());
+        if (affected == 0) {
+            log.warn("[Inventory-B2] 보상 복원 대상 없음(상품 행 없음) - orderId: {}, productId: {}, qty: {}",
+                    event.orderId(), event.productId(), event.quantity());
+        } else {
+            log.info("[Inventory-B2] 보상 복원 - orderId: {}, productId: {}, qty: {}",
+                    event.orderId(), event.productId(), event.quantity());
+        }
         // REPLENISH는 재집계 신호를 발행하지 않는다(복원은 보상 종착점).
     }
 }

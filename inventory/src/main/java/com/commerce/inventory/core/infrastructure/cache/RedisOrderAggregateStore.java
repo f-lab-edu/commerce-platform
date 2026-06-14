@@ -30,8 +30,11 @@ public class RedisOrderAggregateStore implements OrderAggregateStore {
         String key = AGG_PREFIX + orderId;
         String value = success ? String.valueOf(quantity) : FAIL_MARK;
         redis.opsForHash().put(key, productId.id(), value); // HSET (field 단위 멱등)
-        redis.expire(key, AGG_TTL);
         Long len = redis.opsForHash().size(key);            // HLEN
+        // backstop TTL은 키 최초 생성 시 1회만 설정(orderId 파티션 직렬화로 race 없음).
+        if (len != null && len == 1L) {
+            redis.expire(key, AGG_TTL);
+        }
         return len == null ? 0L : len;
     }
 

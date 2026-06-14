@@ -46,14 +46,15 @@ public class OrderAggregateUseCaseImpl implements OrderAggregateUseCase {
 
         long received = store.record(orderId, productId, event.success(), event.quantity());
 
-        if (received < event.totalItems()) {
-            return; // 아직 미완료
+        // 정확히 totalItems에 도달한 도착만 finalizer. (미만=미완료, 초과=비정상 재유입 → 이미 finalize·정리됨, skip)
+        if (received != event.totalItems()) {
+            return;
         }
         // received == totalItems : 유일 finalizer (HSET field 멱등으로 HLEN이 정확히 한 번 임계 도달)
-        finalize(event);
+        finalizeOrder(event);
     }
 
-    private void finalize(OrderAggregateEvent event) {
+    private void finalizeOrder(OrderAggregateEvent event) {
         String orderId = event.orderId();
         Map<String, String> hash = store.getAll(orderId);
 
@@ -63,7 +64,7 @@ public class OrderAggregateUseCaseImpl implements OrderAggregateUseCase {
             if (FAIL_MARK.equals(e.getValue())) {
                 failed.add(e.getKey());
             } else {
-                succeeded.add(new ItemEntry(ProductId.of(e.getKey()), Quantity.create(Long.parseLong(e.getValue()))));
+                succeeded.add(new ItemEntry(ProductId.of(e.getKey()), Quantity.create(parseQuantity(orderId, e.getKey(), e.getValue()))));
             }
         }
 
@@ -103,5 +104,16 @@ public class OrderAggregateUseCaseImpl implements OrderAggregateUseCase {
     private void publishDeductFailed(String orderId, String reason) {
         eventPublisher.publish(EventTopic.INVENTORY_DEDUCT_FAILED_TOPIC,
                 new InventoryDeductFailedEvent(orderId, reason, orderId, LocalDateTime.now()));
+    }
+
+    /** 집계 HASH의 성공 값(차감수량)을 파싱한다. 손상된 값이면 어느 주문/상품인지 남기고 재던진다(DLT 진단용). */
+    private long parseQuantity(String orderId, String productId, String value) {
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            log.error("[Inventory-B2] 집계 HASH 값 손상 - orderId: {}, productId: {}, value: {}",
+                    orderId, productId, value);
+            throw e;
+        }
     }
 }
