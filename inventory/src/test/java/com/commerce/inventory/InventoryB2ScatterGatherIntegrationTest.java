@@ -114,6 +114,8 @@ class InventoryB2ScatterGatherIntegrationTest {
             if (cond.getAsBoolean()) return;
             Thread.sleep(100);
         }
+        // 조건 미충족으로 타임아웃하면 부분 상태에서 후속 단언이 false-green 될 수 있으므로 큰 소리로 실패시킨다.
+        throw new AssertionError("waitUntil 타임아웃(" + timeoutMs + "ms) - 조건 미충족");
     }
 
     @DisplayName("정상: 3개 상품 전부 충분 → inventory.deducted 발행, 각 상품 DB 수량만큼 차감")
@@ -198,6 +200,7 @@ class InventoryB2ScatterGatherIntegrationTest {
         start.countDown();
         pool.shutdown();
         assertThat(pool.awaitTermination(30, TimeUnit.SECONDS)).isTrue();
+        assertThat(published.get()).as("모든 fanout 호출이 인터럽트 없이 완료").isEqualTo(orders);
 
         // 모든 주문이 deducted 또는 failed로 종결될 때까지 대기
         waitUntil(() -> deductedHot() + failedHot() >= orders, 60_000);
