@@ -42,7 +42,7 @@ class OrderAggregateUseCaseImplTest {
     @Test
     @DisplayName("미완료(received < totalItems): 어떤 발행도 하지 않는다")
     void notYetComplete() {
-        when(store.record("O1", any(), eq(true), eq(2L))).thenReturn(1L);
+        when(store.record(eq("O1"), any(), eq(true), eq(2L))).thenReturn(1L);
         useCase.handle(ev("O1", "P1", 2, true, 3));
         verify(publisher, never()).publish(any(), any());
         verify(store, never()).getAll(any());
