@@ -54,6 +54,8 @@ class EventDtoTest {
 
         assertThat(back.quantity()).isEqualTo(3L);
         assertThat(back.success()).isTrue();
+        assertThat(back.productId()).isEqualTo("P1");
+        assertThat(back.totalItems()).isEqualTo(2);
         assertThat(back.customerId()).isEqualTo("C1");
         assertThat(back.key()).isEqualTo("O1");
     }
@@ -70,6 +72,9 @@ class EventDtoTest {
         String json = om.writeValueAsString(e);
         StockCommandEvent back = om.readValue(json, StockCommandEvent.class);
 
+        assertThat(back.type()).isEqualTo(StockCommandType.DEDUCT);
+        assertThat(back.orderId()).isEqualTo("O1");
+        assertThat(back.totalItems()).isEqualTo(2);
         assertThat(back.customerId()).isEqualTo("C1");
         assertThat(back.couponId()).isEqualTo("CP1");
         assertThat(back.payMethod()).isEqualTo("CARD");
