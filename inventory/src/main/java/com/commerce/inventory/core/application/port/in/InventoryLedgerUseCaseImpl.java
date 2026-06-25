@@ -2,6 +2,8 @@ package com.commerce.inventory.core.application.port.in;
 
 import com.commerce.inventory.core.application.port.out.InventoryStockPort;
 import com.commerce.inventory.core.application.port.out.ProcessedEventPort;
+import com.commerce.shared.exception.BusinessError;
+import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.kafka.event.dto.ItemEntry;
 import com.commerce.shared.vo.ProductId;
 import lombok.RequiredArgsConstructor;
@@ -38,13 +40,14 @@ public class InventoryLedgerUseCaseImpl implements InventoryLedgerUseCase {
         }
 
         for (ItemEntry item : items) {
-            ProductId productId = item.productId();
-            int affected = stockPort.deductIfEnough(productId, item.quantity().value());
+            int affected = stockPort.deductIfEnough(item.productId(), item.quantity().value());
             if (affected == 0) {
-                // Redis 게이트가 승인한 차감을 DB 원장이 따라가지 못함 = 드리프트(원장이 Redis보다 과소).
-                // 재시도해도 동일하므로 throw하지 않고 ERROR 알람 후 진행한다(수동 정합화 대상).
-                log.error("[Inventory-Ledger] 원장 차감 실패(드리프트) - orderId: {}, productId: {}, qty: {}",
-                        orderId, productId.id(), item.quantity().value());
+                // DB가 진실원천: 재고 부족 = 오버셀 최종 거절. BusinessException으로 트랜잭션을 롤백해
+                // 같은 주문에서 이미 깐 항목들까지 전부 원복한다(all-or-nothing).
+                // BusinessException이라 DefaultErrorHandler가 재시도하지 않는다(재고 부족은 재시도 무의미).
+                log.warn("[Inventory-Ledger] DB 재고 부족(차감 거절) - orderId: {}, productId: {}, qty: {}",
+                        orderId, item.productId().id(), item.quantity().value());
+                throw new BusinessException(BusinessError.INSUFFICIENT_STOCK);
             }
         }
 
