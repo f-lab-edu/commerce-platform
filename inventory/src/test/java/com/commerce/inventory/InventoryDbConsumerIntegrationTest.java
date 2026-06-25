@@ -1,10 +1,10 @@
 package com.commerce.inventory;
 
-import com.commerce.inventory.bootstrap.dto.InventoryRestoreEvent;
 import com.commerce.inventory.core.domain.aggregate.Inventory;
 import com.commerce.inventory.core.infrastructure.persistence.InventoryRepository;
 import com.commerce.inventory.core.infrastructure.persistence.ProcessedEventRepository;
 import com.commerce.shared.kafka.KafkaEventPublisher;
+import com.commerce.shared.kafka.event.dto.DomainEvent;
 import com.commerce.shared.kafka.event.dto.InventoryReservedEvent;
 import com.commerce.shared.kafka.event.dto.ItemEntry;
 import com.commerce.shared.kafka.event.topic.EventTopic;
@@ -98,7 +98,7 @@ class InventoryDbConsumerIntegrationTest {
         waitUntil(() -> dbStock(p) == 7, 30_000);
 
         publisher.publish(EventTopic.ORDER_PRICE_FAILED_TOPIC,
-                new InventoryRestoreEvent(orderId, new ItemEntry(p, Quantity.create(3))));
+                new RestoreSignal(orderId, new ItemEntry(p, Quantity.create(3)), orderId, LocalDateTime.now()));
 
         waitUntil(() -> dbStock(p) == 10, 30_000);
         assertThat(dbStock(p)).as("원장 복원").isEqualTo(10);
@@ -149,4 +149,8 @@ class InventoryDbConsumerIntegrationTest {
         }
         return false;
     }
+
+    /** Test-local publish carrier — keeps InventoryRestoreEvent a plain consume-only projection. */
+    private record RestoreSignal(String orderId, ItemEntry item, String key, java.time.LocalDateTime timestamp)
+            implements DomainEvent { }
 }

@@ -1,10 +1,7 @@
 package com.commerce.inventory.bootstrap.dto;
 
-import com.commerce.shared.kafka.event.dto.DomainEvent;
 import com.commerce.shared.kafka.event.dto.ItemEntry;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import java.time.LocalDateTime;
 
 /**
  * Inventory 모듈 관점의 재고 복구 트리거 페이로드.
@@ -16,7 +13,4 @@ import java.time.LocalDateTime;
 public record InventoryRestoreEvent(
         String orderId,
         ItemEntry item
-) implements DomainEvent {
-    @Override public String key() { return orderId; }
-    @Override public LocalDateTime timestamp() { return null; }
-}
+) { }
