@@ -23,9 +23,9 @@ public enum EventTopic {
     PAYMENT_FAILED_TOPIC("payment.failed"),
     SAGA_TIMEOUT_TOPIC("saga.timeout"),
 
-    // B2 scatter-gather (inventory)
-    INVENTORY_STOCK_COMMAND_TOPIC("inventory.stock-command"),
-    INVENTORY_ORDER_AGGREGATE_TOPIC("inventory.order-aggregate")
+    // 재고차감 분리 (Redis 예약 → DB 차감)
+    INVENTORY_RESERVED_TOPIC("inventory.reserved"),
+    INVENTORY_RESERVE_ROLLBACK_TOPIC("inventory.reserve-rollback")
     ;
 
     private final String value;

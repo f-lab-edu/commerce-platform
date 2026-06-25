@@ -42,43 +42,34 @@ class EventDtoTest {
     }
 
     @Test
-    @DisplayName("OrderAggregateEvent는 차감수량과 주문 컨텍스트를 운반한다")
-    void orderAggregateEvent_carriesQuantityAndContext() throws Exception {
+    @DisplayName("InventoryReservedEvent는 주문 컨텍스트와 items를 운반하고 JSON 직렬화/역직렬화된다")
+    void inventoryReservedEvent_roundTrip() throws Exception {
         ObjectMapper om = new ObjectMapper().registerModule(new JavaTimeModule());
-        OrderAggregateEvent e = new OrderAggregateEvent(
-                "O1", "P1", 3L, true, 2,
-                "C1", "CP1", "CARD", "TOSS",
-                "O1", LocalDateTime.now());
+        InventoryReservedEvent e = new InventoryReservedEvent(
+                "O1", "C1", "CP1",
+                List.of(new ItemEntry(ProductId.of("P1"), Quantity.create(2))),
+                "CARD", "TOSS", "O1", LocalDateTime.now());
 
-        OrderAggregateEvent back = om.readValue(om.writeValueAsString(e), OrderAggregateEvent.class);
+        InventoryReservedEvent back = om.readValue(om.writeValueAsString(e), InventoryReservedEvent.class);
 
-        assertThat(back.quantity()).isEqualTo(3L);
-        assertThat(back.success()).isTrue();
-        assertThat(back.productId()).isEqualTo("P1");
-        assertThat(back.totalItems()).isEqualTo(2);
-        assertThat(back.customerId()).isEqualTo("C1");
+        assertThat(back.orderId()).isEqualTo("O1");
+        assertThat(back.items()).hasSize(1);
         assertThat(back.key()).isEqualTo("O1");
     }
 
     @Test
-    @DisplayName("StockCommandEvent는 주문 컨텍스트 스칼라를 운반하고 JSON 직렬화/역직렬화된다")
-    void stockCommandEvent_carriesOrderContext() throws Exception {
+    @DisplayName("InventoryReserveRollbackEvent는 orderId와 items를 운반하고 JSON 직렬화/역직렬화된다")
+    void inventoryReserveRollbackEvent_roundTrip() throws Exception {
         ObjectMapper om = new ObjectMapper().registerModule(new JavaTimeModule());
-        StockCommandEvent e = new StockCommandEvent(
-                StockCommandType.DEDUCT, "O1", "P1", 3L, 2,
-                "C1", "CP1", "CARD", "TOSS",
-                "P1", LocalDateTime.now());
+        InventoryReserveRollbackEvent e = new InventoryReserveRollbackEvent(
+                "O1", List.of(new ItemEntry(ProductId.of("P1"), Quantity.create(2))),
+                "O1", LocalDateTime.now());
 
-        String json = om.writeValueAsString(e);
-        StockCommandEvent back = om.readValue(json, StockCommandEvent.class);
+        InventoryReserveRollbackEvent back =
+                om.readValue(om.writeValueAsString(e), InventoryReserveRollbackEvent.class);
 
-        assertThat(back.type()).isEqualTo(StockCommandType.DEDUCT);
         assertThat(back.orderId()).isEqualTo("O1");
-        assertThat(back.totalItems()).isEqualTo(2);
-        assertThat(back.customerId()).isEqualTo("C1");
-        assertThat(back.couponId()).isEqualTo("CP1");
-        assertThat(back.payMethod()).isEqualTo("CARD");
-        assertThat(back.payProvider()).isEqualTo("TOSS");
-        assertThat(back.key()).isEqualTo("P1");
+        assertThat(back.items()).hasSize(1);
+        assertThat(back.key()).isEqualTo("O1");
     }
 }
