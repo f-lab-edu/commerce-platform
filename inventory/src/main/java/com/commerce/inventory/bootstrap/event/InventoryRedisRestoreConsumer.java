@@ -26,7 +26,7 @@ public class InventoryRedisRestoreConsumer {
 
     private final InventoryUseCase inventoryUseCase;
 
-    @KafkaListener(topics = {"order.price-failed", "payment.failed"}, groupId = "inventory-redis-restore")
+    @KafkaListener(topics = {"order.price-failed", "coupon.apply-failed", "payment.failed", "saga.timeout"}, groupId = "inventory-redis-restore")
     public void onCompensation(InventoryRestoreEvent event) {
         if (event.item() == null) {
             log.info("[Inventory-RedisRestore] 복원할 item 없음 - orderId: {}", event.orderId());

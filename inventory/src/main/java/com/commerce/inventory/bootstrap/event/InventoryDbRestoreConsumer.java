@@ -23,7 +23,7 @@ public class InventoryDbRestoreConsumer {
 
     private final InventoryLedgerUseCase ledgerUseCase;
 
-    @KafkaListener(topics = {"order.price-failed", "payment.failed"}, groupId = "inventory-db-restore")
+    @KafkaListener(topics = {"order.price-failed", "coupon.apply-failed", "payment.failed", "saga.timeout"}, groupId = "inventory-db-restore")
     public void onCompensation(InventoryRestoreEvent event) {
         if (event.item() == null) {
             log.info("[Inventory-DbRestore] 복원할 item 없음 - orderId: {}", event.orderId());

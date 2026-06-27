@@ -5,6 +5,7 @@ import com.commerce.inventory.core.infrastructure.persistence.InventoryRepositor
 import com.commerce.inventory.core.infrastructure.persistence.ProcessedEventRepository;
 import com.commerce.shared.kafka.KafkaEventPublisher;
 import com.commerce.shared.kafka.event.dto.DomainEvent;
+import com.commerce.shared.kafka.event.dto.InventoryDeductFailedEvent;
 import com.commerce.shared.kafka.event.dto.InventoryReservedEvent;
 import com.commerce.shared.kafka.event.dto.ItemEntry;
 import com.commerce.shared.kafka.event.topic.EventTopic;
@@ -17,9 +18,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.kafka.annotation.KafkaListener;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BooleanSupplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,9 +42,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InventoryDbConsumerIntegrationTest {
 
+    /** Collects orderId values from inventory.deduct-failed for deterministic failure detection. */
+    @TestConfiguration
+    static class DeductFailedCollectorConfig {
+        @Bean
+        DeductFailedCollector deductFailedCollector() {
+            return new DeductFailedCollector();
+        }
+    }
+
+    static class DeductFailedCollector {
+        final Set<String> receivedOrderIds =
+                Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+        @KafkaListener(topics = "inventory.deduct-failed", groupId = "inv-deductfailed-test-collector")
+        public void onDeductFailed(InventoryDeductFailedEvent event) {
+            receivedOrderIds.add(event.orderId());
+        }
+    }
+
     @Autowired private KafkaEventPublisher publisher;
     @Autowired private InventoryRepository inventoryRepository;
     @Autowired private ProcessedEventRepository processedEventRepository;
+    @Autowired private DeductFailedCollector deductFailedCollector;
 
     @BeforeAll
     void warmup() throws InterruptedException {
@@ -79,7 +106,8 @@ class InventoryDbConsumerIntegrationTest {
         seedDb(p, 2); // 요청 3 > 재고 2
 
         publishReserved(orderId, p, 3);
-        settle(3_000);
+        // Wait for the deduct-failed signal (B publishes it on INSUFFICIENT_STOCK) — deterministic.
+        waitUntil(() -> deductFailedCollector.receivedOrderIds.contains(orderId), 30_000);
 
         assertThat(dbStock(p)).as("원장 무변경").isEqualTo(2);
         assertThat(processedEventRepository.existsById(orderId + ":LEDGER-DEDUCT")).isFalse();
@@ -134,8 +162,6 @@ class InventoryDbConsumerIntegrationTest {
     private void deleteProcessed(String eventId) {
         if (processedEventRepository.existsById(eventId)) processedEventRepository.deleteById(eventId);
     }
-
-    private void settle(long ms) throws InterruptedException { Thread.sleep(ms); }
 
     private void waitUntil(BooleanSupplier cond, long timeoutMs) throws InterruptedException {
         if (!waitFor(cond, timeoutMs)) throw new AssertionError("waitUntil 타임아웃(" + timeoutMs + "ms)");
