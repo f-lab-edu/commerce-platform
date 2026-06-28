@@ -64,6 +64,20 @@ public class CouponIssues {
         else if(this.status == CouponIssueStatus.EXPIRED) throw new BusinessException(EXPIRED_ISSUED_COUPON);
     }
 
+    /**
+     * 쿠폰 복구 (보상 트랜잭션)
+     * USED -> UNUSED로 복구, orderId/usedAt 초기화
+     * 멱등성: 이미 UNUSED면 아무것도 하지 않음
+     */
+    public void restore() {
+        if (this.status != CouponIssueStatus.USED) {
+            return;
+        }
+        this.status = CouponIssueStatus.UNUSED;
+        this.orderId = null;
+        this.usedAt = null;
+    }
+
     @Builder
     private CouponIssues(CouponIssueId couponIssueId, CouponIssueStatus status,
                          OrderId orderId, LocalDateTime issuedAt, LocalDateTime usedAt) {

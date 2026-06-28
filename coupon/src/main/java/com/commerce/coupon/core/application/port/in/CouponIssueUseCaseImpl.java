@@ -13,6 +13,8 @@ import com.commerce.shared.kafka.KafkaEventPublisher;
 import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.CouponIssueId;
 import com.commerce.shared.vo.CustomerId;
+import com.commerce.shared.vo.Money;
+import com.commerce.shared.vo.OrderId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.commerce.shared.exception.BusinessError.INVALID_COUPON;
+import static com.commerce.shared.exception.BusinessError.NOT_ISSUED_COUPON;
 import static com.commerce.shared.kafka.event.topic.EventTopic.COUPON_ISSUE_TOPIC;
 
 @Transactional
@@ -108,5 +111,40 @@ public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
                 });
 
         return issued.get();
+    }
+
+    @Transactional
+    @Override
+    public long applyCouponForSaga(String couponId, String customerId, String orderId, long originAmt) {
+        if (couponId == null || couponId.isBlank()) {
+            return 0;
+        }
+
+        CouponIssueId issueId = new CouponIssueId(CouponId.of(couponId), CustomerId.of(customerId));
+        CouponIssues couponIssue = couponIssueOutPort.findByCouponIssueId(issueId)
+            .orElseThrow(() -> new BusinessException(NOT_ISSUED_COUPON));
+        couponIssue.valid();
+
+        Coupon coupon = couponOutPort.findById(CouponId.of(couponId))
+            .orElseThrow(() -> new BusinessException(INVALID_COUPON));
+        Money discountAmt = coupon.calculateDiscountAmt(Money.of(originAmt));
+
+        couponIssue.use(OrderId.of(orderId));
+        couponIssueOutPort.save(couponIssue);
+
+        return discountAmt.value();
+    }
+
+    @Transactional
+    @Override
+    public void restoreCouponForSaga(String couponId, String customerId) {
+        if (couponId == null || couponId.isBlank()) {
+            return;
+        }
+        CouponIssueId issueId = new CouponIssueId(CouponId.of(couponId), CustomerId.of(customerId));
+        couponIssueOutPort.findByCouponIssueId(issueId).ifPresent(issue -> {
+            issue.restore();
+            couponIssueOutPort.save(issue);
+        });
     }
 }
