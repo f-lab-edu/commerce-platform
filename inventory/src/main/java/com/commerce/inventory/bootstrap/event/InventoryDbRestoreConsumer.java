@@ -14,7 +14,6 @@ import java.util.List;
  *
  * 다운스트림 보상(order.price-failed / payment.failed)만 구독한다 — 이 시점엔 DB 차감이 확정(inventory.deducted)된 후다.
  * B의 reserve-rollback은 구독하지 않는다: B 실패 시 DB 트랜잭션은 롤백되어 복원할 대상이 없기 때문.
- * 멱등성·차감선행 팬텀 가드는 persistRestoration 내부(ProcessedEvent)에 있다. Redis는 만지지 않는다.
  */
 @Slf4j
 @RequiredArgsConstructor
