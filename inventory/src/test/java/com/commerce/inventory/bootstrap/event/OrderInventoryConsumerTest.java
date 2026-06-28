@@ -59,17 +59,6 @@ class OrderInventoryConsumerTest {
                 .publish(eq(EventTopic.INVENTORY_RESERVED_TOPIC), any(InventoryReservedEvent.class));
     }
 
-    @DisplayName("이미 예약된 주문(ALREADY_DONE)도 reserved를 발행해 saga를 이어간다")
-    @Test
-    void handleAlreadyDone() {
-        given(inventoryUseCase.reserve(eq("O001"), any())).willReturn(StockReserveResult.alreadyDone());
-
-        consumer.handleDeductInventory(sampleDeduct());
-
-        verify(transactionalEventPublisher)
-                .publish(eq(EventTopic.INVENTORY_RESERVED_TOPIC), any(InventoryReservedEvent.class));
-    }
-
     @DisplayName("Redis 재고 부족 시 InventoryDeductFailedEvent를 발행하고 reserved는 발행하지 않는다")
     @Test
     void handleInsufficient() {

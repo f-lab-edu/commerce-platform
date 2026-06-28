@@ -3,7 +3,7 @@ package com.commerce.inventory.core.application.port.out;
 import com.commerce.shared.vo.ProductId;
 
 /**
- * B2 재고 차감/복원 아웃바운드 포트. 단일 조건부 UPDATE(SELECT 없음)로 DB 재고를 다룬다.
+ * 재고 차감/복원 아웃바운드 포트. 단일 조건부 UPDATE(SELECT 없음)로 DB 재고를 다룬다.
  * 락 없이 행 원자성만으로 오버셀을 막는다(부족하면 affected == 0).
  */
 public interface InventoryStockPort {

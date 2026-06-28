@@ -19,7 +19,7 @@ import java.util.Optional;
 public interface InventoryRepository extends JpaRepository<Inventory, ProductId> {
     Optional<Inventory> findByProductId(ProductId productId);
 
-    /** B2 조건부 차감. 재고가 충분할 때만 1행 갱신. @Modifying은 트랜잭션 필수이므로 메서드 자체에 보장(기존 트랜잭션과는 REQUIRED로 합류). */
+    /** 조건부 차감. 재고가 충분할 때만 1행 갱신. @Modifying은 트랜잭션 필수이므로 메서드 자체에 보장(기존 트랜잭션과는 REQUIRED로 합류). */
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Inventory i SET i.quantity.value = i.quantity.value - :qty, i.updatedAt = :now " +
@@ -28,7 +28,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, ProductId>
                        @Param("qty") long qty,
                        @Param("now") LocalDateTime now);
 
-    /** B2 보상 복원. */
+    /** 보상 복원. */
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Inventory i SET i.quantity.value = i.quantity.value + :qty, i.updatedAt = :now " +

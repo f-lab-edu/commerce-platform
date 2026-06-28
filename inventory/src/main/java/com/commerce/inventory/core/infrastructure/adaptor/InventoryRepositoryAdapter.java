@@ -14,7 +14,7 @@ import java.util.Optional;
 
 /**
  * JPA를 사용하여 재고 저장소 포트를 구현하는 어댑터.
- * B1/관리자용 {@link InventoryOutport}와 B2 조건부 차감용 {@link InventoryStockPort}를 함께 구현한다.
+ * 관리자용 {@link InventoryOutport}와 조건부 차감용 {@link InventoryStockPort}를 함께 구현한다.
  */
 @Component
 @RequiredArgsConstructor
