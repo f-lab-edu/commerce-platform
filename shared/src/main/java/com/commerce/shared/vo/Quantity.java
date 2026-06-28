@@ -2,6 +2,8 @@ package com.commerce.shared.vo;
 
 import com.commerce.shared.exception.BusinessError;
 import com.commerce.shared.exception.BusinessException;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
@@ -20,6 +22,7 @@ public record Quantity (
         return new Quantity(this.value - quantity.value);
     }
 
+    @JsonCreator
     public static Quantity create(long quantity) {
         return new Quantity(quantity);
     }
@@ -28,4 +31,8 @@ public record Quantity (
         if(value < 0) throw new BusinessException(BusinessError.INVALID_QUANTITY);
     }
 
+    @JsonValue
+    public long getValue() {
+        return value;
+    }
 }

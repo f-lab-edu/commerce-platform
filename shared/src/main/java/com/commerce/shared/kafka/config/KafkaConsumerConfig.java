@@ -2,6 +2,7 @@ package com.commerce.shared.kafka.config;
 
 import com.commerce.shared.exception.BusinessException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,7 @@ import org.springframework.kafka.listener.CommonErrorHandler;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.converter.StringJsonMessageConverter;
 import org.springframework.kafka.support.serializer.DeserializationException;
 import org.springframework.util.backoff.FixedBackOff;
 
@@ -81,9 +83,17 @@ public class KafkaConsumerConfig {
         return handler;
     }
 
+    /**
+     * KafkaListener 리스너 파라미터를 typed payload(record)로 직접 수신하기 위한 factory.
+     * <p>
+     * {@link StringJsonMessageConverter}: 리스너 파라미터 타입에 맞춰 ObjectMapper로 역직렬화.
+     * typeMapper precedence 기본값 INFERRED: producer 측 __TypeId__ 헤더와 무관하게 리스너
+     * 파라미터 타입을 신뢰 → consumer-side projection DTO도 안전.
+     * <p>
+     */
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(
-            KafkaTemplate<String, Object> kafkaTemplate) {
+            KafkaTemplate<String, Object> kafkaTemplate, ObjectMapper objectMapper) {
         ConcurrentKafkaListenerContainerFactory<String, String> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
 
@@ -97,6 +107,7 @@ public class KafkaConsumerConfig {
         factory.setConcurrency(3);
 
         factory.setCommonErrorHandler(kafkaErrorHandler(kafkaTemplate));
+        factory.setRecordMessageConverter(new StringJsonMessageConverter(objectMapper));
 
         return factory;
     }

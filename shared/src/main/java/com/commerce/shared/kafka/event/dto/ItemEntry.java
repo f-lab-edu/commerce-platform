@@ -1,3 +1,6 @@
 package com.commerce.shared.kafka.event.dto;
 
-public record ItemEntry(String productId, long quantity) { }
+import com.commerce.shared.vo.ProductId;
+import com.commerce.shared.vo.Quantity;
+
+public record ItemEntry(ProductId productId, Quantity quantity) { }
