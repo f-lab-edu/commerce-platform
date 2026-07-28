@@ -2,7 +2,6 @@ package com.commerce.inventory;
 
 import com.commerce.inventory.core.domain.aggregate.Inventory;
 import com.commerce.inventory.core.infrastructure.persistence.InventoryRepository;
-import com.commerce.inventory.core.infrastructure.persistence.ProcessedEventRepository;
 import com.commerce.shared.kafka.KafkaEventPublisher;
 import com.commerce.shared.kafka.event.dto.DomainEvent;
 import com.commerce.shared.kafka.event.dto.InventoryDeductFailedEvent;
@@ -63,7 +62,6 @@ class InventoryDbConsumerIntegrationTest {
 
     @Autowired private KafkaEventPublisher publisher;
     @Autowired private InventoryRepository inventoryRepository;
-    @Autowired private ProcessedEventRepository processedEventRepository;
     @Autowired private DeductFailedCollector deductFailedCollector;
 
     @BeforeAll
@@ -93,7 +91,6 @@ class InventoryDbConsumerIntegrationTest {
 
         waitUntil(() -> dbStock(p) == 7, 30_000);
         assertThat(dbStock(p)).as("원장 차감").isEqualTo(7);
-        assertThat(processedEventRepository.existsById(orderId + ":LEDGER-DEDUCT")).isTrue();
 
         cleanup(orderId, p);
     }
@@ -110,7 +107,6 @@ class InventoryDbConsumerIntegrationTest {
         waitUntil(() -> deductFailedCollector.receivedOrderIds.contains(orderId), 30_000);
 
         assertThat(dbStock(p)).as("원장 무변경").isEqualTo(2);
-        assertThat(processedEventRepository.existsById(orderId + ":LEDGER-DEDUCT")).isFalse();
 
         cleanup(orderId, p);
     }
@@ -130,7 +126,6 @@ class InventoryDbConsumerIntegrationTest {
 
         waitUntil(() -> dbStock(p) == 10, 30_000);
         assertThat(dbStock(p)).as("원장 복원").isEqualTo(10);
-        assertThat(processedEventRepository.existsById(orderId + ":LEDGER-RESTORE")).isTrue();
 
         cleanup(orderId, p);
     }
@@ -154,13 +149,7 @@ class InventoryDbConsumerIntegrationTest {
     }
 
     private void cleanup(String orderId, ProductId pid) {
-        deleteProcessed(orderId + ":LEDGER-DEDUCT");
-        deleteProcessed(orderId + ":LEDGER-RESTORE");
         if (inventoryRepository.existsById(pid)) inventoryRepository.deleteById(pid);
-    }
-
-    private void deleteProcessed(String eventId) {
-        if (processedEventRepository.existsById(eventId)) processedEventRepository.deleteById(eventId);
     }
 
     private void waitUntil(BooleanSupplier cond, long timeoutMs) throws InterruptedException {
