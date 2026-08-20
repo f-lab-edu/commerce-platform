@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
  * 직접 수신.
  *
  * 에러 처리 정책:
- * - BusinessException(쿠폰 만료/미발급 등): 보상 이벤트(CouponApplyFailedEvent) 발행 + 종료.
+ * - BusinessException(쿠폰 만료/미발급/타 주문 사용 등): 보상 이벤트(CouponApplyFailedEvent) 발행 + 종료.
  * - 그 외 예외: throw → ErrorHandler 재시도 → DLT.
  */
 @Slf4j
@@ -65,15 +65,9 @@ public class OrderCouponConsumer {
         );
     }
 
-    @KafkaListener(topics = {"payment.failed", "saga.timeout"}, groupId = "coupon-service")
+    @KafkaListener(topics = {"payment.failed"}, groupId = "coupon-service")
     public void handleRestoreCoupon(CouponRestoreEvent event) {
         log.info("[Coupon] 보상 이벤트 수신 - orderId: {}, couponId: {}", event.orderId(), event.couponId());
-
-        try {
-            couponIssueUseCase.restoreCouponForSaga(event.couponId(), event.customerId());
-        } catch (BusinessException e) {
-            log.warn("[Coupon] 쿠폰 복구 비즈니스 거부 - orderId: {}, code: {}", event.orderId(), e.getCode());
-            // 이미 UNUSED 등 멱등 거부 케이스. 정상 종료.
-        }
+        couponIssueUseCase.restoreCouponForSaga(event.couponId(), event.customerId(), event.orderId());
     }
 }

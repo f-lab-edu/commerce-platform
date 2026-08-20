@@ -39,7 +39,8 @@ class OrderCouponConsumerTest {
     @DisplayName("couponId가 null이면 discountAmt=0으로 CouponAppliedEvent를 발행한다")
     @Test
     void handleNoCoupon() {
-        given(couponIssueUseCase.applyCouponForSaga(null, "C001", "O001", 10000)).willReturn(0L);
+        given(couponIssueUseCase.applyCouponForSaga(null, "C001", "O001", 10000))
+                .willReturn(0L);
 
         CouponApplyEvent event = new CouponApplyEvent(
                 "O001", "C001", null, 10000L,
@@ -52,13 +53,13 @@ class OrderCouponConsumerTest {
         verify(transactionalEventPublisher).publish(eq(EventTopic.COUPON_APPLIED_TOPIC), any(CouponAppliedEvent.class));
     }
 
-    @DisplayName("보상 이벤트에 couponId 없으면 restoreCouponForSaga에 null 전달")
+    @DisplayName("보상 이벤트를 restoreCouponForSaga(couponId, customerId, orderId)로 위임한다")
     @Test
-    void handleCompensationNoCoupon() {
+    void handleCompensationDelegatesWithOrderId() {
         CouponRestoreEvent event = new CouponRestoreEvent("O001", null, null);
 
         consumer.handleRestoreCoupon(event);
 
-        verify(couponIssueUseCase).restoreCouponForSaga(null, null);
+        verify(couponIssueUseCase).restoreCouponForSaga(null, null, "O001");
     }
 }

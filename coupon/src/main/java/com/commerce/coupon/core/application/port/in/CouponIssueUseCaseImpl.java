@@ -117,34 +117,32 @@ public class CouponIssueUseCaseImpl implements CouponIssueUseCase{
     @Override
     public long applyCouponForSaga(String couponId, String customerId, String orderId, long originAmt) {
         if (couponId == null || couponId.isBlank()) {
-            return 0;
+            return 0L;
         }
 
+        OrderId oid = OrderId.of(orderId);
         CouponIssueId issueId = new CouponIssueId(CouponId.of(couponId), CustomerId.of(customerId));
         CouponIssues couponIssue = couponIssueOutPort.findByCouponIssueId(issueId)
             .orElseThrow(() -> new BusinessException(NOT_ISSUED_COUPON));
-        couponIssue.valid();
-
         Coupon coupon = couponOutPort.findById(CouponId.of(couponId))
             .orElseThrow(() -> new BusinessException(INVALID_COUPON));
+
+        // 타 주문 사용 중이거나 만료면 BusinessException(→ 보상)
+        couponIssue.valid();
         Money discountAmt = coupon.calculateDiscountAmt(Money.of(originAmt));
-
-        couponIssue.use(OrderId.of(orderId));
-        couponIssueOutPort.save(couponIssue);
-
+        couponIssue.use(oid);
         return discountAmt.value();
     }
 
     @Transactional
     @Override
-    public void restoreCouponForSaga(String couponId, String customerId) {
-        if (couponId == null || couponId.isBlank()) {
+    public void restoreCouponForSaga(String couponId, String customerId, String orderId) {
+        if (couponId == null || couponId.isBlank() || orderId == null || orderId.isBlank()) {
             return;
         }
+        OrderId oid = OrderId.of(orderId);
         CouponIssueId issueId = new CouponIssueId(CouponId.of(couponId), CustomerId.of(customerId));
-        couponIssueOutPort.findByCouponIssueId(issueId).ifPresent(issue -> {
-            issue.restore();
-            couponIssueOutPort.save(issue);
-        });
+        couponIssueOutPort.findByCouponIssueId(issueId)
+            .ifPresent(issue -> issue.restore(oid));
     }
 }

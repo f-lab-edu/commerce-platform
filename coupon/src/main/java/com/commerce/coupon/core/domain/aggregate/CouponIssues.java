@@ -65,14 +65,15 @@ public class CouponIssues {
     }
 
     /**
-     * 쿠폰 복구 (보상 트랜잭션)
-     * USED -> UNUSED로 복구, orderId/usedAt 초기화
-     * 멱등성: 이미 UNUSED면 아무것도 하지 않음
+     * 쿠폰 복구 (보상 트랜잭션) — 주문 단위로 스코프.
+     *
+     * - USED이고 소유 주문이 일치 → UNUSED로 복구.
+     * - USED이지만 다른 주문 소유 → 무시(타 주문의 사용 상태 보호).
      */
-    public void restore() {
-        if (this.status != CouponIssueStatus.USED) {
-            return;
-        }
+    public void restore(OrderId orderId) {
+        if (this.status != CouponIssueStatus.USED) return;
+        if (!orderId.equals(this.orderId)) return;
+
         this.status = CouponIssueStatus.UNUSED;
         this.orderId = null;
         this.usedAt = null;
