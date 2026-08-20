@@ -113,12 +113,10 @@ public class Coupon {
     public Money calculateDiscountAmt(Money orderAmt) {
         isAvailable(orderAmt);
 
-        // 할인금액
         Money discountAmt = orderAmt.discount(this.discountPercent);
         if(discountAmt.isGreaterThan(this.maxDiscountAmt)) {
             return this.maxDiscountAmt;
         }
-
         return discountAmt;
     }
 

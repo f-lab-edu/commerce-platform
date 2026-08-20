@@ -11,4 +11,6 @@ public interface CouponIssueUseCase {
     void issueCoupon(CouponId couponId, CustomerId customerId);
     void requestIssueCoupon(CouponId couponId, CustomerId customerId);
     boolean checkCouponIssueStatus(CouponId couponId, CustomerId customerId);
+    long applyCouponForSaga(String couponId, String customerId, String orderId, long originAmt);
+    void restoreCouponForSaga(String couponId, String customerId, String orderId);
 }
