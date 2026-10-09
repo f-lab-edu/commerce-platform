@@ -48,7 +48,7 @@ class OrderUseCaseImplTest {
         CreateOrderCommand command = new CreateOrderCommand(
             CustomerId.of("C001"), null,
             List.of(new CreateOrderCommand.OrderItemCommand(ProductId.of("P001"), Quantity.create(2))),
-            "CARD", "shinHan"
+            "CARD", "shinHan", 0
         );
 
         OrderResponse response = orderUseCaseImpl.createOrder(command);

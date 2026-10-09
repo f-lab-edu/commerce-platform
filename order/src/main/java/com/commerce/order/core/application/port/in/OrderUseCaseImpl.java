@@ -43,7 +43,7 @@ public class OrderUseCaseImpl implements OrderUseCase {
 
         transactionalEventPublisher.publish(
                 EventTopic.ORDER_CREATED_TOPIC,
-                order.toCreatedEvent(orderCommand.payMethod(), orderCommand.payProvider())
+                order.toCreatedEvent(orderCommand.payMethod(), orderCommand.payProvider(), orderCommand.installment())
         );
 
         return OrderResponse.from(order);

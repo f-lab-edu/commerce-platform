@@ -48,7 +48,7 @@ public class OrderInventoryConsumer {
             transactionalEventPublisher.publish(EventTopic.INVENTORY_RESERVED_TOPIC,
                     new InventoryReservedEvent(
                             event.orderId(), event.customerId(), event.couponId(),
-                            event.items(), event.payMethod(), event.payProvider(),
+                            event.items(), event.payMethod(), event.payProvider(), event.installment(),
                             event.orderId(), LocalDateTime.now()));
             log.info("[Inventory] Redis 예약 완료 - orderId: {}, status: {}", event.orderId(), result.status());
             return;
@@ -63,6 +63,10 @@ public class OrderInventoryConsumer {
 
     private void publishDeductFailed(InventoryDeductEvent event, String reason) {
         transactionalEventPublisher.publish(EventTopic.INVENTORY_DEDUCT_FAILED_TOPIC,
-                new InventoryDeductFailedEvent(event.orderId(), reason, event.orderId(), LocalDateTime.now()));
+                new InventoryDeductFailedEvent(
+                        event.orderId(), event.customerId(), event.couponId(),
+                        event.items(), event.payMethod(), event.payProvider(), event.installment(),
+                        reason,
+                        event.orderId(), LocalDateTime.now()));
     }
 }

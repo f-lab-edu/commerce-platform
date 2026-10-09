@@ -45,7 +45,7 @@ class InventoryDbDeductConsumerTest {
         return new InventoryReservedEvent(
                 "O1", "C1", null,
                 List.of(new ItemEntry(ProductId.of("P1"), Quantity.create(2))),
-                "CARD", "TOSS", "O1", LocalDateTime.now());
+                "CARD", "TOSS", 0, "O1", LocalDateTime.now());
     }
 
     @DisplayName("DB 차감 성공 시 inventory.deducted를 발행한다")

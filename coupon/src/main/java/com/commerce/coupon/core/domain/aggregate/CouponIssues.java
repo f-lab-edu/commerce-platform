@@ -31,7 +31,7 @@ public class CouponIssues {
     CouponIssueStatus status;
 
     @Embedded
-    @AttributeOverride(name = "id", column = @Column(name = "order_id", length = 21))
+    @AttributeOverride(name = "id", column = @Column(name = "order_id", length = OrderId.LENGTH))
     OrderId orderId;
 
     @Column(name = "issued_at", nullable = false, updatable = false)

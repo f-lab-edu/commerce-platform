@@ -44,7 +44,7 @@ class OrderProductConsumerTest {
         return new ProductPricingEvent(
                 "O001", "C001", null,
                 List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(2))),
-                "CARD", "shinHan"
+                "CARD", "shinHan", 0
         );
     }
 

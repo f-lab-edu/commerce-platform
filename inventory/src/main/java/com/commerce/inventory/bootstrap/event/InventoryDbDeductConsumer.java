@@ -44,7 +44,11 @@ public class InventoryDbDeductConsumer {
             log.warn("[Inventory-DB] DB 차감 거절 - orderId: {}, code: {}, msg: {}",
                     event.orderId(), e.getCode(), e.getMessage());
             publisher.publish(EventTopic.INVENTORY_DEDUCT_FAILED_TOPIC,
-                    new InventoryDeductFailedEvent(event.orderId(), e.getMessage(), event.orderId(), LocalDateTime.now()));
+                    new InventoryDeductFailedEvent(
+                            event.orderId(), event.customerId(), event.couponId(),
+                            event.items(), event.payMethod(), event.payProvider(), event.installment(),
+                            e.getMessage(),
+                            event.orderId(), LocalDateTime.now()));
             publisher.publish(EventTopic.INVENTORY_RESERVE_ROLLBACK_TOPIC,
                     new InventoryReserveRollbackEvent(event.orderId(), event.items(), event.orderId(), LocalDateTime.now()));
             return;
@@ -53,7 +57,7 @@ public class InventoryDbDeductConsumer {
         publisher.publish(EventTopic.INVENTORY_DEDUCTED_TOPIC,
                 new InventoryDeductedEvent(
                         event.orderId(), event.customerId(), event.couponId(),
-                        event.items(), event.payMethod(), event.payProvider(),
+                        event.items(), event.payMethod(), event.payProvider(), event.installment(),
                         event.orderId(), LocalDateTime.now()));
         log.info("[Inventory-DB] DB 차감 완료·deducted 발행 - orderId: {}", event.orderId());
     }

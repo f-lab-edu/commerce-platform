@@ -34,6 +34,10 @@ public class KafkaConsumerConfig {
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
 
+    // 신규 컨슈머 그룹이 배포 전에 쌓인 saga 이벤트를 놓치지 않도록 기본값은 earliest
+    @Value("${spring.kafka.consumer.auto-offset-reset:earliest}")
+    private String autoOffsetReset;
+
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
@@ -50,7 +54,7 @@ public class KafkaConsumerConfig {
         
         // Offset 리셋 정책: earliest - 가장 처음부터 읽기
         // latest : 가장 최근부터 가져온다.
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
         
         // 자동 커밋 비활성화 (수동 커밋으로 메시지 유실 방지)
         // true: 오프셋을 주기적으로 커밋해서 관리하지 않아도 된다. (중복가능 있음)

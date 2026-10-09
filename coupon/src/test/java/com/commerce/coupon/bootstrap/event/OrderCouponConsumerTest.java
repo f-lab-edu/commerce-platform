@@ -45,7 +45,7 @@ class OrderCouponConsumerTest {
         CouponApplyEvent event = new CouponApplyEvent(
                 "O001", "C001", null, 10000L,
                 List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(2))),
-                "CARD", "shinHan"
+                "CARD", "shinHan", 0
         );
 
         consumer.handleApplyCoupon(event);
