@@ -1,6 +1,5 @@
 plugins {
     id 'myproject-convention'
-    id 'myproject-grpc-server'
     id 'myproject-kafka'
 }
 

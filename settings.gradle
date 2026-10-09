@@ -1,5 +1,6 @@
 rootProject.name = 'demo'
-include(':platform')
+// platform: gRPC 제거로 빌드 불가(레거시). 코드는 보존하고 빌드 대상에서만 제외
+// include(':platform')
 include(':payments')
 include(':shared')
 include(':inventory')
