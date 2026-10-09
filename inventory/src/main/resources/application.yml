@@ -21,11 +21,8 @@ spring:
       auto-offset-reset: earliest
       enable-auto-commit: false
 
+  # 접속 정보는 다른 모듈과 동일하게 docker-compose 연동(spring.docker.compose)으로 공용 스키마를 사용한다
   datasource:
-    url: jdbc:mysql://localhost:3306/commerce_inventory?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: root
-    password: root1234!!
-    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
       connection-timeout: 3000

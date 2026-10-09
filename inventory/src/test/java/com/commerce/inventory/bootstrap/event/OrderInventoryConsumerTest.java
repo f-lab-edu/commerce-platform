@@ -44,7 +44,7 @@ class OrderInventoryConsumerTest {
         return new InventoryDeductEvent(
                 "O001", "C001", null,
                 List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(2))),
-                "CARD", "shinHan");
+                "CARD", "shinHan", 0);
     }
 
     @DisplayName("order.created 수신 시 Redis 예약 후 InventoryReservedEvent를 발행한다")

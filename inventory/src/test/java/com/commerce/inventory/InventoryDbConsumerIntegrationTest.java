@@ -136,7 +136,7 @@ class InventoryDbConsumerIntegrationTest {
         publisher.publish(EventTopic.INVENTORY_RESERVED_TOPIC,
                 new InventoryReservedEvent(orderId, "C1", null,
                         List.of(new ItemEntry(p, Quantity.create(qty))),
-                        "CARD", "TOSS", orderId, LocalDateTime.now()));
+                        "CARD", "TOSS", 0, orderId, LocalDateTime.now()));
     }
 
     private void seedDb(ProductId pid, long qty) {

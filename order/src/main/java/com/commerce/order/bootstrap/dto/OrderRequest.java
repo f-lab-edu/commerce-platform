@@ -16,7 +16,9 @@ public record OrderRequest(
         @NotBlank(message = "결제 수단은 필수입니다")
         String payMethod,
         @NotBlank(message = "결제사는 필수입니다")
-        String payProvider
+        String payProvider,
+        @Min(value = 0, message = "할부 개월수는 0 이상이어야 합니다")
+        int installment
 ){
     public record OrderItemRequest(
             @NotBlank(message = "상품 ID는 필수입니다")

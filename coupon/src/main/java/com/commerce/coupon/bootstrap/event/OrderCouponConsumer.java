@@ -48,7 +48,10 @@ public class OrderCouponConsumer {
                     event.orderId(), e.getCode(), e.getMessage());
             transactionalEventPublisher.publish(EventTopic.COUPON_APPLY_FAILED_TOPIC,
                     new CouponApplyFailedEvent(
-                            event.orderId(), event.items(), e.getMessage(),
+                            event.orderId(), event.customerId(), event.couponId(),
+                            event.items(), event.payMethod(), event.payProvider(), event.installment(),
+                            event.originAmt(),
+                            e.getMessage(),
                             event.orderId(), LocalDateTime.now()
                     )
             );
@@ -57,9 +60,9 @@ public class OrderCouponConsumer {
 
         transactionalEventPublisher.publish(EventTopic.COUPON_APPLIED_TOPIC,
                 new CouponAppliedEvent(
-                        event.orderId(), discountAmt, event.originAmt(),
-                        event.items(), event.customerId(), event.couponId(),
-                        event.payMethod(), event.payProvider(),
+                        event.orderId(), event.customerId(), event.couponId(),
+                        event.items(), event.payMethod(), event.payProvider(), event.installment(),
+                        event.originAmt(), discountAmt,
                         event.orderId(), LocalDateTime.now()
                 )
         );

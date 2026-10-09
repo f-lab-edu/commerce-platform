@@ -18,5 +18,6 @@ public record CouponApplyEvent(
         long originAmt,
         List<ItemEntry> items,
         String payMethod,
-        String payProvider
+        String payProvider,
+        int installment
 ) { }

@@ -90,7 +90,7 @@ class OrderCouponConsumerIntegrationTest {
     }
 
     private CouponApplyEvent applyEvent(String orderId) {
-        return new CouponApplyEvent(orderId, customerId, couponId, ORIGIN_AMT, List.of(), "CARD", "shinHan");
+        return new CouponApplyEvent(orderId, customerId, couponId, ORIGIN_AMT, List.of(), "CARD", "shinHan", 0);
     }
 
     private CouponRestoreEvent restoreEvent(String orderId) {

@@ -105,7 +105,7 @@ class CreateOrderIntegrationTest {
         CreateOrderCommand command = new CreateOrderCommand(
                 CustomerId.of(custId), null,
                 List.of(new CreateOrderCommand.OrderItemCommand(ProductId.of("P001"), Quantity.create(2))),
-                "CARD", "shinHan"
+                "CARD", "shinHan", 0
         );
 
         OrderResponse response = orderUseCase.createOrder(command);
@@ -138,7 +138,7 @@ class CreateOrderIntegrationTest {
         CreateOrderCommand command = new CreateOrderCommand(
                 CustomerId.of(custId), null,
                 List.of(),
-                "CARD", "shinHan"
+                "CARD", "shinHan", 0
         );
 
         assertThatThrownBy(() -> orderUseCase.createOrder(command))

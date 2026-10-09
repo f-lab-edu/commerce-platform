@@ -13,7 +13,8 @@ public record CreateOrderCommand(
         CouponId couponId,
         List<OrderItemCommand> orderItemCommands,
         String payMethod,
-        String payProvider
+        String payProvider,
+        int installment
 ) {
     public record OrderItemCommand(
             ProductId productId,
@@ -34,7 +35,8 @@ public record CreateOrderCommand(
                 CouponId.of(orderRequest.couponId()),
                 itemCommands,
                 orderRequest.payMethod(),
-                orderRequest.payProvider()
+                orderRequest.payProvider(),
+                orderRequest.installment()
         );
 
     }

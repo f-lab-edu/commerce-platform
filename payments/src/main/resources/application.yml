@@ -42,18 +42,12 @@ spring:
       env-file: .env
       lifecycle-management: start_only
 
-# gRPC Server 설정
-grpc:
-  server:
-    port: 9090
-    
 server:
   port: 8081
 
 logging:
   level:
     com.commerce.payments: DEBUG
-    io.grpc: INFO
     org.hibernate.tool.schema: DEBUG
 
 aes256:

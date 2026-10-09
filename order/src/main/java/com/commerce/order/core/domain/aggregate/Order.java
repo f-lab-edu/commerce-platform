@@ -137,9 +137,9 @@ public class Order {
     }
 
     /**
-     * 주문 생성 이벤트 페이로드 조립. 외부 컨텍스트(결제 수단/PG)만 인자로 받는다.
+     * 주문 생성 이벤트 페이로드 조립. 외부 컨텍스트(결제 수단/PG/할부)만 인자로 받는다.
      */
-    public OrderCreatedEvent toCreatedEvent(String payMethod, String payProvider) {
+    public OrderCreatedEvent toCreatedEvent(String payMethod, String payProvider, int installment) {
         List<ItemEntry> entries = items.stream()
                 .map(oi -> new ItemEntry(oi.getProductId(), oi.getQuantity()))
                 .toList();
@@ -150,6 +150,7 @@ public class Order {
                 entries,
                 payMethod,
                 payProvider,
+                installment,
                 orderId.id(),
                 LocalDateTime.now()
         );

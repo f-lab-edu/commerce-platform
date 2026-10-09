@@ -31,7 +31,7 @@ public class OrderItem {
     private Long id;
 
     @Embedded
-    @AttributeOverride(name = "id", column = @Column(name = "order_id", nullable = false, length = 21))
+    @AttributeOverride(name = "id", column = @Column(name = "order_id", nullable = false, length = OrderId.LENGTH))
     OrderId orderId;
 
     @Embedded

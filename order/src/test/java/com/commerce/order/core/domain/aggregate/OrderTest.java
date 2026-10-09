@@ -80,13 +80,14 @@ class OrderTest {
                 List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(3)))
         );
 
-        OrderCreatedEvent event = order.toCreatedEvent("CARD", "shinHan");
+        OrderCreatedEvent event = order.toCreatedEvent("CARD", "shinHan", 3);
 
         assertThat(event.orderId()).isEqualTo(order.getOrderId().id());
         assertThat(event.customerId()).isEqualTo("C001");
         assertThat(event.couponId()).isNull();
         assertThat(event.payMethod()).isEqualTo("CARD");
         assertThat(event.payProvider()).isEqualTo("shinHan");
+        assertThat(event.installment()).isEqualTo(3);
         assertThat(event.key()).isEqualTo(order.getOrderId().id());
         assertThat(event.items()).hasSize(1);
         assertThat(event.items().get(0).productId()).isEqualTo(ProductId.of("P001"));

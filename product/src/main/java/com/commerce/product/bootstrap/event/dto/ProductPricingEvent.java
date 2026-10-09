@@ -17,5 +17,6 @@ public record ProductPricingEvent(
         String couponId,
         List<ItemEntry> items,
         String payMethod,
-        String payProvider
+        String payProvider,
+        int installment
 ) { }

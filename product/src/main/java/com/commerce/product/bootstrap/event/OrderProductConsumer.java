@@ -51,7 +51,11 @@ public class OrderProductConsumer {
             log.warn("[Product] 금액 계산 비즈니스 실패 - orderId: {}, code: {}, msg: {}",
                     event.orderId(), e.getCode(), e.getMessage());
             transactionalEventPublisher.publish(EventTopic.ORDER_PRICE_FAILED_TOPIC,
-                    new OrderPriceFailedEvent(event.orderId(), event.items(), e.getMessage(), event.orderId(), LocalDateTime.now())
+                    new OrderPriceFailedEvent(
+                            event.orderId(), event.customerId(), event.couponId(),
+                            event.items(), event.payMethod(), event.payProvider(), event.installment(),
+                            e.getMessage(),
+                            event.orderId(), LocalDateTime.now())
             );
             return;
         }
@@ -59,7 +63,8 @@ public class OrderProductConsumer {
         transactionalEventPublisher.publish(EventTopic.ORDER_PRICED_TOPIC,
                 new OrderPricedEvent(
                         event.orderId(), event.customerId(), event.couponId(),
-                        originAmt, event.items(), event.payMethod(), event.payProvider(),
+                        event.items(), event.payMethod(), event.payProvider(), event.installment(),
+                        originAmt,
                         event.orderId(), LocalDateTime.now()
                 )
         );
