@@ -6,6 +6,7 @@ import com.commerce.payments.core.application.port.in.dto.PayOrderCommand;
 import com.commerce.payments.core.application.port.out.PaymentOutPort;
 import com.commerce.payments.core.application.port.out.PgStrategy;
 import com.commerce.payments.core.domain.aggregate.Payment;
+import com.commerce.payments.core.domain.aggregate.PaymentFailure;
 import com.commerce.payments.core.domain.aggregate.PaymentPartCancel;
 import com.commerce.payments.core.domain.enums.PaymentStatus;
 import com.commerce.payments.core.domain.vo.payments.PgPayCancelResponse;
@@ -33,14 +34,24 @@ public class PaymentUseCaseImpl implements PaymentUseCase {
         // pg사 라우팅
         PgStrategy pgStrategy = pgRouter.routePg(payOrdercommand.getPayMethod(), payOrdercommand.getPayProvider());
 
-        // 결재 entity 생성
+        // 결제 entity 생성
         Payment paymentEntity = Payment.create(payOrdercommand, pgStrategy.getPgProvider());
 
         // pg 결제 응답 수신
         PgPayResponse pgResponse = pgStrategy.processApproval(payOrdercommand);
+
+        // 승인실패 : 거래실패 테이블에 저장
+        if (!pgResponse.isSuccess()) {
+            paymentOutPort.savePaymentFailure(
+                    PaymentFailure.create(pgResponse.responseCode(), pgResponse.responseMessage())
+            );
+            log.info("Payment failed for orderId: {}, errorCode: {}", paymentEntity.getOrderId(), pgResponse.responseCode());
+            return;
+        }
+
         validRequestAmount(payOrdercommand.getApprovedAmount(), pgResponse.amount().value());
 
-        // 승인거래 저장
+        // 승인성공 : 승인거래만 payment 테이블에 저장
         paymentEntity.approved(pgResponse);
         paymentOutPort.savePayment(paymentEntity);
 

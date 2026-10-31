@@ -13,6 +13,7 @@ import com.commerce.payments.core.domain.service.PaymentUseCaseImpl;
 import com.commerce.payments.core.domain.vo.payments.PgPayCancelResponse;
 import com.commerce.payments.core.domain.vo.payments.PgPayResponse;
 import com.commerce.payments.infrastructure.adaptor.PaymentAdaptor;
+import com.commerce.payments.infrastructure.persistence.PaymentFailureRepository;
 import com.commerce.payments.infrastructure.persistence.PaymentPartCancelRepository;
 import com.commerce.shared.enums.PayProvider;
 import com.commerce.shared.exception.BusinessError;
@@ -50,6 +51,9 @@ class PaymentUseCaseImplTest {
 
     @Autowired
     private PaymentPartCancelRepository paymentPartCancelRepository;
+
+    @Autowired
+    private PaymentFailureRepository paymentFailureRepository;
 
     @MockitoBean
     private PaymentPgRouter mockPaymentPgRouter;
@@ -105,6 +109,36 @@ class PaymentUseCaseImplTest {
         assertThat(payment).isNotNull();
         assertThat(payment.getPaymentStatus()).isEqualTo(PaymentStatus.APPROVED);
         approved_paymentId = payment.getPaymentId();
+    }
+
+    @DisplayName("주문 결제 실패 : 거래실패 테이블 저장")
+    @Test
+    void doApproval_failed() {
+        PayOrderCommand command = PayOrderCommand.builder()
+                .orderId(testOrderId)
+                .approvedAmount(Money.of(50000))
+                .installment(3)
+                .payMethod(PayMethod.CARD)
+                .payProvider(PayProvider.KB)
+                .build();
+
+        mockPgStrategy(fail_pgResponse);
+
+        paymentUseCase.doApproval(command);
+
+        // then 승인실패 거래는 payment 미저장
+        assertThat(paymentOutPort.findByOrderId(testOrderId))
+                .as("승인실패 거래는 payment 테이블에 저장하지 않음")
+                .isEmpty();
+
+        // 거래실패 테이블 저장 검증
+        assertThat(paymentFailureRepository.findAll())
+                .anySatisfy(failure -> {
+                    assertThat(failure.getErrorCode()).isEqualTo(fail_pgResponse.responseCode());
+                    assertThat(failure.getErrorMessage()).isEqualTo(fail_pgResponse.responseMessage());
+                    assertThat(failure.getCreatedAt()).isNotNull();
+                    assertThat(failure.getUpdatedAt()).isNotNull();
+                });
     }
 
     @DisplayName("전체환불 성공")
@@ -250,6 +284,10 @@ class PaymentUseCaseImplTest {
     }
 
     private void mockPgStrategy() {
+        mockPgStrategy(success_pgResponse);
+    }
+
+    private void mockPgStrategy(PgPayResponse approvalResponse) {
         PgStrategy mockPgStrategy = mock(PgStrategy.class);
 
         when(mockPaymentPgRouter.routePg(any(PayMethod.class), any(PayProvider.class)))
@@ -262,9 +300,20 @@ class PaymentUseCaseImplTest {
                 .thenReturn(PgProvider.TOSS);
 
         when(mockPgStrategy.processApproval(any()))
-                .thenReturn(success_pgResponse);
+                .thenReturn(approvalResponse);
 
+        // pg 취소금액은 요청 취소금액과 동일하게 응답
         when(mockPgStrategy.processCancel(any()))
-                .thenReturn(cancelResponse);
+                .thenAnswer(invocation -> {
+                    PayCancelCommand cancelCommand = invocation.getArgument(0);
+                    return PgPayCancelResponse.builder()
+                            .pgCcTid(cancelResponse.pgCcTid())
+                            .responseCode(cancelResponse.responseCode())
+                            .responseMessage(cancelResponse.responseMessage())
+                            .cancelReason(cancelResponse.cancelReason())
+                            .cancelAmount(cancelCommand.getCanceledAmount().value())
+                            .isSuccess(true)
+                            .build();
+                });
     }
 }

@@ -8,8 +8,7 @@ import lombok.Getter;
 public enum PaymentStatus {
     APPROVED("approved"),
     FULL_CANCELED("fullCanceled"),
-    PARTIAL_CANCELED("partialCanceled"),
-    FAILED("failed");
+    PARTIAL_CANCELED("partialCanceled");
 
     private final String value;
 }
