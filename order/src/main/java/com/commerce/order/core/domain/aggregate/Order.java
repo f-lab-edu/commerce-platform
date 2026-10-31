@@ -3,7 +3,6 @@ package com.commerce.order.core.domain.aggregate;
 import com.commerce.order.core.domain.enums.OrderStatus;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.kafka.event.dto.ItemEntry;
-import com.commerce.shared.kafka.event.dto.OrderCreatedEvent;
 import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
@@ -134,26 +133,6 @@ public class Order {
 
     public List<OrderItem> getItems() {
         return List.copyOf(items);
-    }
-
-    /**
-     * 주문 생성 이벤트 페이로드 조립. 외부 컨텍스트(결제 수단/PG/할부)만 인자로 받는다.
-     */
-    public OrderCreatedEvent toCreatedEvent(String payMethod, String payProvider, int installment) {
-        List<ItemEntry> entries = items.stream()
-                .map(oi -> new ItemEntry(oi.getProductId(), oi.getQuantity()))
-                .toList();
-        return new OrderCreatedEvent(
-                orderId.id(),
-                customerId.id(),
-                couponId != null ? couponId.id() : null,
-                entries,
-                payMethod,
-                payProvider,
-                installment,
-                orderId.id(),
-                LocalDateTime.now()
-        );
     }
 
     /**

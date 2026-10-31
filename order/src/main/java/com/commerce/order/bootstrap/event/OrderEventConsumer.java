@@ -3,6 +3,7 @@ package com.commerce.order.bootstrap.event;
 import com.commerce.order.bootstrap.event.dto.OrderCompletedEvent;
 import com.commerce.order.bootstrap.event.dto.OrderFailedEvent;
 import com.commerce.order.core.application.port.in.OrderUseCase;
+import com.commerce.order.core.application.port.in.dto.CompleteOrderCommand;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
@@ -28,11 +29,16 @@ public class OrderEventConsumer {
         log.info("[Order] payment.completed 수신 - orderId: {}", event.orderId());
 
         try {
-            orderUseCase.orderCompleted(
+            orderUseCase.orderCompleted(new CompleteOrderCommand(
                     OrderId.of(event.orderId()),
                     Money.of(event.originAmt()),
-                    Money.of(event.discountAmt())
-            );
+                    Money.of(event.discountAmt()),
+                    event.paymentId(),
+                    event.items(),
+                    event.payMethod(),
+                    event.payProvider(),
+                    event.installment()
+            ));
         } catch (BusinessException e) {
             log.warn("handleOrderCompleted - orderId: {}, code: {}, msg: {}",
                     event.orderId(), e.getCode(), e.getMessage());

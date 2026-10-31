@@ -1,16 +1,15 @@
 package com.commerce.order.core.application.port.in;
 
+import com.commerce.order.core.application.port.in.dto.CompleteOrderCommand;
 import com.commerce.order.core.application.port.in.dto.CreateOrderCommand;
 import com.commerce.order.core.application.port.in.dto.OrderDetailResponse;
 import com.commerce.order.core.application.port.in.dto.OrderResponse;
+import com.commerce.order.core.application.port.out.OrderEventPort;
 import com.commerce.order.core.application.port.out.OrderOutputPort;
 import com.commerce.order.core.domain.aggregate.Order;
 import com.commerce.shared.exception.BusinessException;
-import com.commerce.shared.kafka.TransactionalEventPublisher;
 import com.commerce.shared.kafka.event.dto.ItemEntry;
-import com.commerce.shared.kafka.event.topic.EventTopic;
 import com.commerce.shared.vo.CustomerId;
-import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +28,7 @@ import static com.commerce.shared.exception.BusinessError.INVALID_ORDER_ID;
 @Service
 public class OrderUseCaseImpl implements OrderUseCase {
     private final OrderOutputPort orderOutputPort;
-    private final TransactionalEventPublisher transactionalEventPublisher;
+    private final OrderEventPort orderEventPort;
 
     @Override
     @Transactional
@@ -41,10 +40,8 @@ public class OrderUseCaseImpl implements OrderUseCase {
         Order order = Order.create(orderCommand.customerId(), orderCommand.couponId(), itemSpecs);
         orderOutputPort.saveOrder(order);
 
-        transactionalEventPublisher.publish(
-                EventTopic.ORDER_CREATED_TOPIC,
-                order.toCreatedEvent(orderCommand.payMethod(), orderCommand.payProvider(), orderCommand.installment())
-        );
+        orderEventPort.publishOrderCreated(
+                order, orderCommand.payMethod(), orderCommand.payProvider(), orderCommand.installment());
 
         return OrderResponse.from(order);
     }
@@ -91,12 +88,19 @@ public class OrderUseCaseImpl implements OrderUseCase {
         return OrderResponse.ofCanceled(order);
     }
 
+    /**
+     * 결제 완료 → 금액 반영 후 주문 확정. order.confirmed는 커밋 후 발행된다.
+     */
     @Transactional
     @Override
-    public void orderCompleted(OrderId orderId, Money originAmt, Money discountAmt) {
-        Order order = orderOutputPort.findById(orderId)
+    public void orderCompleted(CompleteOrderCommand command) {
+        Order order = orderOutputPort.findById(command.orderId())
                 .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
-        order.applyAmounts(originAmt, discountAmt);
+        order.applyAmounts(command.originAmt(), command.discountAmt());
         order.confirm();
+
+        orderEventPort.publishOrderConfirmed(
+                order, command.items(),
+                command.payMethod(), command.payProvider(), command.installment(), command.paymentId());
     }
 }

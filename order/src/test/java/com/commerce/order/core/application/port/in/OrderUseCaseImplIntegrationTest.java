@@ -1,5 +1,7 @@
 package com.commerce.order.core.application.port.in;
 
+import com.commerce.order.core.application.port.in.dto.CompleteOrderCommand;
+import com.commerce.order.core.application.port.out.OrderEventPort;
 import com.commerce.order.core.application.port.out.OrderOutputPort;
 import com.commerce.order.core.domain.aggregate.Order;
 import com.commerce.order.core.domain.enums.OrderStatus;
@@ -7,7 +9,6 @@ import com.commerce.order.infrastructure.adaptor.OrderAdaptor;
 import com.commerce.order.infrastructure.persistence.OrderRepository;
 import com.commerce.shared.exception.BusinessError;
 import com.commerce.shared.exception.BusinessException;
-import com.commerce.shared.kafka.TransactionalEventPublisher;
 import com.commerce.shared.kafka.event.dto.ItemEntry;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
@@ -33,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Import({OrderUseCaseImpl.class, OrderAdaptor.class})
 class OrderUseCaseImplIntegrationTest {
 
-    @MockitoBean TransactionalEventPublisher transactionalEventPublisher;
+    @MockitoBean OrderEventPort orderEventPort;
 
     @Autowired OrderUseCase orderUseCase;
     @Autowired OrderRepository orderRepository;
@@ -49,12 +50,18 @@ class OrderUseCaseImplIntegrationTest {
         return order.getOrderId();
     }
 
+    private CompleteOrderCommand completeCommand(OrderId orderId, long originAmt, long discountAmt) {
+        return new CompleteOrderCommand(
+                orderId, Money.of(originAmt), Money.of(discountAmt), "PAY001",
+                List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(2))), "CARD", "shinHan", 0);
+    }
+
     @DisplayName("orderCompleted 성공: PENDING 주문이 CONFIRMED + 금액과 함께 DB에 반영된다")
     @Test
     void orderCompletedSuccess() {
         OrderId orderId = savePendingOrder();
 
-        orderUseCase.orderCompleted(orderId, Money.of(10000), Money.of(1000));
+        orderUseCase.orderCompleted(completeCommand(orderId, 10000, 1000));
 
         Order persisted = orderRepository.findById(orderId).orElseThrow();
         assertThat(persisted.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
@@ -68,9 +75,9 @@ class OrderUseCaseImplIntegrationTest {
     @Test
     void orderCompletedFailureOnAlreadyConfirmed() {
         OrderId orderId = savePendingOrder();
-        orderUseCase.orderCompleted(orderId, Money.of(10000), Money.of(1000));
+        orderUseCase.orderCompleted(completeCommand(orderId, 10000, 1000));
 
-        assertThatThrownBy(() -> orderUseCase.orderCompleted(orderId, Money.of(20000), Money.of(2000)))
+        assertThatThrownBy(() -> orderUseCase.orderCompleted(completeCommand(orderId, 20000, 2000)))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("code", BusinessError.INVALID_ORDER_STATUS.getCode());
 
