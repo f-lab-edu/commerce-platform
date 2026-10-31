@@ -122,7 +122,7 @@ class InventoryDbConsumerIntegrationTest {
         waitUntil(() -> dbStock(p) == 7, 30_000);
 
         publisher.publish(EventTopic.ORDER_PRICE_FAILED_TOPIC,
-                new RestoreSignal(orderId, new ItemEntry(p, Quantity.create(3)), orderId, LocalDateTime.now()));
+                new RestoreSignal(orderId, List.of(new ItemEntry(p, Quantity.create(3))), orderId, LocalDateTime.now()));
 
         waitUntil(() -> dbStock(p) == 10, 30_000);
         assertThat(dbStock(p)).as("원장 복원").isEqualTo(10);
@@ -166,6 +166,6 @@ class InventoryDbConsumerIntegrationTest {
     }
 
     /** Test-local publish carrier — keeps InventoryRestoreEvent a plain consume-only projection. */
-    private record RestoreSignal(String orderId, ItemEntry item, String key, java.time.LocalDateTime timestamp)
+    private record RestoreSignal(String orderId, List<ItemEntry> items, String key, java.time.LocalDateTime timestamp)
             implements DomainEvent { }
 }
