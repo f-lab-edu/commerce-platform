@@ -7,8 +7,8 @@ import com.commerce.order.core.application.port.in.dto.OrderResponse;
 import com.commerce.order.core.application.port.out.OrderEventPort;
 import com.commerce.order.core.application.port.out.OrderOutputPort;
 import com.commerce.order.core.domain.aggregate.Order;
+import com.commerce.order.core.domain.vo.ItemSpec;
 import com.commerce.shared.exception.BusinessException;
-import com.commerce.shared.kafka.event.dto.ItemEntry;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.OrderId;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +33,8 @@ public class OrderUseCaseImpl implements OrderUseCase {
     @Override
     @Transactional
     public OrderResponse createOrder(CreateOrderCommand orderCommand) {
-        List<ItemEntry> itemSpecs = orderCommand.orderItemCommands().stream()
-                .map(item -> new ItemEntry(item.productId(), item.quantity()))
+        List<ItemSpec> itemSpecs = orderCommand.orderItemCommands().stream()
+                .map(item -> new ItemSpec(item.productId(), item.quantity()))
                 .toList();
 
         Order order = Order.create(orderCommand.customerId(), orderCommand.couponId(), itemSpecs);

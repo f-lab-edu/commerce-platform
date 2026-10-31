@@ -1,6 +1,7 @@
 package com.commerce.order.infrastructure.adaptor;
 
 import com.commerce.order.core.domain.aggregate.Order;
+import com.commerce.order.core.domain.vo.ItemSpec;
 import com.commerce.shared.kafka.TransactionalEventPublisher;
 import com.commerce.shared.kafka.event.dto.ItemEntry;
 import com.commerce.shared.kafka.event.dto.OrderConfirmedEvent;
@@ -32,7 +33,11 @@ class OrderEventAdaptorTest {
 
     @InjectMocks OrderEventAdaptor orderEventAdaptor;
 
-    private static List<ItemEntry> oneItem() {
+    private static List<ItemSpec> oneItem() {
+        return List.of(new ItemSpec(ProductId.of("P001"), Quantity.create(3)));
+    }
+
+    private static List<ItemEntry> oneEntry() {
         return List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(3)));
     }
 
@@ -54,7 +59,7 @@ class OrderEventAdaptorTest {
         assertThat(event.payProvider()).isEqualTo("shinHan");
         assertThat(event.installment()).isEqualTo(3);
         assertThat(event.key()).isEqualTo(order.getOrderId().id());
-        assertThat(event.items()).containsExactlyElementsOf(oneItem());
+        assertThat(event.items()).containsExactlyElementsOf(oneEntry());
     }
 
     @DisplayName("publishOrderConfirmed는 확정된 Order 금액과 saga 컨텍스트로 OrderConfirmedEvent를 조립해 발행한다")
@@ -73,7 +78,7 @@ class OrderEventAdaptorTest {
         assertThat(event.orderId()).isEqualTo(order.getOrderId().id());
         assertThat(event.customerId()).isEqualTo("C001");
         assertThat(event.couponId()).isEqualTo("C100");
-        assertThat(event.items()).containsExactlyElementsOf(oneItem());
+        assertThat(event.items()).containsExactlyElementsOf(oneEntry());
         assertThat(event.payMethod()).isEqualTo("CARD");
         assertThat(event.originAmt()).isEqualTo(10000L);
         assertThat(event.discountAmt()).isEqualTo(1000L);

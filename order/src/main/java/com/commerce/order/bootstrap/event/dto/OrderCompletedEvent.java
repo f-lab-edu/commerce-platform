@@ -11,6 +11,7 @@ import java.util.List;
  * payment.completed 토픽으로 들어오는 producer 이벤트를 order 모듈이 필요한 필드만
  * 투영(projection)해서 수신한다. producer 측 이벤트가 추가 필드를 가져도 무시.
  * items/payMethod/payProvider/installment/paymentId는 order.confirmed 발행용 saga 컨텍스트.
+ * approvedAmt는 확정 실패 시 환불 추적 로그용.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record OrderCompletedEvent(
@@ -18,6 +19,7 @@ public record OrderCompletedEvent(
         long originAmt,
         long discountAmt,
         String paymentId,
+        long approvedAmt,
         List<ItemEntry> items,
         String payMethod,
         String payProvider,

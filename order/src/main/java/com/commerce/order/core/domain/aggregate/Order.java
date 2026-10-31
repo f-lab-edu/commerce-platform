@@ -2,7 +2,7 @@ package com.commerce.order.core.domain.aggregate;
 
 import com.commerce.order.core.domain.enums.OrderStatus;
 import com.commerce.shared.exception.BusinessException;
-import com.commerce.shared.kafka.event.dto.ItemEntry;
+import com.commerce.order.core.domain.vo.ItemSpec;
 import com.commerce.shared.vo.CouponId;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
@@ -106,7 +106,7 @@ public class Order {
     public static Order create(
             CustomerId customerId,
             CouponId couponId,
-            List<ItemEntry> itemSpecs
+            List<ItemSpec> itemSpecs
     ) {
         if (itemSpecs == null || itemSpecs.isEmpty()) {
             throw new BusinessException(INVALID_REQUEST_VALUE);

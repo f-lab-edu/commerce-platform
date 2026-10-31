@@ -1,7 +1,7 @@
 package com.commerce.order.core.application.port.out;
 
 import com.commerce.order.core.domain.aggregate.Order;
-import com.commerce.shared.kafka.event.dto.ItemEntry;
+import com.commerce.order.core.domain.vo.ItemSpec;
 
 import java.util.List;
 
@@ -14,6 +14,6 @@ public interface OrderEventPort {
     void publishOrderCreated(Order order, String payMethod, String payProvider, int installment);
 
     /** 주문 확정(order.confirmed). JPA로 로드한 Order는 items가 비어있어 saga 컨텍스트의 items를 받는다. */
-    void publishOrderConfirmed(Order order, List<ItemEntry> items,
+    void publishOrderConfirmed(Order order, List<ItemSpec> items,
                                String payMethod, String payProvider, int installment, String paymentId);
 }

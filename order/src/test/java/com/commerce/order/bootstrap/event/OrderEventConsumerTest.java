@@ -4,6 +4,9 @@ import com.commerce.order.bootstrap.event.dto.OrderCompletedEvent;
 import com.commerce.order.bootstrap.event.dto.OrderFailedEvent;
 import com.commerce.order.core.application.port.in.OrderUseCase;
 import com.commerce.order.core.application.port.in.dto.CompleteOrderCommand;
+import com.commerce.order.core.domain.vo.ItemSpec;
+import com.commerce.shared.exception.BusinessError;
+import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.kafka.event.dto.ItemEntry;
 import com.commerce.shared.kafka.event.dto.PaymentCompletedEvent;
 import com.commerce.shared.vo.Money;
@@ -23,7 +26,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,17 +46,28 @@ class OrderEventConsumerTest {
         consumer = new OrderEventConsumer(orderUseCase);
     }
 
-    @DisplayName("payment.completed 수신 시 saga 컨텍스트를 담아 orderCompleted를 호출한다")
+    @DisplayName("payment.completed 수신 시 items를 ItemSpec으로 변환해 orderCompleted를 호출한다")
     @Test
     void handleOrderCompleted() {
         OrderCompletedEvent event = new OrderCompletedEvent(
-                "O001", 10000L, 1000L, "PAY001", ITEMS, "CARD", "shinHan", 0);
+                "O001", 10000L, 1000L, "PAY001", 9000L, ITEMS, "CARD", "shinHan", 0);
 
         consumer.handleOrderCompleted(event);
 
         verify(orderUseCase).orderCompleted(eq(new CompleteOrderCommand(
                 OrderId.of("O001"), Money.of(10000), Money.of(1000), "PAY001",
-                ITEMS, "CARD", "shinHan", 0)));
+                List.of(new ItemSpec(ProductId.of("P001"), Quantity.create(2))), "CARD", "shinHan", 0)));
+    }
+
+    @DisplayName("주문 확정 실패(BusinessException)는 재시도하지 않도록 예외를 전파하지 않는다")
+    @Test
+    void handleOrderCompletedSwallowsBusinessException() {
+        OrderCompletedEvent event = new OrderCompletedEvent(
+                "O001", 10000L, 1000L, "PAY001", 9000L, ITEMS, "CARD", "shinHan", 0);
+        willThrow(new BusinessException(BusinessError.INVALID_ORDER_CANCEL))
+                .given(orderUseCase).orderCompleted(any());
+
+        assertThatCode(() -> consumer.handleOrderCompleted(event)).doesNotThrowAnyException();
     }
 
     @DisplayName("payment.completed producer 페이로드(JSON)를 OrderCompletedEvent로 투영하면 필요한 필드가 모두 채워진다")
@@ -67,7 +84,7 @@ class OrderEventConsumerTest {
                 objectMapper.writeValueAsString(producerEvent), OrderCompletedEvent.class);
 
         assertThat(event).isEqualTo(new OrderCompletedEvent(
-                "O001", 10000L, 1000L, "PAY001", ITEMS, "CARD", "shinHan", 3));
+                "O001", 10000L, 1000L, "PAY001", 9000L, ITEMS, "CARD", "shinHan", 3));
     }
 
     @DisplayName("saga 실패 이벤트 수신 시 cancelOrder를 호출한다")

@@ -4,7 +4,9 @@ import com.commerce.order.bootstrap.event.dto.OrderCompletedEvent;
 import com.commerce.order.bootstrap.event.dto.OrderFailedEvent;
 import com.commerce.order.core.application.port.in.OrderUseCase;
 import com.commerce.order.core.application.port.in.dto.CompleteOrderCommand;
+import com.commerce.order.core.domain.vo.ItemSpec;
 import com.commerce.shared.exception.BusinessException;
+import com.commerce.shared.kafka.event.dto.ItemEntry;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 주문 saga 이벤트 컨슈머.
@@ -34,15 +38,25 @@ public class OrderEventConsumer {
                     Money.of(event.originAmt()),
                     Money.of(event.discountAmt()),
                     event.paymentId(),
-                    event.items(),
+                    toItemSpecs(event.items()),
                     event.payMethod(),
                     event.payProvider(),
                     event.installment()
             ));
         } catch (BusinessException e) {
-            log.warn("handleOrderCompleted - orderId: {}, code: {}, msg: {}",
-                    event.orderId(), e.getCode(), e.getMessage());
+            // 결제는 승인됐는데 주문 확정 실패(이미 취소된 주문 등) → 수동 환불 대상
+            log.error("handleOrderCompleted 확정 실패(환불 필요) - orderId: {}, paymentId: {}, approvedAmt: {}, code: {}, msg: {}",
+                    event.orderId(), event.paymentId(), event.approvedAmt(), e.getCode(), e.getMessage());
         }
+    }
+
+    private List<ItemSpec> toItemSpecs(List<ItemEntry> items) {
+        if (items == null) {
+            return List.of();
+        }
+        return items.stream()
+                .map(item -> new ItemSpec(item.productId(), item.quantity()))
+                .toList();
     }
 
     @KafkaListener(

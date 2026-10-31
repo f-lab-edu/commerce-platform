@@ -2,6 +2,7 @@ package com.commerce.order.infrastructure.adaptor;
 
 import com.commerce.order.core.application.port.out.OrderEventPort;
 import com.commerce.order.core.domain.aggregate.Order;
+import com.commerce.order.core.domain.vo.ItemSpec;
 import com.commerce.shared.kafka.TransactionalEventPublisher;
 import com.commerce.shared.kafka.event.dto.ItemEntry;
 import com.commerce.shared.kafka.event.dto.OrderConfirmedEvent;
@@ -37,14 +38,17 @@ public class OrderEventAdaptor implements OrderEventPort {
     }
 
     @Override
-    public void publishOrderConfirmed(Order order, List<ItemEntry> items,
+    public void publishOrderConfirmed(Order order, List<ItemSpec> items,
                                       String payMethod, String payProvider, int installment, String paymentId) {
+        List<ItemEntry> entries = items.stream()
+                .map(spec -> new ItemEntry(spec.productId(), spec.quantity()))
+                .toList();
         String orderId = order.getOrderId().id();
 
         transactionalEventPublisher.publish(EventTopic.ORDER_CONFIRMED_TOPIC,
                 new OrderConfirmedEvent(
                         orderId, order.getCustomerId().id(), couponIdOf(order),
-                        items, payMethod, payProvider, installment,
+                        entries, payMethod, payProvider, installment,
                         order.getOriginAmt().value(), order.getDiscountAmt().value(), order.getResultAmt().value(),
                         paymentId,
                         orderId, LocalDateTime.now()));

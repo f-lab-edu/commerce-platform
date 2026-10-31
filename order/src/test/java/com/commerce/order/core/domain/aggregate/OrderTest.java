@@ -2,7 +2,7 @@ package com.commerce.order.core.domain.aggregate;
 
 import com.commerce.order.core.domain.enums.OrderStatus;
 import com.commerce.shared.exception.BusinessException;
-import com.commerce.shared.kafka.event.dto.ItemEntry;
+import com.commerce.order.core.domain.vo.ItemSpec;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.ProductId;
@@ -17,8 +17,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OrderTest {
 
-    private static List<ItemEntry> oneItem() {
-        return List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(2)));
+    private static List<ItemSpec> oneItem() {
+        return List.of(new ItemSpec(ProductId.of("P001"), Quantity.create(2)));
     }
 
     @DisplayName("주문 생성 시 PENDING 상태이다")
@@ -36,8 +36,8 @@ class OrderTest {
                 CustomerId.of("C001"),
                 null,
                 List.of(
-                        new ItemEntry(ProductId.of("P001"), Quantity.create(2)),
-                        new ItemEntry(ProductId.of("P002"), Quantity.create(1))
+                        new ItemSpec(ProductId.of("P001"), Quantity.create(2)),
+                        new ItemSpec(ProductId.of("P002"), Quantity.create(1))
                 )
         );
 

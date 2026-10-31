@@ -9,7 +9,7 @@ import com.commerce.order.infrastructure.adaptor.OrderAdaptor;
 import com.commerce.order.infrastructure.persistence.OrderRepository;
 import com.commerce.shared.exception.BusinessError;
 import com.commerce.shared.exception.BusinessException;
-import com.commerce.shared.kafka.event.dto.ItemEntry;
+import com.commerce.order.core.domain.vo.ItemSpec;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
@@ -44,7 +44,7 @@ class OrderUseCaseImplIntegrationTest {
         Order order = Order.create(
                 CustomerId.of("test-customer-id2"),
                 null,
-                List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(2)))
+                List.of(new ItemSpec(ProductId.of("P001"), Quantity.create(2)))
         );
         orderOutputPort.saveOrder(order);
         return order.getOrderId();
@@ -53,7 +53,7 @@ class OrderUseCaseImplIntegrationTest {
     private CompleteOrderCommand completeCommand(OrderId orderId, long originAmt, long discountAmt) {
         return new CompleteOrderCommand(
                 orderId, Money.of(originAmt), Money.of(discountAmt), "PAY001",
-                List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(2))), "CARD", "shinHan", 0);
+                List.of(new ItemSpec(ProductId.of("P001"), Quantity.create(2))), "CARD", "shinHan", 0);
     }
 
     @DisplayName("orderCompleted 성공: PENDING 주문이 CONFIRMED + 금액과 함께 DB에 반영된다")

@@ -1,6 +1,6 @@
 package com.commerce.order.core.application.port.in.dto;
 
-import com.commerce.shared.kafka.event.dto.ItemEntry;
+import com.commerce.order.core.domain.vo.ItemSpec;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
 
@@ -15,7 +15,7 @@ public record CompleteOrderCommand(
         Money originAmt,
         Money discountAmt,
         String paymentId,
-        List<ItemEntry> items,
+        List<ItemSpec> items,
         String payMethod,
         String payProvider,
         int installment
