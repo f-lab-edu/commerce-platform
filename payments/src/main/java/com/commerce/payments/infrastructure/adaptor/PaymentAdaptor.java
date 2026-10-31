@@ -51,4 +51,9 @@ public class PaymentAdaptor implements PaymentOutPort {
     public void savePaymentFailure(PaymentFailure paymentFailure) {
         paymentFailureRepository.save(paymentFailure);
     }
+
+    @Override
+    public boolean existsPaymentFailureByOrderId(OrderId orderId) {
+        return paymentFailureRepository.existsByOrderId(orderId);
+    }
 }

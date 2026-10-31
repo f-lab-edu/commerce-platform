@@ -20,4 +20,5 @@ public interface PaymentOutPort {
 
     // 거래실패 관련
     void savePaymentFailure(PaymentFailure paymentFailure);
+    boolean existsPaymentFailureByOrderId(OrderId orderId);
 }

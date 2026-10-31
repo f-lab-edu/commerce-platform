@@ -49,12 +49,22 @@ public class PaymentUseCaseImpl implements PaymentUseCase {
 
     /**
      * PG 승인
-     * PG 호출 이후에는 예외를 던지지 않고 결과로 반환한다. (호출자 재시도 시 이중 승인 방지)
+     * 예외를 던지지 않고 결과로 반환한다. (호출자 재시도 시 이중 승인 방지)
+     * - PG 호출 전 실패(라우팅 실패): DECLINED (PG 미호출)
      */
     @Override
     public PgApprovalResult approveWithPg(PayOrderCommand command) {
         // pg사 라우팅
-        PgStrategy pgStrategy = pgRouter.routePg(command.getPayMethod(), command.getPayProvider());
+        PgStrategy pgStrategy;
+        try {
+            pgStrategy = pgRouter.routePg(command.getPayMethod(), command.getPayProvider());
+        } catch (RuntimeException e) {
+            log.warn("PG 라우팅 실패 (PG 미호출) - orderId: {}", command.getOrderId(), e);
+            return PgApprovalResult.builder()
+                    .status(PgApprovalStatus.DECLINED)
+                    .reason("PG 라우팅 실패: " + e.getMessage())
+                    .build();
+        }
 
         PgPayResponse pgResponse;
         try {
@@ -118,11 +128,14 @@ public class PaymentUseCaseImpl implements PaymentUseCase {
     }
 
     /**
-     * 실패거래 저장 : 거래실패 테이블
+     * 실패거래 저장 : 거래실패 테이블 (재수신 시 중복 저장 안 함)
      */
     @Override
     @Transactional
     public void savePaymentFailure(OrderId orderId, PgApprovalResult approvalResult) {
+        if (paymentOutPort.existsPaymentFailureByOrderId(orderId)) {
+            return;
+        }
         paymentOutPort.savePaymentFailure(PaymentFailure.create(orderId, approvalResult));
         log.info("Payment failed for orderId: {}, failType: {}", orderId, approvalResult.status());
     }

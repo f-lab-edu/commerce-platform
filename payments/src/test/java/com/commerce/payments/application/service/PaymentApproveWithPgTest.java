@@ -25,9 +25,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.ResourceAccessException;
 
+import java.util.NoSuchElementException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -54,8 +57,48 @@ class PaymentApproveWithPgTest {
     @BeforeEach
     void setUp() {
         paymentUseCase = new PaymentUseCaseImpl(pgRouter, paymentOutPort);
-        given(pgRouter.routePg(PayMethod.CARD, PayProvider.KB)).willReturn(pgStrategy);
-        given(pgStrategy.getPgProvider()).willReturn(PgProvider.TOSS);
+        lenient().when(pgRouter.routePg(PayMethod.CARD, PayProvider.KB)).thenReturn(pgStrategy);
+        lenient().when(pgStrategy.getPgProvider()).thenReturn(PgProvider.TOSS);
+    }
+
+    @DisplayName("PG 라우팅 실패 → PG 미호출 DECLINED (예외 전파 없음)")
+    @Test
+    void routingFailed_declined() {
+        given(pgRouter.routePg(PayMethod.CARD, PayProvider.KB)).willThrow(new NoSuchElementException());
+
+        PgApprovalResult result = paymentUseCase.approveWithPg(command);
+
+        assertThat(result.status()).isEqualTo(PgApprovalStatus.DECLINED);
+        assertThat(result.pgProvider()).isNull();
+        assertThat(result.reason()).contains("PG 라우팅 실패");
+        verifyNoInteractions(pgStrategy);
+    }
+
+    @DisplayName("실패거래 저장: 같은 orderId 실패거래가 없으면 저장")
+    @Test
+    void savePaymentFailure_saves() {
+        given(paymentOutPort.existsPaymentFailureByOrderId(command.getOrderId())).willReturn(false);
+
+        paymentUseCase.savePaymentFailure(command.getOrderId(), declinedResult());
+
+        verify(paymentOutPort).savePaymentFailure(any());
+    }
+
+    @DisplayName("실패거래 저장: pg-result 재수신으로 이미 저장된 orderId면 중복 저장하지 않음")
+    @Test
+    void savePaymentFailure_idempotent() {
+        given(paymentOutPort.existsPaymentFailureByOrderId(command.getOrderId())).willReturn(true);
+
+        paymentUseCase.savePaymentFailure(command.getOrderId(), declinedResult());
+
+        verify(paymentOutPort, never()).savePaymentFailure(any());
+    }
+
+    private PgApprovalResult declinedResult() {
+        return PgApprovalResult.builder()
+                .status(PgApprovalStatus.DECLINED)
+                .reason("한도초과")
+                .build();
     }
 
     @DisplayName("승인 성공 + 금액 일치 → APPROVED, 망취소·DB 저장 없음")

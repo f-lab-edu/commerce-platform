@@ -2,6 +2,7 @@ package com.commerce.payments.bootstrap.event;
 
 import com.commerce.payments.core.application.port.in.PaymentUseCase;
 import com.commerce.payments.core.application.port.in.dto.PayOrderCommand;
+import com.commerce.payments.core.domain.enums.PgApprovalStatus;
 import com.commerce.payments.core.domain.vo.payments.PgApprovalResult;
 import com.commerce.shared.kafka.TransactionalEventPublisher;
 import com.commerce.shared.kafka.event.dto.CouponAppliedEvent;
@@ -23,7 +24,8 @@ import java.time.LocalDateTime;
  * (DB 저장 실패로 재시도될 때 PG 재승인 = 이중결제를 막기 위해 단계를 분리)
  *
  * 에러 처리 정책:
- * - PG 호출 전 예외(요청값 변환 실패, PG 라우팅 실패): throw → ErrorHandler 재시도 → DLT. PG 미호출이라 재시도해도 안전.
+ * - PG 호출 전 실패(요청값 변환 실패, 결제금액 음수, PG 라우팅 실패): DECLINED 로 pg-result 발행 → DB 단계가 payment.failed 발행.
+ *   재시도해도 같은 결과라 DLT 대신 즉시 보상한다. 라우팅 실패는 approveWithPg가 DECLINED 로 반환한다.
  * - PG 호출 이후: approveWithPg가 예외 없이 결과로 반환하므로 coupon.applied 재시도로 이어지지 않는다.
  */
 @Slf4j
@@ -39,11 +41,27 @@ public class PaymentPgConsumer {
         log.info("[Payments-PG] coupon.applied 수신 - orderId: {}", event.orderId());
 
         long requestedAmt = event.originAmt() - event.discountAmt();
-        PayOrderCommand command = PayOrderCommand.of(
-                event.orderId(), requestedAmt, event.payMethod(), event.payProvider(), event.installment());
+        PayOrderCommand command;
+        try {
+            if (requestedAmt < 0) {
+                throw new IllegalArgumentException("결제금액 음수 (originAmt: " + event.originAmt()
+                        + ", discountAmt: " + event.discountAmt() + ")");
+            }
+            command = PayOrderCommand.of(
+                    event.orderId(), requestedAmt, event.payMethod(), event.payProvider(), event.installment());
+        } catch (RuntimeException e) {
+            log.warn("[Payments-PG] 결제 요청값 오류 (PG 미호출) - orderId: {}, msg: {}", event.orderId(), e.getMessage());
+            publishPgResult(event, requestedAmt, PgApprovalResult.builder()
+                    .status(PgApprovalStatus.DECLINED)
+                    .reason("결제 요청값 오류: " + e.getMessage())
+                    .build());
+            return;
+        }
 
-        PgApprovalResult result = paymentUseCase.approveWithPg(command);
+        publishPgResult(event, requestedAmt, paymentUseCase.approveWithPg(command));
+    }
 
+    private void publishPgResult(CouponAppliedEvent event, long requestedAmt, PgApprovalResult result) {
         publisher.publish(EventTopic.PAYMENT_PG_RESULT_TOPIC,
                 new PaymentPgResultEvent(
                         event.orderId(), event.customerId(), event.couponId(),

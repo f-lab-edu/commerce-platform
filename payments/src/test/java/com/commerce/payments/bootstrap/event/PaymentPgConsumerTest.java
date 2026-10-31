@@ -2,6 +2,9 @@ package com.commerce.payments.bootstrap.event;
 
 import com.commerce.payments.core.application.port.in.PaymentUseCase;
 import com.commerce.payments.core.application.port.in.dto.PayOrderCommand;
+import com.commerce.payments.core.application.port.out.PaymentOutPort;
+import com.commerce.payments.core.domain.service.PaymentPgRouter;
+import com.commerce.payments.core.domain.service.PaymentUseCaseImpl;
 import com.commerce.payments.core.domain.enums.PayMethod;
 import com.commerce.payments.core.domain.enums.PgApprovalStatus;
 import com.commerce.payments.core.domain.enums.PgProvider;
@@ -25,11 +28,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -98,5 +104,59 @@ class PaymentPgConsumerTest {
         verify(publisher).publish(eq(EventTopic.PAYMENT_PG_RESULT_TOPIC), eventCaptor.capture());
         assertThat(eventCaptor.getValue().result()).isEqualTo(PgResult.VOID_FAILED);
         assertThat(eventCaptor.getValue().reason()).contains("망취소 불가");
+    }
+
+    @DisplayName("변환 불가 payMethod → PG 미호출, DECLINED 로 pg-result 발행")
+    @Test
+    void invalidPayMethod_publishesDeclined() {
+        consumer.onCouponApplied(couponApplied("easyPay", "shinHan", 10000L, 1000L));
+
+        verify(paymentUseCase, never()).approveWithPg(any());
+        PaymentPgResultEvent published = capturePgResult();
+        assertThat(published.result()).isEqualTo(PgResult.DECLINED);
+        assertThat(published.pgProvider()).isNull();
+        assertThat(published.pgTid()).isNull();
+        assertThat(published.reason()).contains("결제 요청값 오류");
+    }
+
+    @DisplayName("결제금액(originAmt - discountAmt) 음수 → PG 미호출, DECLINED 로 pg-result 발행")
+    @Test
+    void negativeAmount_publishesDeclined() {
+        consumer.onCouponApplied(couponApplied("CARD", "shinHan", 1000L, 2000L));
+
+        verify(paymentUseCase, never()).approveWithPg(any());
+        PaymentPgResultEvent published = capturePgResult();
+        assertThat(published.result()).isEqualTo(PgResult.DECLINED);
+        assertThat(published.reason()).contains("결제금액 음수");
+    }
+
+    @DisplayName("PG 라우팅 실패(routePg 예외) → 예외 전파 없이 DECLINED 로 pg-result 발행")
+    @Test
+    void routingFailed_publishesDeclined() {
+        PaymentPgRouter pgRouter = mock(PaymentPgRouter.class);
+        given(pgRouter.routePg(any(), any())).willThrow(new NoSuchElementException("사용 가능한 PG 없음"));
+        PaymentPgConsumer consumerWithRealUseCase = new PaymentPgConsumer(
+                new PaymentUseCaseImpl(pgRouter, mock(PaymentOutPort.class)), publisher);
+
+        consumerWithRealUseCase.onCouponApplied(event);
+
+        PaymentPgResultEvent published = capturePgResult();
+        assertThat(published.result()).isEqualTo(PgResult.DECLINED);
+        assertThat(published.pgProvider()).isNull();
+        assertThat(published.reason()).contains("PG 라우팅 실패");
+    }
+
+    private CouponAppliedEvent couponApplied(String payMethod, String payProvider, long originAmt, long discountAmt) {
+        return new CouponAppliedEvent(
+                orderId, "C001", "CP001", event.items(),
+                payMethod, payProvider, 0,
+                originAmt, discountAmt,
+                orderId, LocalDateTime.now());
+    }
+
+    private PaymentPgResultEvent capturePgResult() {
+        ArgumentCaptor<PaymentPgResultEvent> eventCaptor = ArgumentCaptor.forClass(PaymentPgResultEvent.class);
+        verify(publisher).publish(eq(EventTopic.PAYMENT_PG_RESULT_TOPIC), eventCaptor.capture());
+        return eventCaptor.getValue();
     }
 }
