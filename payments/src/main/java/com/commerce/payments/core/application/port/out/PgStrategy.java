@@ -24,6 +24,15 @@ public abstract class PgStrategy {
     public abstract PgPayCancelResponse processCancel(PayCancelCommand command);
 
     /**
+     * 망취소 대상 PG 거래키
+     * 승인 응답을 받지 못한 경우(결과 불명) approvedPgTid는 null이며, 요청값으로 거래를 특정할 수 있는 PG만 재정의한다.
+     * null 반환 시 망취소 불가
+     */
+    public String getVoidTid(PayOrderCommand command, String approvedPgTid) {
+        return approvedPgTid;
+    }
+
+    /**
      * PG사명
      */
     public abstract PgProvider getPgProvider();

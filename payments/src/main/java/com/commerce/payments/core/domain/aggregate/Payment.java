@@ -1,8 +1,8 @@
 package com.commerce.payments.core.domain.aggregate;
 
 
+import com.commerce.payments.core.domain.vo.payments.PgApprovalResult;
 import com.commerce.payments.core.domain.vo.payments.PgPayCancelResponse;
-import com.commerce.payments.core.domain.vo.payments.PgPayResponse;
 import com.commerce.payments.core.application.port.in.dto.PayOrderCommand;
 import com.commerce.payments.core.domain.enums.PayMethod;
 import com.commerce.shared.enums.PayProvider;
@@ -88,11 +88,11 @@ public class Payment {
     }
 
     /**
-     * 승인 처리 (승인실패 거래는 PaymentFailure로 저장되므로 성공 응답만 전달된다)
+     * 승인 처리 (승인실패 거래는 PaymentFailure로 저장되므로 성공 결과만 전달된다)
      */
-    public void approved(PgPayResponse pgResponse) {
-        this.pgTid = pgResponse.pgTid();
-        this.approvedAt = LocalDateTime.now();
+    public void approved(PgApprovalResult approvalResult) {
+        this.pgTid = approvalResult.pgTid();
+        this.approvedAt = approvalResult.approvedAt();
         this.paymentStatus = PaymentStatus.APPROVED;
     }
 
