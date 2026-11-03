@@ -12,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -29,21 +31,23 @@ class InventoryDbRestoreConsumerTest {
         consumer = new InventoryDbRestoreConsumer(ledgerUseCase);
     }
 
-    @DisplayName("보상 이벤트 수신 시 DB 원장을 복원한다")
+    @DisplayName("보상 이벤트 수신 시 주문 전체 items로 DB 원장을 복원한다")
     @Test
     void compensation_restoresDb() {
-        InventoryRestoreEvent event = new InventoryRestoreEvent(
-                "O1", new ItemEntry(ProductId.of("P1"), Quantity.create(2)));
+        List<ItemEntry> items = List.of(
+                new ItemEntry(ProductId.of("P1"), Quantity.create(2)),
+                new ItemEntry(ProductId.of("P2"), Quantity.create(1)));
 
-        consumer.onCompensation(event);
+        consumer.onCompensation(new InventoryRestoreEvent("O1", items));
 
-        verify(ledgerUseCase).persistRestoration(eq("O1"), any());
+        verify(ledgerUseCase).persistRestoration(eq("O1"), eq(items));
     }
 
-    @DisplayName("item이 null이면 복원하지 않는다")
+    @DisplayName("items가 null/비어있으면 복원하지 않는다")
     @Test
-    void compensation_nullItem_skip() {
+    void compensation_emptyItems_skip() {
         consumer.onCompensation(new InventoryRestoreEvent("O1", null));
+        consumer.onCompensation(new InventoryRestoreEvent("O1", List.of()));
 
         verify(ledgerUseCase, never()).persistRestoration(any(), any());
     }

@@ -2,7 +2,9 @@ package com.commerce.payments.infrastructure.adaptor;
 
 import com.commerce.payments.core.application.port.out.PaymentOutPort;
 import com.commerce.payments.core.domain.aggregate.Payment;
+import com.commerce.payments.core.domain.aggregate.PaymentFailure;
 import com.commerce.payments.core.domain.aggregate.PaymentPartCancel;
+import com.commerce.payments.infrastructure.persistence.PaymentFailureRepository;
 import com.commerce.payments.infrastructure.persistence.PaymentPartCancelRepository;
 import com.commerce.payments.infrastructure.persistence.PaymentRepository;
 import com.commerce.shared.vo.Money;
@@ -18,6 +20,7 @@ import java.util.Optional;
 public class PaymentAdaptor implements PaymentOutPort {
     private final PaymentRepository paymentRepository;
     private final PaymentPartCancelRepository paymentPartCancelRepository;
+    private final PaymentFailureRepository paymentFailureRepository;
 
     @Override
     public void savePayment(Payment payment) {
@@ -42,5 +45,15 @@ public class PaymentAdaptor implements PaymentOutPort {
     @Override
     public Money getRemainAmount(PaymentId paymentId) {
         return paymentPartCancelRepository.selectRemainAmountByPaymentId(paymentId);
+    }
+
+    @Override
+    public void savePaymentFailure(PaymentFailure paymentFailure) {
+        paymentFailureRepository.save(paymentFailure);
+    }
+
+    @Override
+    public boolean existsPaymentFailureByOrderId(OrderId orderId) {
+        return paymentFailureRepository.existsByOrderId(orderId);
     }
 }

@@ -2,8 +2,7 @@ package com.commerce.order.core.domain.aggregate;
 
 import com.commerce.order.core.domain.enums.OrderStatus;
 import com.commerce.shared.exception.BusinessException;
-import com.commerce.shared.kafka.event.dto.ItemEntry;
-import com.commerce.shared.kafka.event.dto.OrderCreatedEvent;
+import com.commerce.order.core.domain.vo.ItemSpec;
 import com.commerce.shared.vo.CustomerId;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.ProductId;
@@ -18,8 +17,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OrderTest {
 
-    private static List<ItemEntry> oneItem() {
-        return List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(2)));
+    private static List<ItemSpec> oneItem() {
+        return List.of(new ItemSpec(ProductId.of("P001"), Quantity.create(2)));
     }
 
     @DisplayName("주문 생성 시 PENDING 상태이다")
@@ -37,8 +36,8 @@ class OrderTest {
                 CustomerId.of("C001"),
                 null,
                 List.of(
-                        new ItemEntry(ProductId.of("P001"), Quantity.create(2)),
-                        new ItemEntry(ProductId.of("P002"), Quantity.create(1))
+                        new ItemSpec(ProductId.of("P001"), Quantity.create(2)),
+                        new ItemSpec(ProductId.of("P002"), Quantity.create(1))
                 )
         );
 
@@ -69,29 +68,6 @@ class OrderTest {
         Order order = Order.create(CustomerId.of("C001"), null, oneItem());
         assertThatThrownBy(() -> order.getItems().clear())
                 .isInstanceOf(UnsupportedOperationException.class);
-    }
-
-    @DisplayName("toCreatedEvent()는 Order의 items와 외부 컨텍스트로 이벤트를 조립한다")
-    @Test
-    void toCreatedEventAssemblesEvent() {
-        Order order = Order.create(
-                CustomerId.of("C001"),
-                null,
-                List.of(new ItemEntry(ProductId.of("P001"), Quantity.create(3)))
-        );
-
-        OrderCreatedEvent event = order.toCreatedEvent("CARD", "shinHan", 3);
-
-        assertThat(event.orderId()).isEqualTo(order.getOrderId().id());
-        assertThat(event.customerId()).isEqualTo("C001");
-        assertThat(event.couponId()).isNull();
-        assertThat(event.payMethod()).isEqualTo("CARD");
-        assertThat(event.payProvider()).isEqualTo("shinHan");
-        assertThat(event.installment()).isEqualTo(3);
-        assertThat(event.key()).isEqualTo(order.getOrderId().id());
-        assertThat(event.items()).hasSize(1);
-        assertThat(event.items().get(0).productId()).isEqualTo(ProductId.of("P001"));
-        assertThat(event.items().get(0).quantity()).isEqualTo(Quantity.create(3));
     }
 
     @DisplayName("applyAmounts로 금액을 세팅하면 resultAmt가 계산된다")

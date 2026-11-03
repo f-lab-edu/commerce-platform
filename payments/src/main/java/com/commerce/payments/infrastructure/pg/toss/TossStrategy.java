@@ -48,13 +48,31 @@ public abstract class TossStrategy extends PgStrategy {
      */
     @Override
     public PgPayResponse processApproval(PayOrderCommand command) {
-        TossTransResponse response = callTossConfirmApi(
-                command.getJsonSubData(),
-                command.getOrderId().id(),
-                command.getApprovedAmount().value()
-        );
+        TossTransResponse response;
+        try {
+            response = callTossConfirmApi(
+                    command.getJsonSubData(),
+                    command.getOrderId().id(),
+                    command.getApprovedAmount().value()
+            );
+        } catch (HttpClientErrorException e) {
+            // 4xx : 토스가 승인을 거절한 확정 실패 (결과 불명 아님)
+            return PgPayResponse.builder()
+                    .responseCode(String.valueOf(e.getStatusCode().value()))
+                    .responseMessage(e.getResponseBodyAsString())
+                    .isSuccess(false)
+                    .build();
+        }
 
         return convertToResponse(response);
+    }
+
+    /**
+     * 승인 요청의 paymentKey로 결제를 특정하므로 승인 응답이 없어도 망취소 가능
+     */
+    @Override
+    public String getVoidTid(PayOrderCommand command, String approvedPgTid) {
+        return approvedPgTid != null ? approvedPgTid : command.getJsonSubData();
     }
 
     /**
@@ -126,7 +144,7 @@ public abstract class TossStrategy extends PgStrategy {
         } catch (HttpClientErrorException e) {
             log.error("TOSS 결제 승인 실패 (4xx) - status: {}, body: {}",
                     e.getStatusCode(), e.getResponseBodyAsString());
-            throw new RuntimeException(e.getResponseBodyAsString());
+            throw e;
 
         } catch (HttpServerErrorException e) {
             log.error("TOSS 서버 오류 (5xx) - status: {}, body: {}",

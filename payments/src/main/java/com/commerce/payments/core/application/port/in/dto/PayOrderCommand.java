@@ -18,4 +18,19 @@ public class PayOrderCommand {
         private PayProvider payProvider;
         private final PaymentStatus paymentStatus = PaymentStatus.APPROVED;
         private String jsonSubData;  // pg사 요구 데이터
+
+        /**
+         * 주문 요청값(문자열) 기반 생성
+         * payMethod: PayMethod명 (예: CARD), payProvider: PayProvider value (예: shinHan)
+         */
+        public static PayOrderCommand of(String orderId, long approvedAmount,
+                                         String payMethod, String payProvider, int installment) {
+                return PayOrderCommand.builder()
+                        .orderId(OrderId.of(orderId))
+                        .approvedAmount(Money.of(approvedAmount))
+                        .payMethod(PayMethod.valueOf(payMethod.toUpperCase()))
+                        .payProvider(PayProvider.getPayProviderByValue(payProvider))
+                        .installment(installment)
+                        .build();
+        }
 }

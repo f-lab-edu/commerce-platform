@@ -6,17 +6,25 @@ import com.commerce.payments.core.application.port.in.dto.PayOrderCommand;
 import com.commerce.payments.core.application.port.out.PaymentOutPort;
 import com.commerce.payments.core.application.port.out.PgStrategy;
 import com.commerce.payments.core.domain.aggregate.Payment;
+import com.commerce.payments.core.domain.aggregate.PaymentFailure;
 import com.commerce.payments.core.domain.aggregate.PaymentPartCancel;
 import com.commerce.payments.core.domain.enums.PaymentStatus;
+import com.commerce.payments.core.domain.enums.PgApprovalStatus;
+import com.commerce.payments.core.domain.vo.payments.PgApprovalResult;
 import com.commerce.payments.core.domain.vo.payments.PgPayCancelResponse;
 import com.commerce.payments.core.domain.vo.payments.PgPayResponse;
 import com.commerce.shared.exception.BusinessError;
 import com.commerce.shared.exception.BusinessException;
 import com.commerce.shared.vo.Money;
+import com.commerce.shared.vo.OrderId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Optional;
 
 import static com.commerce.shared.exception.BusinessError.*;
 
@@ -30,21 +38,168 @@ public class PaymentUseCaseImpl implements PaymentUseCase {
     @Override
     @Transactional
     public void doApproval(PayOrderCommand payOrdercommand) {
+        PgApprovalResult approvalResult = approveWithPg(payOrdercommand);
+
+        if (approvalResult.isApproved()) {
+            saveApprovedPayment(payOrdercommand, approvalResult);
+        } else {
+            savePaymentFailure(payOrdercommand.getOrderId(), approvalResult);
+        }
+    }
+
+    /**
+     * PG 승인
+     * 예외를 던지지 않고 결과로 반환한다. (호출자 재시도 시 이중 승인 방지)
+     * - PG 호출 전 실패(라우팅 실패): DECLINED (PG 미호출)
+     */
+    @Override
+    public PgApprovalResult approveWithPg(PayOrderCommand command) {
         // pg사 라우팅
-        PgStrategy pgStrategy = pgRouter.routePg(payOrdercommand.getPayMethod(), payOrdercommand.getPayProvider());
+        PgStrategy pgStrategy;
+        try {
+            pgStrategy = pgRouter.routePg(command.getPayMethod(), command.getPayProvider());
+        } catch (RuntimeException e) {
+            log.warn("PG 라우팅 실패 (PG 미호출) - orderId: {}", command.getOrderId(), e);
+            return PgApprovalResult.builder()
+                    .status(PgApprovalStatus.DECLINED)
+                    .reason("PG 라우팅 실패: " + e.getMessage())
+                    .build();
+        }
 
-        // 결재 entity 생성
-        Payment paymentEntity = Payment.create(payOrdercommand, pgStrategy.getPgProvider());
+        PgPayResponse pgResponse;
+        try {
+            pgResponse = pgStrategy.processApproval(command);
+        } catch (Exception e) {
+            log.error("PG 승인 결과 불명 - orderId: {}", command.getOrderId(), e);
+            return voidApproval(pgStrategy, command, null, null,
+                    PgApprovalStatus.UNKNOWN_VOIDED, "승인 결과 불명: " + e.getMessage());
+        }
 
-        // pg 결제 응답 수신
-        PgPayResponse pgResponse = pgStrategy.processApproval(payOrdercommand);
-        validRequestAmount(payOrdercommand.getApprovedAmount(), pgResponse.amount().value());
+        if (pgResponse == null) {
+            return voidApproval(pgStrategy, command, null, null,
+                    PgApprovalStatus.UNKNOWN_VOIDED, "승인 결과 불명: PG 응답 없음");
+        }
 
-        // 승인거래 저장
-        paymentEntity.approved(pgResponse);
+        // 승인거절
+        if (!pgResponse.isSuccess()) {
+            log.info("PG 승인 거절 - orderId: {}, errorCode: {}", command.getOrderId(), pgResponse.responseCode());
+            return PgApprovalResult.builder()
+                    .status(PgApprovalStatus.DECLINED)
+                    .pgProvider(pgStrategy.getPgProvider())
+                    .pgTid(pgResponse.pgTid())
+                    .responseCode(pgResponse.responseCode())
+                    .reason(pgResponse.responseMessage())
+                    .build();
+        }
+
+        // 승인성공 + 요청금액 불일치
+        Long pgApprovedAmt = pgResponse.amount() == null ? null : pgResponse.amount().value();
+        if (!Objects.equals(command.getApprovedAmount().value(), pgApprovedAmt)) {
+            return voidApproval(pgStrategy, command, pgResponse.pgTid(), pgApprovedAmt,
+                    PgApprovalStatus.AMOUNT_MISMATCH_VOIDED,
+                    "요청금액 불일치 (요청: " + command.getApprovedAmount().value() + ", PG: " + pgApprovedAmt + ")");
+        }
+
+        return PgApprovalResult.builder()
+                .status(PgApprovalStatus.APPROVED)
+                .pgProvider(pgStrategy.getPgProvider())
+                .pgTid(pgResponse.pgTid())
+                .pgApprovedAmt(pgApprovedAmt)
+                .responseCode(pgResponse.responseCode())
+                .approvedAt(LocalDateTime.now())
+                .build();
+    }
+
+    /**
+     * 승인거래 저장 (재수신 시 기존 거래 반환)
+     */
+    @Override
+    @Transactional
+    public Payment saveApprovedPayment(PayOrderCommand command, PgApprovalResult approvalResult) {
+        Optional<Payment> savedPayment = paymentOutPort.findByOrderId(command.getOrderId());
+        if (savedPayment.isPresent()) {
+            return savedPayment.get();
+        }
+
+        Payment paymentEntity = Payment.create(command, approvalResult.pgProvider());
+        paymentEntity.approved(approvalResult);
         paymentOutPort.savePayment(paymentEntity);
+        return paymentEntity;
+    }
 
-        log.info("Payment completed event published for orderId: {}", paymentEntity.getOrderId());
+    /**
+     * 실패거래 저장 : 거래실패 테이블 (재수신 시 중복 저장 안 함)
+     */
+    @Override
+    @Transactional
+    public void savePaymentFailure(OrderId orderId, PgApprovalResult approvalResult) {
+        if (paymentOutPort.existsPaymentFailureByOrderId(orderId)) {
+            return;
+        }
+        paymentOutPort.savePaymentFailure(PaymentFailure.create(orderId, approvalResult));
+        log.info("Payment failed for orderId: {}, failType: {}", orderId, approvalResult.status());
+    }
+
+    /**
+     * 망취소 (승인 전액 취소)
+     * 취소 대상을 특정할 수 없거나 PG 취소 실패 시 VOID_FAILED (수동 처리 대상)
+     */
+    private PgApprovalResult voidApproval(PgStrategy pgStrategy,
+                                          PayOrderCommand command,
+                                          String approvedPgTid,
+                                          Long pgApprovedAmt,
+                                          PgApprovalStatus voidedStatus,
+                                          String reason) {
+        PgApprovalResult.PgApprovalResultBuilder result = PgApprovalResult.builder()
+                .pgProvider(pgStrategy.getPgProvider())
+                .pgTid(approvedPgTid)
+                .pgApprovedAmt(pgApprovedAmt);
+
+        String voidTid = null;
+        try {
+            voidTid = pgStrategy.getVoidTid(command, approvedPgTid);
+            if (voidTid == null) {
+                log.error("망취소 불가 (취소 대상 거래키 없음) - orderId: {}", command.getOrderId());
+                return result.status(PgApprovalStatus.VOID_FAILED)
+                        .reason(reason + " / 망취소 불가: 거래키 없음")
+                        .build();
+            }
+
+            PgPayCancelResponse cancelResponse = pgStrategy.processCancel(PayCancelCommand.builder()
+                    .orderId(command.getOrderId())
+                    .paymentStatus(PaymentStatus.FULL_CANCELED)
+                    .cancelReason(reason)
+                    .pgTid(voidTid)
+                    .canceledAmount(pgApprovedAmt != null ? Money.of(pgApprovedAmt) : command.getApprovedAmount())
+                    .payMethod(command.getPayMethod())
+                    .payProvider(command.getPayProvider())
+                    .pgProvider(pgStrategy.getPgProvider())
+                    .build());
+
+            if (cancelResponse == null || !cancelResponse.isSuccess()) {
+                log.error("망취소 실패 - orderId: {}", command.getOrderId());
+                return result.status(PgApprovalStatus.VOID_FAILED)
+                        .pgTid(voidTid)
+                        .responseCode(cancelResponse == null ? null : cancelResponse.responseCode())
+                        .reason(reason + " / 망취소 실패")
+                        .build();
+            }
+
+            return result.status(voidedStatus)
+                    .pgTid(voidTid)
+                    .pgCancelTid(cancelResponse.pgCcTid())
+                    .responseCode(cancelResponse.responseCode())
+                    .reason(reason)
+                    .canceledAt(LocalDateTime.now())
+                    .build();
+
+        } catch (Exception e) {
+            log.error("망취소 실패 - orderId: {}", command.getOrderId(), e);
+            return result.status(PgApprovalStatus.VOID_FAILED)
+                    .pgTid(voidTid != null ? voidTid : approvedPgTid)
+                    .reason(reason + " / 망취소 실패: " + e.getMessage())
+                    .build();
+        }
     }
 
     /**

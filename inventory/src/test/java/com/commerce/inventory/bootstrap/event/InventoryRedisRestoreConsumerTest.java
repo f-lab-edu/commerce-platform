@@ -33,21 +33,23 @@ class InventoryRedisRestoreConsumerTest {
         consumer = new InventoryRedisRestoreConsumer(inventoryUseCase);
     }
 
-    @DisplayName("보상 이벤트(단일 item) 수신 시 Redis 재고를 복원한다")
+    @DisplayName("보상 이벤트 수신 시 주문 전체 items로 Redis 재고를 복원한다")
     @Test
     void compensation_restoresRedis() {
-        InventoryRestoreEvent event = new InventoryRestoreEvent(
-                "O1", new ItemEntry(ProductId.of("P1"), Quantity.create(2)));
+        List<ItemEntry> items = List.of(
+                new ItemEntry(ProductId.of("P1"), Quantity.create(2)),
+                new ItemEntry(ProductId.of("P2"), Quantity.create(1)));
 
-        consumer.onCompensation(event);
+        consumer.onCompensation(new InventoryRestoreEvent("O1", items));
 
-        verify(inventoryUseCase).release(eq("O1"), any());
+        verify(inventoryUseCase).release(eq("O1"), eq(items));
     }
 
-    @DisplayName("보상 이벤트의 item이 null이면 복원하지 않는다")
+    @DisplayName("보상 이벤트의 items가 null/비어있으면 복원하지 않는다")
     @Test
-    void compensation_nullItem_skip() {
+    void compensation_emptyItems_skip() {
         consumer.onCompensation(new InventoryRestoreEvent("O1", null));
+        consumer.onCompensation(new InventoryRestoreEvent("O1", List.of()));
 
         verify(inventoryUseCase, never()).release(any(), any());
     }

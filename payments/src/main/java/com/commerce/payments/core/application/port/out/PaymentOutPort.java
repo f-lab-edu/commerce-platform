@@ -1,6 +1,7 @@
 package com.commerce.payments.core.application.port.out;
 
 import com.commerce.payments.core.domain.aggregate.Payment;
+import com.commerce.payments.core.domain.aggregate.PaymentFailure;
 import com.commerce.payments.core.domain.aggregate.PaymentPartCancel;
 import com.commerce.shared.vo.Money;
 import com.commerce.shared.vo.OrderId;
@@ -16,4 +17,8 @@ public interface PaymentOutPort {
     PaymentPartCancel savePartCancel(PaymentPartCancel partCancel);
     boolean existsPartCancelByPaymentId(PaymentId paymentId);
     Money getRemainAmount(PaymentId paymentId);
+
+    // 거래실패 관련
+    void savePaymentFailure(PaymentFailure paymentFailure);
+    boolean existsPaymentFailureByOrderId(OrderId orderId);
 }
