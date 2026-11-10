@@ -161,14 +161,26 @@ public class Order {
     }
 
     /**
-     * 주문 취소 CONFIRMED 상태에서만 CANCELED로 전이한다.
-     * 사용자 취소(cancelOrder)와 saga 거절 콜백에서 호출된다.
+     * 사용자 취소. CANCELED만 막는다.
      */
     public void cancel() {
         if(this.status == CANCELED) {
             throw new BusinessException(INVALID_ORDER_CANCEL);
         }
         updateOrderStatus(CANCELED);
+    }
+
+    /**
+     * saga 실패 취소. PENDING만 CANCELED로 전이한다.
+     * 결제까지 끝난 CONFIRMED 주문이 늦게 도착하거나 중복된 실패 이벤트로 환불 없이 취소되는 것을 막는다.
+     * @return 전이했으면 true, 상태를 유지했으면 false
+     */
+    public boolean cancelBySagaFailure() {
+        if (this.status != PENDING) {
+            return false;
+        }
+        updateOrderStatus(CANCELED);
+        return true;
     }
 
     /**

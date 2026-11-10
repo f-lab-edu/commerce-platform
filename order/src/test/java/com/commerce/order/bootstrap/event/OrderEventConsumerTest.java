@@ -87,7 +87,7 @@ class OrderEventConsumerTest {
                 "O001", 10000L, 1000L, "PAY001", 9000L, ITEMS, "CARD", "shinHan", 3));
     }
 
-    @DisplayName("saga 실패 이벤트 수신 시 cancelOrder를 호출한다")
+    @DisplayName("saga 실패 이벤트 수신 시 failOrder를 호출한다")
     @Test
     void handleOrderFailed() {
         OrderFailedEvent event = new OrderFailedEvent("O001");
@@ -95,7 +95,7 @@ class OrderEventConsumerTest {
         consumer.handleOrderFailed(event, "payment.failed");
 
         ArgumentCaptor<String> reason = ArgumentCaptor.forClass(String.class);
-        verify(orderUseCase).cancelOrder(eq(OrderId.of("O001")), reason.capture());
+        verify(orderUseCase).failOrder(eq(OrderId.of("O001")), reason.capture());
         assertThat(reason.getValue()).isEqualTo("주문실패:payment.failed");
     }
 }
