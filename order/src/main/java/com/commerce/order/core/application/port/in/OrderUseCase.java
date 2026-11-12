@@ -14,5 +14,6 @@ public interface OrderUseCase {
     List<OrderResponse> getOrders(CustomerId customerId);
     OrderDetailResponse getOrder(OrderId orderId);
     OrderResponse cancelOrder(OrderId orderId, String reason);
+    void failOrder(OrderId orderId, String reason);
     void orderCompleted(CompleteOrderCommand command);
 }

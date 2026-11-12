@@ -105,4 +105,28 @@ class OrderUseCaseImplTest {
         verify(orderEventPort, never()).publishOrderConfirmed(
                 any(), any(), anyString(), anyString(), anyInt(), anyString());
     }
+
+    @DisplayName("failOrder는 CONFIRMED 주문을 취소하지 않는다")
+    @Test
+    void failOrderKeepsConfirmedOrder() {
+        Order order = Order.create(CustomerId.of("C001"), null, oneItem());
+        order.applyAmounts(Money.of(10000), Money.of(0));
+        order.confirm();
+        given(orderOutputPort.findById(any())).willReturn(Optional.of(order));
+
+        orderUseCaseImpl.failOrder(order.getOrderId(), "주문실패:coupon.apply-failed");
+
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
+    }
+
+    @DisplayName("failOrder는 PENDING 주문을 CANCELED로 전이한다")
+    @Test
+    void failOrderCancelsPendingOrder() {
+        Order order = Order.create(CustomerId.of("C001"), null, oneItem());
+        given(orderOutputPort.findById(any())).willReturn(Optional.of(order));
+
+        orderUseCaseImpl.failOrder(order.getOrderId(), "주문실패:payment.failed");
+
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELED);
+    }
 }

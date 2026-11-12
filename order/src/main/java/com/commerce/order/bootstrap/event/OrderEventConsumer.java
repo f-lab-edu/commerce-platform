@@ -68,7 +68,7 @@ public class OrderEventConsumer {
         log.info("[Order] saga 실패 이벤트 수신 - topic: {}, orderId: {}", topic, event.orderId());
 
         try {
-            orderUseCase.cancelOrder(OrderId.of(event.orderId()), "주문실패:" + topic);
+            orderUseCase.failOrder(OrderId.of(event.orderId()), "주문실패:" + topic);
         } catch (BusinessException e) {
             log.warn("handleOrderFailed - orderId: {}, code: {}, msg: {}",
                     event.orderId(), e.getCode(), e.getMessage());

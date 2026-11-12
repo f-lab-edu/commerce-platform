@@ -98,4 +98,31 @@ class OrderTest {
         order.cancel();
         assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELED);
     }
+
+    @DisplayName("cancelBySagaFailure()는 PENDING 주문을 CANCELED로 전이한다")
+    @Test
+    void cancelBySagaFailureFromPending() {
+        Order order = Order.create(CustomerId.of("C001"), null, oneItem());
+        assertThat(order.cancelBySagaFailure()).isTrue();
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELED);
+    }
+
+    @DisplayName("cancelBySagaFailure()는 CONFIRMED 주문을 취소하지 않는다")
+    @Test
+    void cancelBySagaFailureKeepsConfirmed() {
+        Order order = Order.create(CustomerId.of("C001"), null, oneItem());
+        order.applyAmounts(Money.of(10000), Money.of(0));
+        order.confirm();
+        assertThat(order.cancelBySagaFailure()).isFalse();
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
+    }
+
+    @DisplayName("cancelBySagaFailure()는 이미 CANCELED면 예외 없이 상태를 유지한다")
+    @Test
+    void cancelBySagaFailureKeepsCanceled() {
+        Order order = Order.create(CustomerId.of("C001"), null, oneItem());
+        order.cancel();
+        assertThat(order.cancelBySagaFailure()).isFalse();
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELED);
+    }
 }

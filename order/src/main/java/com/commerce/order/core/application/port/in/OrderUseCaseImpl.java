@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static com.commerce.order.core.domain.enums.OrderStatus.CONFIRMED;
 import static com.commerce.shared.exception.BusinessError.INVALID_ORDER_ID;
 
 @Slf4j
@@ -77,7 +78,7 @@ public class OrderUseCaseImpl implements OrderUseCase {
     }
 
     /**
-     * 사용자 취소, 주문 보상트랜잭션
+     * 사용자 취소
      */
     @Transactional
     @Override
@@ -86,6 +87,22 @@ public class OrderUseCaseImpl implements OrderUseCase {
                 .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
         order.cancel();
         return OrderResponse.ofCanceled(order);
+    }
+
+    @Transactional
+    @Override
+    public void failOrder(OrderId orderId, String reason) {
+        Order order = orderOutputPort.findById(orderId)
+                .orElseThrow(() -> new BusinessException(INVALID_ORDER_ID));
+        if (order.cancelBySagaFailure()) {
+            return;
+        }
+        if (order.getStatus() == CONFIRMED) {
+            // 결제 완료 주문에 실패 이벤트가 옴 → 하류 보상(재고·쿠폰)이 이미 돌았을 수 있어 수동 확인 대상
+            log.error("failOrder 무시(CONFIRMED) - orderId: {}, reason: {}", orderId.id(), reason);
+        } else {
+            log.warn("failOrder 무시({}) - orderId: {}, reason: {}", order.getStatus(), orderId.id(), reason);
+        }
     }
 
     /**
